@@ -1,0 +1,38 @@
+{
+  "info": {
+    "name": "7029 风和自由 2/4",
+    "description": "第六幕｜赶赴龙脊雪山 → 观察丘丘人的行为，收集情报｜自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1597.6,
+      "y": -1082.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1328.0,
+      "y": -1013.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1175.1,
+      "y": -1022.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1171.2,
+      "y": -1018.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7030 如同消融的积雪 1/3",
+    "description": "第五幕·前情｜前往至冬堡 → 前往至冬堡｜自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9654.5,
+      "y": 6606.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

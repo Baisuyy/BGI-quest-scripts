@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "7026 草和智慧 1/4",
+    "description": "第六幕｜前往须弥城 → 去净善宫见纳西妲｜自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -454.5,
+      "y": 2765.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -368.0,
+      "y": 2896.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -369.4,
+      "y": 2902.2,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

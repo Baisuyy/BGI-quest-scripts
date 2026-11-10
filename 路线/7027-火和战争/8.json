@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7027 火和战争 8/8",
+    "description": "第六幕｜返回圣火竞技场 → 返回圣火竞技场｜自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 8,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1906.2,
+      "y": 9066.2,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

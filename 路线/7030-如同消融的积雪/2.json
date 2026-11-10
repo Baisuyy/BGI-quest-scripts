@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "7030 如同消融的积雪 2/3",
+    "description": "第五幕·前情｜前往雪桦车站 → 乘坐火车前往贝洛沃迪｜自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9329.3,
+      "y": 4821.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9322.5,
+      "y": 4797.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9592.7,
+      "y": 4322.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9667.4,
+      "y": 4286.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9622.0,
+      "y": 4336.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9647.1,
+      "y": 4273.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

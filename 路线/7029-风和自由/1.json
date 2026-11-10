@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "7029 风和自由 1/4",
+    "description": "第六幕｜前往蒙德城 → 前往骑士团｜自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2250.6,
+      "y": -894.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2243.4,
+      "y": -778.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}
