@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7026 草和智慧 3/4",
+    "description": "第七章 第六幕·寄自彼岸的昨日｜将声音的线索带回须弥城 → 将声音的线索带回须弥城",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -380.2,
+      "y": 2934.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

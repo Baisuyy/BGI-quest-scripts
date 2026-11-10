@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "7026 草和智慧 4/4",
+    "description": "第七章 第六幕·寄自彼岸的昨日｜前去使用「阿如」的力量 → 与纳西妲交谈",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2345.5,
+      "y": 5560.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2345.5,
+      "y": 5554.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2259.6,
+      "y": 5544.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

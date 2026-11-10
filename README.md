@@ -1,10 +1,10 @@
 # 原神主线自动跑图脚本 · BetterGI
 
-按 **篇章 → 幕 → 任务** 组织的 BetterGI 任务点位脚本库。当前覆盖「第七章 至冬」第五、第六幕，共 8 个任务、28 段路线。
+按 **篇章 → 幕 → 任务** 组织的 BetterGI 任务点位脚本库。当前覆盖「第七章 至冬」第五、六幕，共 8 个任务、28 段路线。
 
-每个任务是一个**独立脚本项目**（`manifest.json` + `main.js`）：传送 → 沿路点跑图 → 途中自动跳对话、自动选选项。路线数据内嵌在 `main.js` 里，不依赖外部文件。
+每个任务是一个**独立脚本项目**：`manifest.json` 声明元信息，`main.js` 负责传送与串段，路线放在项目内的 `pathing\*.json`，由 `pathingScript.runFile()` 调用。传送 → 沿路线跑图 → 途中自动跳对话、自动选选项。
 
-> ⚠️ **BetterGI 只认文件夹，不认单个 .js。** 直接把 `main.js` 拖进 BetterGI 是识别不了的——必须把整个任务文件夹放进 `User\JsScript\`。因为 `JsListViewModel` 只枚举该目录的直接子目录，且要求子目录内有 `manifest.json`。用 [`install.ps1`](install.ps1) 可以一键装好。
+> ⚠️ **BetterGI 只认文件夹，不认单个 .js。** 直接把 `main.js` 拖进 BetterGI 是识别不了的——必须把整个任务文件夹放进 `User\JsScript\`。因为 `JsListViewModel` 只枚举该目录的直接子目录，且要求子目录内有 `manifest.json`。用 [`install.ps1`](install.ps1) 可以一键装好脚本和路线。
 
 > 它不是一键通关。不解谜、不战斗、不判断任务是否激活。详见 [能力边界](#能力边界)。
 
@@ -32,7 +32,8 @@ scripts/
     第五幕-坏灭肇始之时/
       7030-如同消融的积雪/
         manifest.json               脚本元信息（名称、版本、入口）
-        main.js                     脚本本体，路线已内嵌
+        main.js                     编排：传送 → runFile → 跳对话
+        pathing/01.json …           该任务的路线，BetterGI 地图追踪格式
       7031-迈向未来的一步/
     第六幕-寄自彼岸的昨日/
       7023-僭越者的试炼/
@@ -41,20 +42,15 @@ scripts/
       7027-火和战争/
       7028-叩响终幕之门/
       7029-风和自由/
-      全流程-第六幕/               六个任务连跑
-routes/
-  第七章-至冬/
-    第五幕-坏灭肇始之时/<任务名>/01.json …
-    第六幕-寄自彼岸的昨日/<任务名>/01.json …
-  routes.json                      28 段的全量索引，含坐标与起止点描述
+      全流程-第六幕/               六个任务连跑，pathing/<任务ID>/*.json
 docs/
   主线解析/                        全书 53 幕解析成果
-install.ps1                        平铺安装脚本
+install.ps1                        脚本 + 路线一键安装
 ```
 
-`routes/` 下的 JSON 是 BetterGI「地图追踪」格式，可以在地图追踪里单独跑某一段；`scripts/` 下是编排层，负责传送与串段。
+路线跟着脚本走，不再单独放一个 `routes/` 顶层目录：`pathingScript.runFile()` 的根目录就是脚本项目目录，`LimitedFile` 会拒绝越界访问，所以路线必须放在项目里才能被读到。
 
-**脚本分了三层，但 BetterGI 不认三层。** 游戏的 `User\JsScript\` 是平铺结构，只扫一层。所以仓库里的分层只服务于人看的目录浏览，装进 BetterGI 时必须平铺——这也是 `install.ps1` 存在的唯一原因。路线目录不受此限制，`User\AutoPathing\` 是递归加载的，层级可以原样保留。
+**脚本分了三层，但 BetterGI 不认三层。** `User\JsScript\` 是平铺结构，只扫一层。仓库里的分层只服务于人看的目录浏览，装进 BetterGI 时必须平铺——这是 `install.ps1` 存在的唯一原因。路线不受此限：`User\AutoPathing\` 是递归加载的，篇章/幕的层级可以原样保留，安装脚本会照搬。
 
 ## 覆盖进度
 
@@ -95,8 +91,6 @@ install.ps1                        平铺安装脚本
 
 第七章其余四幕（1700–1703，共 15 个任务）尚未生成脚本，坐标数据齐全，可按同一流程补。
 
-表中每个 ✅ 对应一个脚本项目文件夹（`manifest.json` + `main.js`），不是单个 js 文件。
-
 ## 安装与使用
 
 ### 一键安装
@@ -104,15 +98,16 @@ install.ps1                        平铺安装脚本
 先把 BetterGI 关掉，在仓库根目录打开 PowerShell：
 
 ```powershell
-.\install.ps1 -BgiRoot "D:\BetterGI"    # 换成你的 BetterGI 安装目录
+.\install.ps1 -BgiRoot "D:\BetterGI"              # 换成你的安装目录
+.\install.ps1 -BgiRoot "D:\BetterGI" -NoPathing   # 只装脚本，不装路线
 ```
 
-脚本会递归找出 `scripts/` 下所有含 `manifest.json` 的文件夹，平铺复制到 `<BetterGI>\User\JsScript\`。同名目录会先删后拷。
+脚本做两件事：递归找出 `scripts/` 下含 `manifest.json` 的文件夹，平铺复制到 `<BetterGI>\User\JsScript\`；再把每个项目的 `pathing\*.json` 复制到 `<BetterGI>\User\AutoPathing\<篇章>\<幕>\<任务>\`。同名目录先删后拷，可反复执行。
 
 ### 手动安装
 
-1. 打开 `<BetterGI>\User\JsScript\`（BetterGI 里「脚本」页有「打开脚本目录」按钮）
-2. 把**整个任务文件夹**（如 `7030-如同消融的积雪`）拖进去，让它成为 `User\JsScript\7030-如同消融的积雪\`
+1. 打开 `<BetterGI>\User\JsScript\`（BetterGI「脚本」页有「打开脚本目录」按钮）
+2. 把**整个任务文件夹**（如 `7030-如同消融的积雪`）拖进去，成为 `User\JsScript\7030-如同消融的积雪\`
 3. 回到 BetterGI → 脚本 → 刷新
 
 注意别拖成 `User\JsScript\第七章-至冬\第五幕-...\7030-...\` 这种多层路径，那样 BetterGI 会把 `第七章-至冬` 当成一个项目并因为找不到 `manifest.json` 而报错。
@@ -121,13 +116,28 @@ install.ps1                        平铺安装脚本
 
 1. 在脚本列表里选中任务，点运行
 2. 运行前手动把角色传到该幕的起始传送点（脚本内的传送只负责段间跳转）
-3. 脚本会按住 W 沿路点跑，遇到对话框自动跳过，遇到选项自动选第一项
+3. 脚本按段调用 `pathingScript.runFile()`，沿途自动跳对话、自动选第一项
 
-只想跑一段而不串整任务时，把 `routes/` 下的 JSON 复制到 `<BetterGI>\User\AutoPathing\`（可保留篇章/幕的层级），在「地图追踪」里选择运行。
+想单独调试某一段，直接把项目里的 `pathing\01.json` 拖进 BetterGI 的「地图追踪」，或在安装后的 `User\AutoPathing\` 里找到它。
+
+## manifest 字段
+
+```json
+{
+  "manifest_version": 1,
+  "name": "7023 僭越者的试炼",
+  "version": "1.0.0",
+  "description": "第七章 第六幕·寄自彼岸的昨日 · 1 段 4 点",
+  "authors": [{ "name": "Baisuyy", "link": "https://github.com/Baisuyy" }],
+  "main": "main.js"
+}
+```
+
+三个版本字段别混：`manifest_version` 是清单格式版本，固定 1；`version` 是**脚本自身**的版本，只在详情页显示；`bgi_version` 才是**要求的最低 BetterGI 版本**，本仓库未填，表示不限制。路线 JSON 的 `info.bgi_version` 则是硬卡——填了且低于当前版本会直接拒绝运行。
 
 ## 能力边界
 
-脚本做三件事：传送到段首附近、沿路点自动跑图、途中自动跳过对话。它**不会**：
+脚本做三件事：传送到段首附近、沿路线自动跑图、途中自动跳过对话。它**不会**：
 
 - 解谜（机关、符石、元素方碑）
 - 战斗（遇到敌人会卡住，需要手动清场）
@@ -136,7 +146,7 @@ install.ps1                        平铺安装脚本
 
 ## 已知限制
 
-**7030 的第二、三段跑不了。** 「前往雪桦车站」最远点距最近传送锚点 1337 米，「击败涌出的魔物」2920 米——这两段在火车上，铁轨沿线没有任何锚点，任何自动跑图都会失败。脚本里已默认跳过，只跑第一段「前往至冬堡」。
+**7030 的第二、三段跑不了。** 「前往雪桦车站」最远点距最近传送锚点 1337 米，「击败涌出的魔物」2920 米——这两段在火车上，铁轨沿线没有任何锚点，任何自动跑图都会失败。脚本里 `skipSegs: [2, 3]` 已默认跳过，只跑第一段「前往至冬堡」。
 
 **7027 的五个图腾柱是或关系。** 五个点位只需激活其中任意一组，脚本按固定顺序跑会多走路，但不会卡死。
 

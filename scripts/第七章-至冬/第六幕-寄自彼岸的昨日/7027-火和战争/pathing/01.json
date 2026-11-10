@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "7027 火和战争 1/8",
+    "description": "第七章 第六幕·寄自彼岸的昨日｜前往圣火竞技场 → 去拜访茜特菈莉",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1872.5,
+      "y": 8994.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1957.5,
+      "y": 9091.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2006.3,
+      "y": 9642.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

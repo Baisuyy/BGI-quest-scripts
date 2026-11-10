@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7027 火和战争 6/8",
+    "description": "第七章 第六幕·寄自彼岸的昨日｜前往任意部族的曜石图腾柱 → 前往任意部族的曜石图腾柱",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 6,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2718.5,
+      "y": 10264.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

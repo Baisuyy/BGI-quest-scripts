@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7031 迈向未来的一步 4/4",
+    "description": "第七章 第五幕·坏灭肇始之时｜等待到几天后 → 等待到几天后",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9644.9,
+      "y": 6615.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

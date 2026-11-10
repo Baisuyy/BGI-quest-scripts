@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7029 风和自由 3/4",
+    "description": "第七章 第六幕·寄自彼岸的昨日｜返回骑士团分享侦察结果 → 返回骑士团分享侦察结果",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2243.4,
+      "y": -778.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

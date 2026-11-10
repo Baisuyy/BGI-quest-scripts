@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7027 火和战争 7/8",
+    "description": "第七章 第六幕·寄自彼岸的昨日｜准备启动驰轮车 → 准备启动驰轮车",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 7,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1657.4,
+      "y": 10015.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

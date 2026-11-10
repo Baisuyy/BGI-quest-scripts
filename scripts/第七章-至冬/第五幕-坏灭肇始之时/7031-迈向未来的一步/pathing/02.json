@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "7031 迈向未来的一步 2/4",
+    "description": "第七章 第五幕·坏灭肇始之时｜与尼可、艾莉丝对话 → 寻找并收集符文",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "TempleOfSpace",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 261.6,
+      "y": 332.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 454.1,
+      "y": 251.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 501.7,
+      "y": 235.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 327.0,
+      "y": 531.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 353.0,
+      "y": 499.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 415.0,
+      "y": 495.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 362.9,
+      "y": 503.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 478.3,
+      "y": 552.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "7030 如同消融的积雪 3/3",
+    "description": "第七章 第五幕·坏灭肇始之时｜击败涌出的魔物 → 与此同时，贝洛沃迪车站…",
+    "author": "Baisuyy",
+    "version": "1.0.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 8789.2,
+      "y": 2918.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8789.6,
+      "y": 2934.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9061.4,
+      "y": 3454.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}
