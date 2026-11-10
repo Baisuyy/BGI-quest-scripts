@@ -11,7 +11,8 @@
 // ============================================================
 
 const CONFIG = {
-    skipSegs: [],        // 要跳过的段号，空数组表示全跑
+    startSeg: 0,             // 从第几段开始（0 = 从头），断点续跑改这里
+    skipSegs: [],            // 要跳过的段号，空数组表示全跑
     teleportBeforeSeg: true,   // 每段开始前先传送到首点附近
     autoSkip: true,            // 自动跳对话 + 自动选项
     chooseOption: '优先选择第一个选项',
@@ -31,7 +32,9 @@ const SEGMENTS = [
 ];
 
 function pickSegments() {
-    return SEGMENTS.filter(function (s) { return CONFIG.skipSegs.indexOf(s.seq) < 0; });
+    return SEGMENTS.filter(function (s) {
+        return s.seq >= CONFIG.startSeg && CONFIG.skipSegs.indexOf(s.seq) < 0;
+    });
 }
 
 function loadPathing(seg) {

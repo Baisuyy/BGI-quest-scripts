@@ -23,6 +23,66 @@
       "move_mode": "run"
     },
     {
+      "x": -2337.6,
+      "y": 5553.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2329.6,
+      "y": 5552.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2321.7,
+      "y": 5551.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2313.7,
+      "y": 5550.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2305.8,
+      "y": 5549.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2297.9,
+      "y": 5548.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2289.9,
+      "y": 5547.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2282.0,
+      "y": 5546.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2274.1,
+      "y": 5545.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2266.1,
+      "y": 5544.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
       "x": -2259.6,
       "y": 5544.1,
       "type": "target",

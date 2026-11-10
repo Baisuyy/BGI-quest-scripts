@@ -11,7 +11,8 @@
 
 const CONFIG = {
     quests: ['7023', '7025', '7026', '7027', '7029', '7028'],   // 空数组 = 全部按顺序
-    skipSegs: [],              // 要跳过的段，写 '7027/5' 这种形式
+    startFrom: '',             // 断点续跑：形如 '7027/3'，从该段开始；空字符串表示从头
+    skipSegs: [],            // 要跳过的段，写 '7027/5' 这种形式
     teleportBeforeSeg: true,
     autoSkip: true,
     chooseOption: '优先选择第一个选项',
@@ -200,7 +201,13 @@ function pickSegments() {
             return qa !== qb ? qa - qb : a.seq - b.seq;
         });
     }
-    return list.filter(function (s) { return CONFIG.skipSegs.indexOf(s.qid + '/' + s.seq) < 0; });
+    list = list.filter(function (s) { return CONFIG.skipSegs.indexOf(s.qid + '/' + s.seq) < 0; });
+    if (CONFIG.startFrom) {
+        const from = list.findIndex(function (s) { return s.qid + '/' + s.seq === CONFIG.startFrom; });
+        if (from < 0) log.warn('startFrom 指向的段不存在：' + CONFIG.startFrom + '，将从头执行');
+        else list = list.slice(from);
+    }
+    return list;
 }
 
 function loadPathing(seg) {
