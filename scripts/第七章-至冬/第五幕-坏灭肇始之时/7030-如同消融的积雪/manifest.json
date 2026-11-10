@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7030 如同消融的积雪",
+  "version": "1.0.0",
+  "description": "第七章 第五幕·坏灭肇始之时 · 3 段 10 点。⚠️ 仅第一段可跑：段 2、3 在火车上，铁轨沿线无锚点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}
