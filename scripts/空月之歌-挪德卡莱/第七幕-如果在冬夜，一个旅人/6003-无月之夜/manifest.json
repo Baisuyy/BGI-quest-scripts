@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6003 无月之夜",
+  "version": "1.0.0",
+  "description": "空月之歌 第七幕·如果在冬夜，一个旅人 · 1 段 1 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

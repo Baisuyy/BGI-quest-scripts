@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5029 当一切镌刻成碑 2/3",
+    "description": "第五章 第五幕·炽烈的还魂诗｜前往玛薇卡所在之处 → 前往玛薇卡所在之处｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -193.5,
+      "y": 10025.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

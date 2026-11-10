@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6036 虚空劫灰往世书 4/5",
+    "description": "空月之歌 第十幕·道成千壑，因果异灭｜与「富人」对话 → 与「富人」对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 178.5,
+      "y": 3642.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4000 如同昔日的微茫月明 1/3",
+    "description": "第四章 第二幕·仿若无因飘落的轻雨｜与娜维娅对话 → 与娜维娅对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3454.5,
+      "y": 4631.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

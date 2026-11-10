@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "6020 命运的回声 2/2",
+    "description": "空月之歌 第四幕·回望湮灭的月光｜与「木偶」对话 → 寻找「木偶」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3226.8,
+      "y": 9944.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3223.8,
+      "y": 9948.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

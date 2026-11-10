@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5001 归火圣夜巡礼 2/3",
+    "description": "第五章 第一幕·荣花与炎日之途｜开始团体赛 → 开始团体赛｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1568.4,
+      "y": 8040.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

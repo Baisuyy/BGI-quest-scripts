@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6010 灰白的秩序熊熊燃烧 1/4",
+    "description": "空月之歌 第二幕·尘与灯的挽歌｜前往终夜长茔见菲林斯 → 前往终夜长茔见菲林斯｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3758.8,
+      "y": 9208.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

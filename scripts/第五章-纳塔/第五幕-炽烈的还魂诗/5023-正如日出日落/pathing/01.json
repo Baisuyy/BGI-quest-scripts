@@ -1,0 +1,188 @@
+{
+  "info": {
+    "name": "5023 正如日出日落 1/3",
+    "description": "第五章 第五幕·炽烈的还魂诗｜前往「流泉之众」 → 返回并继续参加宴会｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2819.6,
+      "y": 9043.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2816.3,
+      "y": 9042.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2824.3,
+      "y": 9043.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2832.2,
+      "y": 9044.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2835.1,
+      "y": 9044.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2840.3,
+      "y": 9050.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2842.8,
+      "y": 9053.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2840.5,
+      "y": 9061.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2838.3,
+      "y": 9069.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2836.0,
+      "y": 9076.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2833.8,
+      "y": 9084.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2831.5,
+      "y": 9092.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2829.3,
+      "y": 9099.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2827.0,
+      "y": 9107.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2824.8,
+      "y": 9115.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2822.5,
+      "y": 9122.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2820.3,
+      "y": 9130.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2819.1,
+      "y": 9134.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2821.2,
+      "y": 9126.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2823.4,
+      "y": 9119.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2825.5,
+      "y": 9111.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2827.6,
+      "y": 9103.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2829.8,
+      "y": 9095.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2831.9,
+      "y": 9088.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2834.0,
+      "y": 9080.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2836.1,
+      "y": 9072.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2838.3,
+      "y": 9065.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2840.4,
+      "y": 9057.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2842.2,
+      "y": 9050.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

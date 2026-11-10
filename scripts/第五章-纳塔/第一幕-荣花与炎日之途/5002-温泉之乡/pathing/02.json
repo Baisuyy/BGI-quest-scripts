@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "5002 温泉之乡 2/2",
+    "description": "第五章 第一幕·荣花与炎日之途｜与玛拉妮对话 → 参加温泉聚会｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2656.1,
+      "y": 9007.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2660.1,
+      "y": 9014.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2664.1,
+      "y": 9021.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2668.1,
+      "y": 9028.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2672.0,
+      "y": 9035.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2676.0,
+      "y": 9042.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2680.0,
+      "y": 9049.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2684.0,
+      "y": 9056.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2688.0,
+      "y": 9063.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2692.0,
+      "y": 9069.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2695.9,
+      "y": 9076.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2699.9,
+      "y": 9083.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2703.9,
+      "y": 9090.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2707.9,
+      "y": 9097.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2711.9,
+      "y": 9104.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2715.9,
+      "y": 9111.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2719.9,
+      "y": 9118.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2723.8,
+      "y": 9125.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2727.8,
+      "y": 9132.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2731.8,
+      "y": 9139.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2735.8,
+      "y": 9146.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2739.8,
+      "y": 9153.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2743.8,
+      "y": 9160.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2747.7,
+      "y": 9167.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2751.5,
+      "y": 9173.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

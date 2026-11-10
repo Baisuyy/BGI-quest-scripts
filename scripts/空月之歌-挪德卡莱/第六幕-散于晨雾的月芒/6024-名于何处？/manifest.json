@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6024 名于何处？",
+  "version": "1.0.0",
+  "description": "空月之歌 第六幕·散于晨雾的月芒 · 1 段 105 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

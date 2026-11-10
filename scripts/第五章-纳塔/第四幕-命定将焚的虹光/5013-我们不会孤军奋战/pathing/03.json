@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "5013 我们不会孤军奋战 3/3",
+    "description": "第五章 第四幕·命定将焚的虹光｜守住大门，抵御最后的攻势 → 守住大门，抵御最后的攻势｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1865.2,
+      "y": 8978.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1862.0,
+      "y": 8971.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

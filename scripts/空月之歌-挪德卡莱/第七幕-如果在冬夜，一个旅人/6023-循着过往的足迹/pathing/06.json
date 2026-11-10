@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 6/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜与「博士」周旋 → 与「博士」周旋｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 6,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3478.9,
+      "y": 9674.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

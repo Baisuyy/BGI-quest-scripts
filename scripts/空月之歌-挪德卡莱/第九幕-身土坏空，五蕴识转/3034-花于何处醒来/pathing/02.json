@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "3034 花于何处醒来 2/4",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜与派蒙讨论信件内容 → 与派蒙讨论信件内容｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1670.3,
+      "y": 9405.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

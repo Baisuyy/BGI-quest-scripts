@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7020 于饯别之时散落的黑羽 3/3",
+    "description": "第七章 第四幕·往冥府的安魂歌｜与派蒙对话 → 与派蒙对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9760.8,
+      "y": 6516.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

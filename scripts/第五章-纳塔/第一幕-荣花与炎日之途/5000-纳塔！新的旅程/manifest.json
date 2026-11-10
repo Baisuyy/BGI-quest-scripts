@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "5000 纳塔！新的旅程",
+  "version": "1.0.0",
+  "description": "第五章 第一幕·荣花与炎日之途 · 3 段 227 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

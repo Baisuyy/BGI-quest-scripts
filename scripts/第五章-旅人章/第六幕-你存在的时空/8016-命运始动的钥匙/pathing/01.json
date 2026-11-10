@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "8016 命运始动的钥匙 1/2",
+    "description": "第五章 第六幕·你存在的时空｜在「沃陆之邦」附近巡逻 → 查看山洞的情况｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2691.7,
+      "y": 9931.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2695.6,
+      "y": 9928.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

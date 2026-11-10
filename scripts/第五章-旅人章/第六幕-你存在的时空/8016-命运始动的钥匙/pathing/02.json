@@ -1,0 +1,212 @@
+{
+  "info": {
+    "name": "8016 命运始动的钥匙 2/2",
+    "description": "第五章 第六幕·你存在的时空｜前往「烟谜主」进行支援 → 与茜特菈莉对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1767.4,
+      "y": 9851.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1761.5,
+      "y": 9846.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1758.5,
+      "y": 9843.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1754.5,
+      "y": 9850.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1750.5,
+      "y": 9857.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1746.6,
+      "y": 9864.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1742.6,
+      "y": 9871.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1738.6,
+      "y": 9878.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1734.6,
+      "y": 9885.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1730.7,
+      "y": 9892.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1726.7,
+      "y": 9899.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1722.7,
+      "y": 9906.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1718.7,
+      "y": 9913.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1714.8,
+      "y": 9920.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1710.8,
+      "y": 9927.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1706.8,
+      "y": 9934.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1702.8,
+      "y": 9940.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1698.9,
+      "y": 9947.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1694.9,
+      "y": 9954.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1690.9,
+      "y": 9961.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1686.9,
+      "y": 9968.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1683.0,
+      "y": 9975.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1679.0,
+      "y": 9982.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1675.0,
+      "y": 9989.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1671.0,
+      "y": 9996.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1667.1,
+      "y": 10003.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1663.1,
+      "y": 10010.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1659.1,
+      "y": 10017.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1655.1,
+      "y": 10024.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1651.2,
+      "y": 10031.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1647.2,
+      "y": 10038.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1643.2,
+      "y": 10045.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1639.4,
+      "y": 10051.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

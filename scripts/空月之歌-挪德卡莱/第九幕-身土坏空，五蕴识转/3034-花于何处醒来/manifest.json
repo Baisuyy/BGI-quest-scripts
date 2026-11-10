@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "3034 花于何处醒来",
+  "version": "1.0.0",
+  "description": "空月之歌 第九幕·身土坏空，五蕴识转 · 4 段 71 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

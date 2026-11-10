@@ -1,0 +1,458 @@
+{
+  "info": {
+    "name": "6001 于月光下重逢 1/4",
+    "description": "空月之歌 第一幕·雪浪与苍林之舞｜在月下散步 → #寻找{M#荧}{F#哥哥}｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1866.2,
+      "y": 10907.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1865.3,
+      "y": 10899.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1864.3,
+      "y": 10891.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1863.4,
+      "y": 10883.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1862.4,
+      "y": 10875.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1861.5,
+      "y": 10867.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1860.5,
+      "y": 10859.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1859.6,
+      "y": 10852.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1858.7,
+      "y": 10844.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1857.7,
+      "y": 10836.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1856.8,
+      "y": 10828.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1855.8,
+      "y": 10820.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1854.9,
+      "y": 10812.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1853.9,
+      "y": 10804.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1853.0,
+      "y": 10796.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1852.1,
+      "y": 10788.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1851.1,
+      "y": 10780.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1850.2,
+      "y": 10772.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1849.2,
+      "y": 10764.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1848.3,
+      "y": 10756.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1847.3,
+      "y": 10748.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1846.4,
+      "y": 10740.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1845.5,
+      "y": 10732.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1844.5,
+      "y": 10724.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1843.6,
+      "y": 10716.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1842.6,
+      "y": 10709.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1841.7,
+      "y": 10701.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1840.8,
+      "y": 10693.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1839.8,
+      "y": 10685.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1838.9,
+      "y": 10677.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1837.9,
+      "y": 10669.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1837.0,
+      "y": 10661.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1836.0,
+      "y": 10653.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1835.1,
+      "y": 10645.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1834.2,
+      "y": 10637.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1833.2,
+      "y": 10629.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1832.3,
+      "y": 10621.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1831.3,
+      "y": 10613.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1830.4,
+      "y": 10605.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1829.4,
+      "y": 10597.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1828.5,
+      "y": 10589.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1827.6,
+      "y": 10581.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1826.6,
+      "y": 10573.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1825.7,
+      "y": 10566.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1824.7,
+      "y": 10558.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1823.8,
+      "y": 10550.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1822.8,
+      "y": 10542.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1821.9,
+      "y": 10534.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1821.0,
+      "y": 10526.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1820.0,
+      "y": 10518.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1819.5,
+      "y": 10514.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1827.1,
+      "y": 10516.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1834.7,
+      "y": 10518.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1842.3,
+      "y": 10521.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1849.9,
+      "y": 10523.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1857.6,
+      "y": 10526.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1865.2,
+      "y": 10528.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1872.8,
+      "y": 10531.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1880.4,
+      "y": 10533.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1888.0,
+      "y": 10536.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1895.6,
+      "y": 10538.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1903.2,
+      "y": 10541.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1910.8,
+      "y": 10543.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1918.4,
+      "y": 10546.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1926.1,
+      "y": 10548.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1933.7,
+      "y": 10551.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1941.3,
+      "y": 10553.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1948.9,
+      "y": 10555.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1955.1,
+      "y": 10557.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1950.3,
+      "y": 10551.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1945.5,
+      "y": 10545.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1940.7,
+      "y": 10538.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1935.9,
+      "y": 10532.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1935.4,
+      "y": 10531.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

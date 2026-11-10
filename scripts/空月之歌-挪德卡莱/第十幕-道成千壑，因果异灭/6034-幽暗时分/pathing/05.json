@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6034 幽暗时分 5/6",
+    "description": "空月之歌 第十幕·道成千壑，因果异灭｜与纳西妲对话 → 与纳西妲对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 5,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 91.5,
+      "y": 2969.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

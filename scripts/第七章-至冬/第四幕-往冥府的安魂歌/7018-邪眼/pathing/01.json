@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7018 邪眼 1/1",
+    "description": "第七章 第四幕·往冥府的安魂歌｜离开老庭院餐厅 → 离开老庭院餐厅｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9901.4,
+      "y": 6690.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

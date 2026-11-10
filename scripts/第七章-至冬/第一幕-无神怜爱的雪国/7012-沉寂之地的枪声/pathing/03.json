@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "7012 沉寂之地的枪声 3/3",
+    "description": "第七章 第一幕·无神怜爱的雪国｜在曙光车站稍作整顿 → 在曙光车站稍作整顿｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 8544.2,
+      "y": 7809.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8545.3,
+      "y": 7803.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

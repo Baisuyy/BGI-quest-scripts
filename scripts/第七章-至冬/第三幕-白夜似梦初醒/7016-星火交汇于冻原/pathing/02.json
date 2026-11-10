@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "7016 星火交汇于冻原 2/3",
+    "description": "第七章 第三幕·白夜似梦初醒｜前往彩冰镇 → 召唤火车返回至冬堡｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 8732.0,
+      "y": 6501.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8726.8,
+      "y": 6507.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8721.6,
+      "y": 6513.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8716.4,
+      "y": 6519.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8711.3,
+      "y": 6525.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8706.1,
+      "y": 6531.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8700.9,
+      "y": 6537.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8695.7,
+      "y": 6544.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8691.3,
+      "y": 6549.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8695.7,
+      "y": 6542.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8700.2,
+      "y": 6535.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8704.6,
+      "y": 6529.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8709.0,
+      "y": 6522.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8713.4,
+      "y": 6515.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8717.9,
+      "y": 6509.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8722.3,
+      "y": 6502.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8726.7,
+      "y": 6495.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8731.2,
+      "y": 6489.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8731.4,
+      "y": 6488.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

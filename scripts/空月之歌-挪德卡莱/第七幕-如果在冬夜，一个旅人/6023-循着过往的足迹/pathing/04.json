@@ -1,0 +1,380 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 4/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜调查能量界域 → 调查能量界域｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2385.5,
+      "y": 9320.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2383.8,
+      "y": 9317.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2378.0,
+      "y": 9311.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2372.3,
+      "y": 9305.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2366.5,
+      "y": 9300.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2360.8,
+      "y": 9294.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2355.0,
+      "y": 9289.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2349.3,
+      "y": 9283.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2346.1,
+      "y": 9280.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2351.7,
+      "y": 9286.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2357.3,
+      "y": 9292.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2362.9,
+      "y": 9297.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2368.6,
+      "y": 9303.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2374.2,
+      "y": 9309.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2379.8,
+      "y": 9314.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2385.4,
+      "y": 9320.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2385.5,
+      "y": 9320.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2379.8,
+      "y": 9314.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2374.2,
+      "y": 9309.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2368.5,
+      "y": 9303.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2362.9,
+      "y": 9298.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2357.2,
+      "y": 9292.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2351.6,
+      "y": 9286.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2345.9,
+      "y": 9281.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2340.3,
+      "y": 9275.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2334.6,
+      "y": 9269.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2329.0,
+      "y": 9264.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2323.3,
+      "y": 9258.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2317.8,
+      "y": 9252.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2323.1,
+      "y": 9258.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2328.3,
+      "y": 9264.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2333.6,
+      "y": 9270.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2338.9,
+      "y": 9276.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2344.1,
+      "y": 9282.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2347.6,
+      "y": 9286.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2351.8,
+      "y": 9280.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2356.0,
+      "y": 9273.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2360.2,
+      "y": 9266.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2364.4,
+      "y": 9259.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2368.6,
+      "y": 9252.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2372.8,
+      "y": 9246.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2377.0,
+      "y": 9239.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2381.2,
+      "y": 9232.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2385.4,
+      "y": 9225.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2389.6,
+      "y": 9218.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2393.8,
+      "y": 9212.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2398.0,
+      "y": 9205.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2398.6,
+      "y": 9204.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2391.7,
+      "y": 9208.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2384.8,
+      "y": 9212.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2377.9,
+      "y": 9216.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2371.0,
+      "y": 9220.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2364.1,
+      "y": 9224.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2357.1,
+      "y": 9228.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2350.2,
+      "y": 9232.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2343.3,
+      "y": 9236.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2336.4,
+      "y": 9240.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2329.5,
+      "y": 9244.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2322.6,
+      "y": 9248.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2315.7,
+      "y": 9252.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2315.5,
+      "y": 9252.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,248 @@
+{
+  "info": {
+    "name": "4008 真相隐于影中 1/2",
+    "description": "第四章 第四幕·谕示胎动的终焉之刻｜前往生产区寻找林尼 → 陪同菲米尼回到医务室｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4489.7,
+      "y": 4608.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4497.4,
+      "y": 4610.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4505.0,
+      "y": 4612.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4512.7,
+      "y": 4614.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4520.4,
+      "y": 4617.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4528.0,
+      "y": 4619.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4535.7,
+      "y": 4621.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4543.3,
+      "y": 4624.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4551.0,
+      "y": 4626.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4558.7,
+      "y": 4628.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4565.8,
+      "y": 4630.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4572.7,
+      "y": 4634.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4577.6,
+      "y": 4637.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4574.7,
+      "y": 4630.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4571.8,
+      "y": 4623.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4570.3,
+      "y": 4619.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4576.2,
+      "y": 4624.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4580.2,
+      "y": 4628.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4572.3,
+      "y": 4629.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4566.9,
+      "y": 4629.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4559.0,
+      "y": 4628.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4551.1,
+      "y": 4627.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4543.3,
+      "y": 4625.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4535.4,
+      "y": 4624.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4527.5,
+      "y": 4622.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4519.6,
+      "y": 4621.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4511.7,
+      "y": 4620.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4503.8,
+      "y": 4618.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4502.6,
+      "y": 4618.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4510.5,
+      "y": 4619.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4518.4,
+      "y": 4620.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4526.4,
+      "y": 4621.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4534.3,
+      "y": 4623.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4542.2,
+      "y": 4624.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4550.1,
+      "y": 4625.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4558.1,
+      "y": 4626.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4566.0,
+      "y": 4627.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4573.9,
+      "y": 4628.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4581.5,
+      "y": 4629.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

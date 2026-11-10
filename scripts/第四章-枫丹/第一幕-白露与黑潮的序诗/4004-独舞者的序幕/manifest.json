@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "4004 独舞者的序幕",
+  "version": "1.0.0",
+  "description": "第四章 第一幕·白露与黑潮的序诗 · 3 段 82 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

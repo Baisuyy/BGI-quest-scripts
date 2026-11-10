@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "7005 白幕降下 1/1",
+    "description": "第七章 第二幕·死魂灵的夜曲｜前往科洛列夫茨基剧院 → 前往科洛列夫茨基剧院｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9446.9,
+      "y": 6606.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9441.5,
+      "y": 6600.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9436.0,
+      "y": 6595.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9430.6,
+      "y": 6589.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9425.2,
+      "y": 6583.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9419.7,
+      "y": 6577.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9414.3,
+      "y": 6571.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9408.9,
+      "y": 6565.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9403.5,
+      "y": 6559.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9398.0,
+      "y": 6553.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9392.6,
+      "y": 6548.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9387.2,
+      "y": 6542.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9381.7,
+      "y": 6536.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9376.3,
+      "y": 6530.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9370.9,
+      "y": 6524.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9365.4,
+      "y": 6518.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9360.0,
+      "y": 6512.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9354.6,
+      "y": 6506.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9349.2,
+      "y": 6501.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9354.3,
+      "y": 6507.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9359.4,
+      "y": 6513.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9364.6,
+      "y": 6519.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9369.7,
+      "y": 6525.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9374.8,
+      "y": 6531.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9377.5,
+      "y": 6535.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6012 匿于阴影",
+  "version": "1.0.0",
+  "description": "空月之歌 第三幕·不存在的国土 · 2 段 26 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

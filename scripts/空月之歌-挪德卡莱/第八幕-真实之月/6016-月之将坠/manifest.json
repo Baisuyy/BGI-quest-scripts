@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6016 月之将坠",
+  "version": "1.0.0",
+  "description": "空月之歌 第八幕·真实之月 · 2 段 116 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

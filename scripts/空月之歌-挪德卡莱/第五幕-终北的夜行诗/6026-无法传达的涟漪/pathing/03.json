@@ -1,0 +1,698 @@
+{
+  "info": {
+    "name": "6026 无法传达的涟漪 3/8",
+    "description": "空月之歌 第五幕·终北的夜行诗｜前往「银月之庭」 → 思考接下来的行动｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2117.0,
+      "y": 11199.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2111.9,
+      "y": 11193.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2106.9,
+      "y": 11186.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2101.8,
+      "y": 11180.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2096.8,
+      "y": 11174.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2091.7,
+      "y": 11168.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2086.7,
+      "y": 11162.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2081.6,
+      "y": 11155.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2076.6,
+      "y": 11149.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2071.5,
+      "y": 11143.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2066.4,
+      "y": 11137.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2061.4,
+      "y": 11131.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2056.3,
+      "y": 11124.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2051.3,
+      "y": 11118.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2046.2,
+      "y": 11112.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2041.2,
+      "y": 11106.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2036.1,
+      "y": 11100.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2031.1,
+      "y": 11093.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2027.4,
+      "y": 11089.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2024.9,
+      "y": 11081.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2022.3,
+      "y": 11074.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2019.8,
+      "y": 11066.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2017.3,
+      "y": 11059.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2014.7,
+      "y": 11051.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2012.2,
+      "y": 11043.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2009.7,
+      "y": 11036.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2007.1,
+      "y": 11028.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2004.6,
+      "y": 11021.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2002.1,
+      "y": 11013.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1999.5,
+      "y": 11005.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1997.0,
+      "y": 10998.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1994.5,
+      "y": 10990.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1991.9,
+      "y": 10983.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1989.4,
+      "y": 10975.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1986.9,
+      "y": 10968.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1984.3,
+      "y": 10960.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1981.8,
+      "y": 10952.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1979.3,
+      "y": 10945.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1976.7,
+      "y": 10937.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1974.2,
+      "y": 10930.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1971.7,
+      "y": 10922.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1969.1,
+      "y": 10914.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1966.6,
+      "y": 10907.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1964.1,
+      "y": 10899.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1961.5,
+      "y": 10892.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1959.0,
+      "y": 10884.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1956.4,
+      "y": 10876.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1953.9,
+      "y": 10869.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1951.4,
+      "y": 10861.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1948.8,
+      "y": 10854.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1946.3,
+      "y": 10846.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1943.8,
+      "y": 10839.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1941.2,
+      "y": 10831.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1938.7,
+      "y": 10823.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1936.2,
+      "y": 10816.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1933.6,
+      "y": 10808.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1931.1,
+      "y": 10801.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1928.6,
+      "y": 10793.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1926.0,
+      "y": 10785.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1923.5,
+      "y": 10778.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1921.0,
+      "y": 10770.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1918.4,
+      "y": 10763.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1915.9,
+      "y": 10755.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1913.4,
+      "y": 10747.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1910.8,
+      "y": 10740.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1908.3,
+      "y": 10732.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1905.8,
+      "y": 10725.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1903.2,
+      "y": 10717.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1900.7,
+      "y": 10710.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1898.2,
+      "y": 10702.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1895.6,
+      "y": 10694.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1893.1,
+      "y": 10687.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1890.6,
+      "y": 10679.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1888.0,
+      "y": 10672.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1885.5,
+      "y": 10664.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1883.0,
+      "y": 10656.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1880.4,
+      "y": 10649.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1877.9,
+      "y": 10641.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1875.4,
+      "y": 10634.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1872.8,
+      "y": 10626.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1870.3,
+      "y": 10618.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1867.8,
+      "y": 10611.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1865.2,
+      "y": 10603.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1862.7,
+      "y": 10596.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1860.2,
+      "y": 10588.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1857.6,
+      "y": 10581.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1855.1,
+      "y": 10573.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1852.6,
+      "y": 10565.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1850.0,
+      "y": 10558.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1847.5,
+      "y": 10550.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1845.0,
+      "y": 10543.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1842.4,
+      "y": 10535.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1839.9,
+      "y": 10527.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1837.4,
+      "y": 10520.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1834.8,
+      "y": 10512.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1832.3,
+      "y": 10505.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1829.8,
+      "y": 10497.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1827.2,
+      "y": 10489.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1824.7,
+      "y": 10482.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1822.1,
+      "y": 10474.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1819.6,
+      "y": 10467.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1817.1,
+      "y": 10459.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1814.5,
+      "y": 10452.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1812.0,
+      "y": 10444.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1809.5,
+      "y": 10436.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1806.9,
+      "y": 10429.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1806.8,
+      "y": 10428.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1799.1,
+      "y": 10431.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1791.4,
+      "y": 10433.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1783.8,
+      "y": 10435.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1778.2,
+      "y": 10437.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1771.7,
+      "y": 10432.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1765.1,
+      "y": 10428.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1765.1,
+      "y": 10428.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

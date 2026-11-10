@@ -1,0 +1,152 @@
+{
+  "info": {
+    "name": "6001 于月光下重逢 4/4",
+    "description": "空月之歌 第一幕·雪浪与苍林之舞｜离开霜月之坊 → 与「少女」见面｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2018.0,
+      "y": 11095.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2023.9,
+      "y": 11100.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2029.8,
+      "y": 11106.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2035.7,
+      "y": 11111.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2041.6,
+      "y": 11117.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2047.6,
+      "y": 11122.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2053.5,
+      "y": 11127.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2059.4,
+      "y": 11133.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2065.3,
+      "y": 11138.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2071.2,
+      "y": 11144.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2077.1,
+      "y": 11149.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2083.0,
+      "y": 11154.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2088.9,
+      "y": 11160.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2094.8,
+      "y": 11165.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2100.7,
+      "y": 11171.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2106.7,
+      "y": 11176.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2112.6,
+      "y": 11181.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2118.5,
+      "y": 11187.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2124.4,
+      "y": 11192.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2130.3,
+      "y": 11197.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2136.2,
+      "y": 11203.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2142.1,
+      "y": 11208.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2146.7,
+      "y": 11212.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

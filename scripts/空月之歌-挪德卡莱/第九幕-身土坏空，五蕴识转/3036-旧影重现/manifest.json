@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "3036 旧影重现",
+  "version": "1.0.0",
+  "description": "空月之歌 第九幕·身土坏空，五蕴识转 · 2 段 7 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

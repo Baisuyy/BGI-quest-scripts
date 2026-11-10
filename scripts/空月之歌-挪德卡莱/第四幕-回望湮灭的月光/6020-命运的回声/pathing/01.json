@@ -1,0 +1,26 @@
+{
+  "info": {
+    "name": "6020 命运的回声 1/2",
+    "description": "空月之歌 第四幕·回望湮灭的月光｜击败「猎月人」雷利尔 → 击败「猎月人」雷利尔｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1905.5,
+      "y": 10898.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1903.8,
+      "y": 10895.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

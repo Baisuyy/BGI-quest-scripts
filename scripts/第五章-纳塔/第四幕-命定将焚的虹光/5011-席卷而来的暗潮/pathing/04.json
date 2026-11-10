@@ -1,0 +1,236 @@
+{
+  "info": {
+    "name": "5011 席卷而来的暗潮 4/4",
+    "description": "第五章 第四幕·命定将焚的虹光｜查看地图，选择支援地点 → 与基尼奇交谈｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1699.9,
+      "y": 8674.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1707.6,
+      "y": 8676.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1715.4,
+      "y": 8678.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1723.1,
+      "y": 8680.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1730.9,
+      "y": 8682.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1738.6,
+      "y": 8684.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1746.3,
+      "y": 8686.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1754.1,
+      "y": 8688.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1761.8,
+      "y": 8690.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1769.6,
+      "y": 8692.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1777.3,
+      "y": 8694.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1785.0,
+      "y": 8696.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1792.8,
+      "y": 8698.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1800.5,
+      "y": 8700.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1808.3,
+      "y": 8702.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1816.0,
+      "y": 8704.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1823.7,
+      "y": 8706.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1831.5,
+      "y": 8708.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1839.2,
+      "y": 8710.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1847.0,
+      "y": 8712.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1852.3,
+      "y": 8714.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1854.4,
+      "y": 8706.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1855.0,
+      "y": 8704.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1851.3,
+      "y": 8711.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1847.7,
+      "y": 8718.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1846.4,
+      "y": 8721.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1852.6,
+      "y": 8716.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1858.8,
+      "y": 8711.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1865.1,
+      "y": 8706.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1871.3,
+      "y": 8701.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1877.5,
+      "y": 8696.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1883.7,
+      "y": 8691.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1884.4,
+      "y": 8690.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1877.2,
+      "y": 8694.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1870.1,
+      "y": 8697.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1862.9,
+      "y": 8701.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1856.7,
+      "y": 8704.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

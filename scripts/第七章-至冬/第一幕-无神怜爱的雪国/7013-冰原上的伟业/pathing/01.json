@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7013 冰原上的伟业 1/4",
+    "description": "第七章 第一幕·无神怜爱的雪国｜乘坐列车前往至冬堡 → 乘坐列车前往至冬堡｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 8545.3,
+      "y": 7803.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

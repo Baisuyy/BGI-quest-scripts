@@ -1,0 +1,374 @@
+{
+  "info": {
+    "name": "6004 墟火 2/2",
+    "description": "空月之歌 序奏·归途｜前往希诺宁的工坊 → 与商队成员会面｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1377.8,
+      "y": 7694.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1376.9,
+      "y": 7686.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1376.1,
+      "y": 7678.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1375.2,
+      "y": 7670.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1375.0,
+      "y": 7668.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1376.9,
+      "y": 7676.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1378.8,
+      "y": 7683.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1379.8,
+      "y": 7688.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1374.6,
+      "y": 7682.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1372.0,
+      "y": 7679.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1375.7,
+      "y": 7686.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1379.5,
+      "y": 7693.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1383.2,
+      "y": 7700.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1386.9,
+      "y": 7707.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1390.7,
+      "y": 7714.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1394.4,
+      "y": 7721.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1398.1,
+      "y": 7728.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1401.8,
+      "y": 7735.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1405.6,
+      "y": 7742.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1409.3,
+      "y": 7749.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1413.0,
+      "y": 7756.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1416.8,
+      "y": 7764.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1420.5,
+      "y": 7771.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1424.2,
+      "y": 7778.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1428.0,
+      "y": 7785.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1431.7,
+      "y": 7792.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1435.4,
+      "y": 7799.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1439.2,
+      "y": 7806.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1442.9,
+      "y": 7813.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1446.6,
+      "y": 7820.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1450.3,
+      "y": 7827.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1454.1,
+      "y": 7834.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1457.8,
+      "y": 7841.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1461.5,
+      "y": 7848.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1465.3,
+      "y": 7856.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1469.0,
+      "y": 7863.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1472.7,
+      "y": 7870.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1476.5,
+      "y": 7877.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1480.2,
+      "y": 7884.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1483.9,
+      "y": 7891.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1487.6,
+      "y": 7898.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1491.4,
+      "y": 7905.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1495.1,
+      "y": 7912.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1498.8,
+      "y": 7919.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1502.6,
+      "y": 7926.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1506.3,
+      "y": 7933.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1510.0,
+      "y": 7940.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1513.8,
+      "y": 7948.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1517.5,
+      "y": 7955.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1521.2,
+      "y": 7962.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1525.0,
+      "y": 7969.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1528.7,
+      "y": 7976.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1532.4,
+      "y": 7983.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1536.1,
+      "y": 7990.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1539.9,
+      "y": 7997.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1543.6,
+      "y": 8004.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1547.3,
+      "y": 8011.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1551.1,
+      "y": 8018.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1554.8,
+      "y": 8025.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1557.4,
+      "y": 8030.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

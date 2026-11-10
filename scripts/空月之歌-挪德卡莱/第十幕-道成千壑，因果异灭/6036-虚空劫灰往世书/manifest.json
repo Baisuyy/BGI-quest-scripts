@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6036 虚空劫灰往世书",
+  "version": "1.0.0",
+  "description": "空月之歌 第十幕·道成千壑，因果异灭 · 5 段 94 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

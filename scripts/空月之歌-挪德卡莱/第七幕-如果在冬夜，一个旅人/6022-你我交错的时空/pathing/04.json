@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6022 你我交错的时空 4/10",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜继续探索这个空间 → 继续探索这个空间｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2513.7,
+      "y": 10051.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

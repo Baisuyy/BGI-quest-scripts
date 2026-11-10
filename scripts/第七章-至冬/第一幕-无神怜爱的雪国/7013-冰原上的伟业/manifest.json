@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7013 冰原上的伟业",
+  "version": "1.0.0",
+  "description": "第七章 第一幕·无神怜爱的雪国 · 4 段 226 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "7020 于饯别之时散落的黑羽 2/3",
+    "description": "第七章 第四幕·往冥府的安魂歌｜前往曙光车站 → 与米提亚对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 8540.1,
+      "y": 7829.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8537.0,
+      "y": 7822.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8533.9,
+      "y": 7815.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8530.9,
+      "y": 7807.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8527.8,
+      "y": 7800.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8526.1,
+      "y": 7796.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

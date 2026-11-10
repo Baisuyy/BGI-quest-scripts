@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6003 无月之夜 1/1",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜进入「博士」的研究所 → 进入「博士」的研究所｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 6394.1,
+      "y": 9531.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

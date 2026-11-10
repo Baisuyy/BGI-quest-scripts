@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "7017 仅此一着 1/1",
+    "description": "第七章 第三幕·白夜似梦初醒｜前往车站 → 跟上接头人｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9304.4,
+      "y": 6904.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9296.6,
+      "y": 6902.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9288.7,
+      "y": 6901.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9280.9,
+      "y": 6899.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9273.1,
+      "y": 6897.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9265.3,
+      "y": 6896.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9257.4,
+      "y": 6894.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9249.6,
+      "y": 6892.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9241.8,
+      "y": 6891.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9233.9,
+      "y": 6889.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9226.1,
+      "y": 6887.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9218.3,
+      "y": 6886.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9210.5,
+      "y": 6884.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9202.6,
+      "y": 6882.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9194.8,
+      "y": 6881.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9187.0,
+      "y": 6879.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9179.1,
+      "y": 6877.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9171.3,
+      "y": 6876.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9170.0,
+      "y": 6876.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

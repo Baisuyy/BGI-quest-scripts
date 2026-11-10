@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6009 曾有人追猎月亮",
+  "version": "1.0.0",
+  "description": "空月之歌 第二幕·尘与灯的挽歌 · 2 段 168 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6001 于月光下重逢 2/4",
+    "description": "空月之歌 第一幕·雪浪与苍林之舞｜离开「秘闻馆」 → 离开「秘闻馆」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1634.1,
+      "y": 9524.2,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

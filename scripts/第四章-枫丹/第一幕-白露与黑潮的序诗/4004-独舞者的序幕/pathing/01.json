@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4004 独舞者的序幕 1/3",
+    "description": "第四章 第一幕·白露与黑潮的序诗｜前往喀万驿 → 前往喀万驿｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1637.2,
+      "y": 3867.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,260 @@
+{
+  "info": {
+    "name": "5012 绝望高悬天之上 7/8",
+    "description": "第五章 第四幕·命定将焚的虹光｜前往「回声之子」部族营地 → 与先行撤离的队伍会合｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 7,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1374.3,
+      "y": 7676.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1376.3,
+      "y": 7684.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1378.3,
+      "y": 7691.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1380.4,
+      "y": 7699.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1382.4,
+      "y": 7707.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1384.4,
+      "y": 7715.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1386.4,
+      "y": 7722.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1388.4,
+      "y": 7730.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1390.4,
+      "y": 7738.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1392.5,
+      "y": 7746.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1394.5,
+      "y": 7753.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1396.5,
+      "y": 7761.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1398.5,
+      "y": 7769.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1400.5,
+      "y": 7777.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1402.6,
+      "y": 7784.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1404.6,
+      "y": 7792.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1406.4,
+      "y": 7799.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1411.0,
+      "y": 7806.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1415.7,
+      "y": 7812.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1420.3,
+      "y": 7819.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1424.9,
+      "y": 7825.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1429.6,
+      "y": 7832.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1434.2,
+      "y": 7838.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1438.9,
+      "y": 7845.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1443.5,
+      "y": 7851.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1448.1,
+      "y": 7858.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1452.8,
+      "y": 7864.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1457.4,
+      "y": 7871.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1462.0,
+      "y": 7877.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1466.7,
+      "y": 7884.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1471.3,
+      "y": 7890.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1476.0,
+      "y": 7897.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1480.6,
+      "y": 7903.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1485.2,
+      "y": 7910.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1489.9,
+      "y": 7916.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1494.5,
+      "y": 7923.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1499.1,
+      "y": 7929.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1503.8,
+      "y": 7936.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1508.4,
+      "y": 7942.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1513.0,
+      "y": 7949.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1513.3,
+      "y": 7949.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

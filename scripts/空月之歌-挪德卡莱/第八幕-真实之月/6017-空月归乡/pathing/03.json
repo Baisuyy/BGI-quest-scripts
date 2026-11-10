@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6017 空月归乡 3/3",
+    "description": "空月之歌 第八幕·真实之月｜给骑士团写信 → 给骑士团写信｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1599.2,
+      "y": 9453.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

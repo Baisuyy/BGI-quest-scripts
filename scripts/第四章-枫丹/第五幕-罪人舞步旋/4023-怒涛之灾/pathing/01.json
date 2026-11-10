@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4023 怒涛之灾 1/2",
+    "description": "第四章 第五幕·罪人舞步旋｜回到监舍区 → 回到监舍区｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4520.1,
+      "y": 4561.2,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

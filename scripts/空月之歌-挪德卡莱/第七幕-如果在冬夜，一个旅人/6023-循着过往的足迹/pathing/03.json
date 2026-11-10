@@ -1,0 +1,92 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 3/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜与「公子」会合 → 与「公子」对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 5395.1,
+      "y": 9380.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5402.9,
+      "y": 9378.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5410.8,
+      "y": 9376.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5418.6,
+      "y": 9375.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5426.4,
+      "y": 9373.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5434.3,
+      "y": 9371.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5435.9,
+      "y": 9371.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5441.5,
+      "y": 9377.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5447.0,
+      "y": 9383.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5452.6,
+      "y": 9388.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5455.1,
+      "y": 9391.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5449.4,
+      "y": 9385.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 5448.0,
+      "y": 9384.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6026 无法传达的涟漪 6/8",
+    "description": "空月之歌 第五幕·终北的夜行诗｜前往会见愚人众执行官 → 前往会见愚人众执行官｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 6,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3236.9,
+      "y": 9950.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

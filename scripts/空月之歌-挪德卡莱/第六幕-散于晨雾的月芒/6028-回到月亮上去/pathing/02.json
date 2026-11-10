@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6028 回到月亮上去 2/2",
+    "description": "空月之歌 第六幕·散于晨雾的月芒｜出门看看月亮 → 出门看看月亮｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1679.0,
+      "y": 9395.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

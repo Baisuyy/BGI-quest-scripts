@@ -1,0 +1,416 @@
+{
+  "info": {
+    "name": "6006 逆焰 1/1",
+    "description": "空月之歌 序奏·归途｜进入遗迹 → 在花羽会打开信件｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1160.5,
+      "y": 9158.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1162.7,
+      "y": 9165.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1164.9,
+      "y": 9173.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1167.1,
+      "y": 9181.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1169.3,
+      "y": 9189.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1171.5,
+      "y": 9196.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1173.7,
+      "y": 9204.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1175.8,
+      "y": 9212.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1178.0,
+      "y": 9219.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1180.2,
+      "y": 9227.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1182.4,
+      "y": 9235.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1184.6,
+      "y": 9242.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1186.8,
+      "y": 9250.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1189.0,
+      "y": 9258.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1191.2,
+      "y": 9265.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1193.4,
+      "y": 9273.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1195.6,
+      "y": 9281.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1197.8,
+      "y": 9289.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1200.0,
+      "y": 9296.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1202.1,
+      "y": 9304.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1204.3,
+      "y": 9312.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1206.5,
+      "y": 9319.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1208.7,
+      "y": 9327.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1210.9,
+      "y": 9335.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1213.1,
+      "y": 9342.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1215.3,
+      "y": 9350.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1217.5,
+      "y": 9358.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1219.7,
+      "y": 9365.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1221.9,
+      "y": 9373.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1224.1,
+      "y": 9381.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1226.3,
+      "y": 9389.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1228.4,
+      "y": 9396.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1230.6,
+      "y": 9404.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1232.8,
+      "y": 9412.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1235.0,
+      "y": 9419.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1237.2,
+      "y": 9427.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1239.4,
+      "y": 9435.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1241.6,
+      "y": 9442.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1243.8,
+      "y": 9450.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1246.0,
+      "y": 9458.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1248.2,
+      "y": 9466.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1250.4,
+      "y": 9473.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1252.6,
+      "y": 9481.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1254.7,
+      "y": 9489.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1256.9,
+      "y": 9496.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1259.1,
+      "y": 9504.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1261.3,
+      "y": 9512.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1263.5,
+      "y": 9519.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1265.7,
+      "y": 9527.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1267.9,
+      "y": 9535.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1270.1,
+      "y": 9542.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1272.3,
+      "y": 9550.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1274.5,
+      "y": 9558.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1276.7,
+      "y": 9566.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1278.9,
+      "y": 9573.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1281.1,
+      "y": 9581.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1283.0,
+      "y": 9588.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1279.5,
+      "y": 9581.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1276.0,
+      "y": 9573.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1272.5,
+      "y": 9566.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1268.9,
+      "y": 9559.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1265.4,
+      "y": 9552.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1261.9,
+      "y": 9545.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1258.4,
+      "y": 9537.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1254.9,
+      "y": 9530.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1251.4,
+      "y": 9523.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1248.4,
+      "y": 9517.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

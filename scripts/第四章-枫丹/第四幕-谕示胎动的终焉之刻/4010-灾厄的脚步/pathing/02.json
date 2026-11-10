@@ -1,0 +1,128 @@
+{
+  "info": {
+    "name": "4010 灾厄的脚步 2/4",
+    "description": "第四章 第四幕·谕示胎动的终焉之刻｜与那维莱特对话 → 前往歌剧院｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3329.4,
+      "y": 3809.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3334.9,
+      "y": 3804.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3340.5,
+      "y": 3798.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3346.0,
+      "y": 3792.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3351.6,
+      "y": 3786.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3357.1,
+      "y": 3780.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3362.6,
+      "y": 3775.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3368.2,
+      "y": 3769.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3373.7,
+      "y": 3763.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3379.2,
+      "y": 3757.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3384.8,
+      "y": 3752.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3390.3,
+      "y": 3746.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3395.9,
+      "y": 3740.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3401.4,
+      "y": 3734.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3406.9,
+      "y": 3729.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3412.5,
+      "y": 3723.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3418.0,
+      "y": 3717.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3423.5,
+      "y": 3711.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3425.8,
+      "y": 3709.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

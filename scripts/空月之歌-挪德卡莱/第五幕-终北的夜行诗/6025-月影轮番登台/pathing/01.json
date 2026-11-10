@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6025 月影轮番登台 1/3",
+    "description": "空月之歌 第五幕·终北的夜行诗｜前往「银月之庭」 → 前往「银月之庭」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2146.8,
+      "y": 11212.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

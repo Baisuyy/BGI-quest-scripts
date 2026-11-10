@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5012 绝望高悬天之上 3/8",
+    "description": "第五章 第四幕·命定将焚的虹光｜击败所有魔物 → 击败所有魔物｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2194.9,
+      "y": 8783.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

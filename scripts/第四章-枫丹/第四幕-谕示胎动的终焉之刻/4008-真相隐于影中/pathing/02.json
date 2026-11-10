@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4008 真相隐于影中 2/2",
+    "description": "第四章 第四幕·谕示胎动的终焉之刻｜与菲米尼对话 → 与菲米尼对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4580.8,
+      "y": 4630.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

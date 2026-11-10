@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6034 幽暗时分 6/6",
+    "description": "空月之歌 第十幕·道成千壑，因果异灭｜返回阿如的倒影 → 返回阿如的倒影｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 6,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2345.0,
+      "y": 5495.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5015 皆为崇高之名 1/3",
+    "description": "第五章 第三幕·镜与谜烟的彼方｜前往冒险家协会 → 前往冒险家协会｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1849.6,
+      "y": 9081.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

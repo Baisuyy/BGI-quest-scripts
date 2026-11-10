@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "6026 无法传达的涟漪 4/8",
+    "description": "空月之歌 第五幕·终北的夜行诗｜继续和艾莉丝交谈 → 在那夏镇漫步｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1651.0,
+      "y": 9464.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1657.9,
+      "y": 9460.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1664.6,
+      "y": 9456.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1661.3,
+      "y": 9449.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1658.1,
+      "y": 9441.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1654.8,
+      "y": 9434.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1651.5,
+      "y": 9427.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1648.3,
+      "y": 9419.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1645.0,
+      "y": 9412.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1643.5,
+      "y": 9409.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

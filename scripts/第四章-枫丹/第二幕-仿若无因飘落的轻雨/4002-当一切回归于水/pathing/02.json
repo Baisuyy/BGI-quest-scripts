@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4002 当一切回归于水 2/3",
+    "description": "第四章 第二幕·仿若无因飘落的轻雨｜在枫丹廷闲逛 → 在枫丹廷闲逛｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3567.1,
+      "y": 4445.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

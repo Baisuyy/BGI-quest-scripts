@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5000 纳塔！新的旅程 1/3",
+    "description": "第五章 第一幕·荣花与炎日之途｜前往海露港 → 前往海露港｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1629.0,
+      "y": 5035.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

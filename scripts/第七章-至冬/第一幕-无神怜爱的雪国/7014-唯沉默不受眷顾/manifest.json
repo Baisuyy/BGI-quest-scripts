@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7014 唯沉默不受眷顾",
+  "version": "1.0.0",
+  "description": "第七章 第一幕·无神怜爱的雪国 · 1 段 49 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

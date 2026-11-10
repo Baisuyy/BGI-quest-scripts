@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "4015 匿于日常之禁忌",
+  "version": "1.0.0",
+  "description": "第四章 第三幕·向深水中的晨星 · 3 段 274 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

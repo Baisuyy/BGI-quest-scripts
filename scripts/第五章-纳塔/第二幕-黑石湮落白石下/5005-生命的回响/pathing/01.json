@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5005 生命的回响 1/1",
+    "description": "第五章 第二幕·黑石湮落白石下｜进入地下遗迹 → 进入地下遗迹｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1938.9,
+      "y": 8790.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

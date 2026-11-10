@@ -1,0 +1,212 @@
+{
+  "info": {
+    "name": "6002 在夜的阴影中 3/7",
+    "description": "空月之歌 第一幕·雪浪与苍林之舞｜用高级权限卡开启终端 → 进入下层空间｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3261.0,
+      "y": 9806.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3253.6,
+      "y": 9803.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3246.2,
+      "y": 9800.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3238.8,
+      "y": 9797.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3231.3,
+      "y": 9794.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3223.9,
+      "y": 9791.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3222.2,
+      "y": 9790.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3214.3,
+      "y": 9789.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3206.3,
+      "y": 9788.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3198.4,
+      "y": 9788.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3194.7,
+      "y": 9787.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3195.6,
+      "y": 9795.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3196.5,
+      "y": 9803.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3197.5,
+      "y": 9811.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3198.4,
+      "y": 9819.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3199.3,
+      "y": 9827.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3199.8,
+      "y": 9831.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3205.3,
+      "y": 9837.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3210.7,
+      "y": 9843.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3216.2,
+      "y": 9849.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3221.7,
+      "y": 9855.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3227.1,
+      "y": 9861.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3232.6,
+      "y": 9866.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3238.1,
+      "y": 9872.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3243.5,
+      "y": 9878.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3249.0,
+      "y": 9884.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3254.5,
+      "y": 9890.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3259.9,
+      "y": 9896.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3260.0,
+      "y": 9896.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3262.4,
+      "y": 9891.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3262.8,
+      "y": 9883.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3263.2,
+      "y": 9875.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3263.4,
+      "y": 9872.2,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

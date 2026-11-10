@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5013 我们不会孤军奋战 2/3",
+    "description": "第五章 第四幕·命定将焚的虹光｜与伙伴共享战场情报 → 与伙伴共享战场情报｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1665.8,
+      "y": 8161.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

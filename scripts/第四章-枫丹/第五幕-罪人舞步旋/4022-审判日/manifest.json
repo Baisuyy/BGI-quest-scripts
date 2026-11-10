@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "4022 审判日",
+  "version": "1.0.0",
+  "description": "第四章 第五幕·罪人舞步旋 · 1 段 10 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

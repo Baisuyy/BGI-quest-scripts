@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6013 特别行动 2/2",
+    "description": "空月之歌 第三幕·不存在的国土｜总结关于「猎月人」的线索 → 总结关于「猎月人」的线索｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1560.8,
+      "y": 11114.2,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "3034 花于何处醒来 4/4",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜准备离开须弥城 → 准备离开须弥城｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1561.0,
+      "y": 3818.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

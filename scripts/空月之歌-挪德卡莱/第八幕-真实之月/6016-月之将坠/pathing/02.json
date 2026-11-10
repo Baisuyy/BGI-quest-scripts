@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6016 月之将坠 2/2",
+    "description": "空月之歌 第八幕·真实之月｜击败「博士」 → 击败「博士」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1638.4,
+      "y": 9538.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

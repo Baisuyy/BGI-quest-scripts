@@ -1,0 +1,290 @@
+{
+  "info": {
+    "name": "4023 怒涛之灾 2/2",
+    "description": "第四章 第五幕·罪人舞步旋｜前往白淞镇 → 前往墓园｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2708.4,
+      "y": 4255.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2711.5,
+      "y": 4247.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2714.6,
+      "y": 4240.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2717.7,
+      "y": 4233.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2720.8,
+      "y": 4225.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2723.9,
+      "y": 4218.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2727.0,
+      "y": 4211.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2730.1,
+      "y": 4203.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2733.2,
+      "y": 4196.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2734.0,
+      "y": 4194.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2741.9,
+      "y": 4193.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2749.8,
+      "y": 4192.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2757.7,
+      "y": 4190.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2765.6,
+      "y": 4189.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2773.5,
+      "y": 4188.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2781.4,
+      "y": 4187.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2789.3,
+      "y": 4185.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2797.2,
+      "y": 4184.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2805.1,
+      "y": 4183.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2813.1,
+      "y": 4182.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2814.4,
+      "y": 4182.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2807.3,
+      "y": 4185.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2800.3,
+      "y": 4189.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2793.2,
+      "y": 4193.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2786.1,
+      "y": 4196.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2779.0,
+      "y": 4200.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2772.0,
+      "y": 4204.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2764.9,
+      "y": 4208.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2757.8,
+      "y": 4211.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2750.7,
+      "y": 4215.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2743.7,
+      "y": 4219.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2736.6,
+      "y": 4223.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2729.5,
+      "y": 4226.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2722.4,
+      "y": 4230.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2715.4,
+      "y": 4234.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2708.3,
+      "y": 4238.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2701.2,
+      "y": 4241.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2694.1,
+      "y": 4245.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2687.1,
+      "y": 4249.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2680.0,
+      "y": 4253.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2672.9,
+      "y": 4256.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2665.8,
+      "y": 4260.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2658.8,
+      "y": 4264.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2651.7,
+      "y": 4267.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2644.6,
+      "y": 4271.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2640.3,
+      "y": 4273.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

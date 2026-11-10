@@ -1,0 +1,116 @@
+{
+  "info": {
+    "name": "6022 你我交错的时空 5/10",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜探索镜中的世界 → 与「博士」对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 5,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1649.4,
+      "y": 9433.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1647.5,
+      "y": 9441.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1645.5,
+      "y": 9449.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1643.6,
+      "y": 9457.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1641.7,
+      "y": 9464.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1639.7,
+      "y": 9472.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1637.8,
+      "y": 9480.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1637.3,
+      "y": 9482.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1644.6,
+      "y": 9485.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1651.9,
+      "y": 9488.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1659.2,
+      "y": 9492.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1666.5,
+      "y": 9495.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1673.8,
+      "y": 9498.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1681.1,
+      "y": 9502.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1688.4,
+      "y": 9505.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1695.7,
+      "y": 9508.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1701.0,
+      "y": 9510.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

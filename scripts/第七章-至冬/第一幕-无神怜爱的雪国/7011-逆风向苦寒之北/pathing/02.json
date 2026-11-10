@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7011 逆风向苦寒之北 2/6",
+    "description": "第七章 第一幕·无神怜爱的雪国｜与派蒙交谈 → 与派蒙交谈｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1650.1,
+      "y": 9470.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

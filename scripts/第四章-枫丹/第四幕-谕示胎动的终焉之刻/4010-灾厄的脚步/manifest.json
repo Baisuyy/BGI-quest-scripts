@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "4010 灾厄的脚步",
+  "version": "1.0.0",
+  "description": "第四章 第四幕·谕示胎动的终焉之刻 · 4 段 42 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

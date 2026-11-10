@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7005 白幕降下",
+  "version": "1.0.0",
+  "description": "第七章 第二幕·死魂灵的夜曲 · 1 段 25 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

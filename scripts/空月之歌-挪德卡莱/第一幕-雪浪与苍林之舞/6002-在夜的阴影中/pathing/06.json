@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "6002 在夜的阴影中 6/7",
+    "description": "空月之歌 第一幕·雪浪与苍林之舞｜尝试封印狂猎 → 寻找众人｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 6,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2281.4,
+      "y": 9566.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2276.0,
+      "y": 9560.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2270.6,
+      "y": 9554.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2265.2,
+      "y": 9549.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2259.7,
+      "y": 9543.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2254.3,
+      "y": 9537.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2248.9,
+      "y": 9531.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2247.0,
+      "y": 9529.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

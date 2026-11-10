@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6012 匿于阴影 2/2",
+    "description": "空月之歌 第三幕·不存在的国土｜与众人交流现况 → 与众人交流现况｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1578.0,
+      "y": 11022.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

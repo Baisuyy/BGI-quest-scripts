@@ -1,0 +1,212 @@
+{
+  "info": {
+    "name": "6002 在夜的阴影中 1/7",
+    "description": "空月之歌 第一幕·雪浪与苍林之舞｜潜入愚人众试验设计局 → 继续潜入｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3094.5,
+      "y": 9513.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3095.6,
+      "y": 9521.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3096.6,
+      "y": 9529.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3097.7,
+      "y": 9536.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3098.8,
+      "y": 9544.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3099.9,
+      "y": 9552.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3100.3,
+      "y": 9556.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3106.2,
+      "y": 9561.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3112.1,
+      "y": 9566.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3118.0,
+      "y": 9572.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3123.9,
+      "y": 9577.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3129.8,
+      "y": 9583.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3135.7,
+      "y": 9588.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3141.6,
+      "y": 9593.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3147.4,
+      "y": 9599.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3153.3,
+      "y": 9604.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3159.2,
+      "y": 9610.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3165.0,
+      "y": 9615.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3172.4,
+      "y": 9612.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3179.8,
+      "y": 9609.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3187.2,
+      "y": 9606.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3194.6,
+      "y": 9603.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3202.1,
+      "y": 9600.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3209.5,
+      "y": 9597.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3216.9,
+      "y": 9594.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3224.3,
+      "y": 9591.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3231.6,
+      "y": 9588.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3237.9,
+      "y": 9592.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3241.1,
+      "y": 9589.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3248.4,
+      "y": 9585.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3255.7,
+      "y": 9582.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3262.4,
+      "y": 9579.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3255.4,
+      "y": 9578.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "8020 不应存在的记忆 2/2",
+    "description": "第四章 第六幕·睡前故事｜前往藏匿「耕地机的眼睛」的地方 → 进入藏匿「耕地机的眼睛」的地方｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -509.7,
+      "y": 2135.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -511.8,
+      "y": 2127.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -512.1,
+      "y": 2126.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

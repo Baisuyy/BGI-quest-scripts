@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "4022 审判日 1/1",
+    "description": "第四章 第五幕·罪人舞步旋｜在白淞镇寻找芙宁娜 → 与芙宁娜对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2764.8,
+      "y": 4191.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2769.7,
+      "y": 4185.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2774.6,
+      "y": 4178.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2779.6,
+      "y": 4172.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2784.5,
+      "y": 4166.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2789.4,
+      "y": 4159.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2794.3,
+      "y": 4153.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2799.2,
+      "y": 4147.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2804.2,
+      "y": 4140.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2804.8,
+      "y": 4140.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

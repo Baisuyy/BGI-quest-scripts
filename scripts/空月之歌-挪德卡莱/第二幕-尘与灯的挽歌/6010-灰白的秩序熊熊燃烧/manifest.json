@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6010 灰白的秩序熊熊燃烧",
+  "version": "1.0.0",
+  "description": "空月之歌 第二幕·尘与灯的挽歌 · 4 段 180 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

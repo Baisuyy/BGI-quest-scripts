@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "6007 轰鸣与暗涌 1/1",
+    "description": "空月之歌 第二幕·尘与灯的挽歌｜前往那夏镇 → 与奈芙尔分析已有情报｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1639.5,
+      "y": 9472.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1641.9,
+      "y": 9480.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1644.4,
+      "y": 9487.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1646.8,
+      "y": 9495.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1647.1,
+      "y": 9496.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1652.1,
+      "y": 9497.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1648.9,
+      "y": 9505.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1645.6,
+      "y": 9512.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1642.4,
+      "y": 9519.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1639.2,
+      "y": 9527.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1636.6,
+      "y": 9532.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1632.6,
+      "y": 9526.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1628.5,
+      "y": 9519.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1624.5,
+      "y": 9512.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1620.5,
+      "y": 9505.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1616.5,
+      "y": 9498.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1612.4,
+      "y": 9491.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1608.4,
+      "y": 9484.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1604.4,
+      "y": 9477.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1600.4,
+      "y": 9470.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1596.3,
+      "y": 9463.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1596.3,
+      "y": 9463.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1591.8,
+      "y": 9470.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1591.4,
+      "y": 9471.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

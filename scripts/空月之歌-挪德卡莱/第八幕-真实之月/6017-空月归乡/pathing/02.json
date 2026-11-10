@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6017 空月归乡 2/3",
+    "description": "空月之歌 第八幕·真实之月｜与哥伦比娅会合 → 与哥伦比娅会合｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1940.1,
+      "y": 10535.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

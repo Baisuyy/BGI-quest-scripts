@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6001 于月光下重逢",
+  "version": "1.0.0",
+  "description": "空月之歌 第一幕·雪浪与苍林之舞 · 4 段 147 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

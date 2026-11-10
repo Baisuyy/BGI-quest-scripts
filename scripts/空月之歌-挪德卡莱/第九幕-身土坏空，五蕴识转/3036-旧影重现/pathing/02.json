@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "3036 旧影重现 2/2",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜深入衡准大厅 → 调查阿如的倒影｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2374.1,
+      "y": 5568.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2367.1,
+      "y": 5564.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2360.1,
+      "y": 5560.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2353.1,
+      "y": 5556.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2346.1,
+      "y": 5552.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -2345.4,
+      "y": 5552.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

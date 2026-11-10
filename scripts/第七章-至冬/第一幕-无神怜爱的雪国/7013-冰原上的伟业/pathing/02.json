@@ -1,0 +1,818 @@
+{
+  "info": {
+    "name": "7013 冰原上的伟业 2/4",
+    "description": "第七章 第一幕·无神怜爱的雪国｜离开列车，进入至冬堡 → 与木偶同行前往「火炬书行」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9297.9,
+      "y": 6899.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9304.5,
+      "y": 6894.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9311.2,
+      "y": 6890.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9317.8,
+      "y": 6885.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9324.4,
+      "y": 6881.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9331.0,
+      "y": 6876.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9337.7,
+      "y": 6872.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9344.3,
+      "y": 6867.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9350.9,
+      "y": 6863.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9357.5,
+      "y": 6858.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9360.4,
+      "y": 6856.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9366.5,
+      "y": 6851.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9372.6,
+      "y": 6846.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9378.7,
+      "y": 6841.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9384.8,
+      "y": 6836.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9390.9,
+      "y": 6831.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9397.0,
+      "y": 6825.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9403.1,
+      "y": 6820.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9409.2,
+      "y": 6815.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9415.3,
+      "y": 6810.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9421.4,
+      "y": 6805.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9427.5,
+      "y": 6800.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9433.6,
+      "y": 6794.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9439.7,
+      "y": 6789.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9445.8,
+      "y": 6784.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9452.0,
+      "y": 6779.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9458.1,
+      "y": 6774.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9464.2,
+      "y": 6769.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9470.3,
+      "y": 6763.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9476.4,
+      "y": 6758.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9482.5,
+      "y": 6753.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9486.2,
+      "y": 6750.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9492.2,
+      "y": 6745.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9498.2,
+      "y": 6739.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9499.0,
+      "y": 6739.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9506.9,
+      "y": 6738.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9514.9,
+      "y": 6737.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9522.8,
+      "y": 6736.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9530.8,
+      "y": 6735.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9538.7,
+      "y": 6734.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9546.7,
+      "y": 6733.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9554.6,
+      "y": 6732.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9562.5,
+      "y": 6731.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9570.5,
+      "y": 6730.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9578.4,
+      "y": 6729.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9586.4,
+      "y": 6728.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9594.3,
+      "y": 6727.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9602.3,
+      "y": 6726.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9610.2,
+      "y": 6725.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9618.1,
+      "y": 6724.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9626.1,
+      "y": 6723.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9634.0,
+      "y": 6722.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9642.0,
+      "y": 6721.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9649.9,
+      "y": 6720.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9657.8,
+      "y": 6719.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9665.8,
+      "y": 6719.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9673.7,
+      "y": 6718.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9681.7,
+      "y": 6717.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9689.6,
+      "y": 6716.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9697.6,
+      "y": 6715.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9705.5,
+      "y": 6714.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9713.4,
+      "y": 6713.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9721.4,
+      "y": 6712.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9729.3,
+      "y": 6711.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9737.3,
+      "y": 6710.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9745.2,
+      "y": 6709.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9753.2,
+      "y": 6708.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9761.1,
+      "y": 6707.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9769.0,
+      "y": 6706.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9777.0,
+      "y": 6705.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9784.9,
+      "y": 6704.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9792.9,
+      "y": 6703.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9800.8,
+      "y": 6702.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9808.8,
+      "y": 6701.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9816.7,
+      "y": 6700.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9824.6,
+      "y": 6699.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9832.6,
+      "y": 6698.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9840.5,
+      "y": 6697.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9848.5,
+      "y": 6697.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9856.4,
+      "y": 6696.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9864.4,
+      "y": 6695.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9872.3,
+      "y": 6694.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9880.2,
+      "y": 6693.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9888.2,
+      "y": 6692.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9896.1,
+      "y": 6691.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9901.2,
+      "y": 6690.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9893.2,
+      "y": 6690.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9885.2,
+      "y": 6690.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9877.2,
+      "y": 6689.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9869.2,
+      "y": 6689.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9861.2,
+      "y": 6689.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9853.2,
+      "y": 6688.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9845.2,
+      "y": 6688.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9837.2,
+      "y": 6688.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9829.3,
+      "y": 6687.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9821.3,
+      "y": 6687.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9813.3,
+      "y": 6687.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9805.3,
+      "y": 6686.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9797.3,
+      "y": 6686.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9789.3,
+      "y": 6686.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9781.3,
+      "y": 6685.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9773.3,
+      "y": 6685.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9765.3,
+      "y": 6685.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9757.3,
+      "y": 6685.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9749.3,
+      "y": 6684.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9741.3,
+      "y": 6684.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9733.3,
+      "y": 6684.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9725.3,
+      "y": 6683.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9717.3,
+      "y": 6683.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9709.3,
+      "y": 6683.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9701.4,
+      "y": 6682.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9693.4,
+      "y": 6682.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9685.4,
+      "y": 6682.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9677.4,
+      "y": 6681.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9669.4,
+      "y": 6681.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9661.4,
+      "y": 6681.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9653.4,
+      "y": 6680.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9645.4,
+      "y": 6680.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9637.4,
+      "y": 6680.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9629.4,
+      "y": 6680.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9621.4,
+      "y": 6679.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9613.4,
+      "y": 6679.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9605.4,
+      "y": 6679.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9597.4,
+      "y": 6678.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9589.4,
+      "y": 6678.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9581.4,
+      "y": 6678.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9573.4,
+      "y": 6677.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9565.5,
+      "y": 6677.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9557.5,
+      "y": 6677.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9549.5,
+      "y": 6676.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9541.5,
+      "y": 6676.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9533.5,
+      "y": 6676.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9525.5,
+      "y": 6676.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 9518.8,
+      "y": 6675.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

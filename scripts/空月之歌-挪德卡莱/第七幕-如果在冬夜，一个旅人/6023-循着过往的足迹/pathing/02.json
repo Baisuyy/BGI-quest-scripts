@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 2/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜茶点时间 → 将茶递给「木偶」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2133.1,
+      "y": 10068.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2136.7,
+      "y": 10061.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2139.1,
+      "y": 10056.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

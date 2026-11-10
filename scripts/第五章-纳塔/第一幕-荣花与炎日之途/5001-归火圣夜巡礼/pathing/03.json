@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "5001 归火圣夜巡礼 3/3",
+    "description": "第五章 第一幕·荣花与炎日之途｜完成团体赛 → 参加颁奖典礼｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1877.3,
+      "y": 8998.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1877.9,
+      "y": 9006.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1878.5,
+      "y": 9014.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1879.2,
+      "y": 9022.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1879.8,
+      "y": 9030.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1880.4,
+      "y": 9038.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1881.0,
+      "y": 9046.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1881.6,
+      "y": 9054.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1881.9,
+      "y": 9058.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1889.5,
+      "y": 9060.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1897.1,
+      "y": 9063.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1904.7,
+      "y": 9065.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1906.4,
+      "y": 9066.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1898.8,
+      "y": 9063.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1891.2,
+      "y": 9061.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1883.6,
+      "y": 9058.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1881.9,
+      "y": 9058.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1889.5,
+      "y": 9060.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1897.1,
+      "y": 9063.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1904.7,
+      "y": 9065.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1906.4,
+      "y": 9066.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

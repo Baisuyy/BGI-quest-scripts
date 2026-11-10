@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4011 锋芒难掩的茶会 2/3",
+    "description": "第四章 第三幕·向深水中的晨星｜使用升降平台进入梅洛彼得堡 → 使用升降平台进入梅洛彼得堡｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3317.7,
+      "y": 3823.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6035 妄念与真知的通天塔",
+  "version": "1.0.0",
+  "description": "空月之歌 第十幕·道成千壑，因果异灭 · 4 段 96 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

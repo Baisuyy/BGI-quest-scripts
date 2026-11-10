@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "5012 绝望高悬天之上 5/8",
+    "description": "第五章 第四幕·命定将焚的虹光｜前往支援地点 → 查看地图，选择支援地点｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 5,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1476.4,
+      "y": 8117.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1472.1,
+      "y": 8110.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1468.6,
+      "y": 8104.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1472.9,
+      "y": 8111.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1476.4,
+      "y": 8117.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1472.1,
+      "y": 8110.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1468.6,
+      "y": 8104.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1470.1,
+      "y": 8112.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1470.4,
+      "y": 8114.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

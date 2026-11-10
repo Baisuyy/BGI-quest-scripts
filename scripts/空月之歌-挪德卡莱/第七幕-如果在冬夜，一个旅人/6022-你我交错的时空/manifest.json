@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6022 你我交错的时空",
+  "version": "1.0.0",
+  "description": "空月之歌 第七幕·如果在冬夜，一个旅人 · 10 段 263 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

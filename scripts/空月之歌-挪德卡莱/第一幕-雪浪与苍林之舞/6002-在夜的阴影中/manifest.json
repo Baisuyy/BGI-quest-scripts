@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6002 在夜的阴影中",
+  "version": "1.0.0",
+  "description": "空月之歌 第一幕·雪浪与苍林之舞 · 7 段 120 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

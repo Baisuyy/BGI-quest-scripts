@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5015 皆为崇高之名 3/3",
+    "description": "第五章 第三幕·镜与谜烟的彼方｜前往约定地点等候茜特菈莉 → 前往约定地点等候茜特菈莉｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1918.7,
+      "y": 8999.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

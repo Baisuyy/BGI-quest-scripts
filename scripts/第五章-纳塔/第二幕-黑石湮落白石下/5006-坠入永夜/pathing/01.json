@@ -1,0 +1,32 @@
+{
+  "info": {
+    "name": "5006 坠入永夜 1/1",
+    "description": "第五章 第二幕·黑石湮落白石下｜抵达夜神之国 → 与卡齐娜对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1938.9,
+      "y": 8790.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1933.3,
+      "y": 8784.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1927.9,
+      "y": 8779.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 5/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜离开能量界域 → 与杜林对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 5,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2382.4,
+      "y": 9301.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2383.6,
+      "y": 9293.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2384.8,
+      "y": 9285.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2386.0,
+      "y": 9278.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2387.2,
+      "y": 9270.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2388.4,
+      "y": 9262.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2389.6,
+      "y": 9254.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2390.8,
+      "y": 9246.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2392.0,
+      "y": 9238.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2393.2,
+      "y": 9230.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2394.5,
+      "y": 9222.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2395.7,
+      "y": 9214.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2396.9,
+      "y": 9206.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2397.7,
+      "y": 9201.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2396.9,
+      "y": 9209.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2396.1,
+      "y": 9217.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2395.3,
+      "y": 9225.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2394.4,
+      "y": 9233.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2393.6,
+      "y": 9241.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2392.8,
+      "y": 9249.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2392.0,
+      "y": 9257.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2391.2,
+      "y": 9265.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2390.4,
+      "y": 9272.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2389.6,
+      "y": 9280.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2388.7,
+      "y": 9288.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2387.9,
+      "y": 9296.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2387.1,
+      "y": 9304.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2386.3,
+      "y": 9312.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2385.5,
+      "y": 9320.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

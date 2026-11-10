@@ -1,0 +1,188 @@
+{
+  "info": {
+    "name": "4012 梅洛彼得堡 2/2",
+    "description": "第四章 第三幕·向深水中的晨星｜拿取工件 → 回到监舍区休息｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4389.0,
+      "y": 4618.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4395.6,
+      "y": 4613.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4402.2,
+      "y": 4609.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4408.8,
+      "y": 4604.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4415.5,
+      "y": 4600.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4422.1,
+      "y": 4595.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4428.7,
+      "y": 4591.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4435.3,
+      "y": 4586.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4441.9,
+      "y": 4582.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4448.5,
+      "y": 4577.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4455.1,
+      "y": 4573.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4457.5,
+      "y": 4571.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4459.1,
+      "y": 4567.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4464.2,
+      "y": 4573.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4469.4,
+      "y": 4579.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4474.5,
+      "y": 4585.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4479.7,
+      "y": 4592.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4484.8,
+      "y": 4598.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4489.9,
+      "y": 4604.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4494.5,
+      "y": 4609.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4489.8,
+      "y": 4603.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4485.2,
+      "y": 4596.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4484.3,
+      "y": 4595.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4490.0,
+      "y": 4589.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4495.6,
+      "y": 4584.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4501.3,
+      "y": 4578.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4507.0,
+      "y": 4572.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4512.7,
+      "y": 4567.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4516.5,
+      "y": 4563.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

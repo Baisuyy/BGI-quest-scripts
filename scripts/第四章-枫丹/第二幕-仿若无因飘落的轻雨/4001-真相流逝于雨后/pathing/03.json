@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4001 真相流逝于雨后 3/3",
+    "description": "第四章 第二幕·仿若无因飘落的轻雨｜与娜维娅整理线索 → 与娜维娅整理线索｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3518.7,
+      "y": 4455.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,218 @@
+{
+  "info": {
+    "name": "3034 花于何处醒来 1/4",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜与赛索斯交流现状 → 探索须弥城｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -516.1,
+      "y": 2695.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -514.0,
+      "y": 2703.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -512.0,
+      "y": 2711.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -509.9,
+      "y": 2718.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -507.9,
+      "y": 2726.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -505.8,
+      "y": 2734.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -503.8,
+      "y": 2741.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -501.7,
+      "y": 2749.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -499.7,
+      "y": 2757.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -497.6,
+      "y": 2765.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -495.6,
+      "y": 2772.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -493.5,
+      "y": 2780.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -491.5,
+      "y": 2788.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -489.4,
+      "y": 2796.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -487.4,
+      "y": 2803.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -487.2,
+      "y": 2804.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -484.4,
+      "y": 2796.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -481.6,
+      "y": 2789.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -478.8,
+      "y": 2781.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -476.0,
+      "y": 2774.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -473.1,
+      "y": 2767.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -470.3,
+      "y": 2759.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -467.5,
+      "y": 2752.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -464.7,
+      "y": 2744.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -461.9,
+      "y": 2737.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -459.1,
+      "y": 2729.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -456.3,
+      "y": 2722.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -453.5,
+      "y": 2714.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -453.3,
+      "y": 2714.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -446.2,
+      "y": 2710.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -439.1,
+      "y": 2706.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -432.1,
+      "y": 2702.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -425.0,
+      "y": 2699.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -424.3,
+      "y": 2698.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

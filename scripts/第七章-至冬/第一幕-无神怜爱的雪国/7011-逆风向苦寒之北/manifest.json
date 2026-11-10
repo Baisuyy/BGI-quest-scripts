@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7011 逆风向苦寒之北",
+  "version": "1.0.0",
+  "description": "第七章 第一幕·无神怜爱的雪国 · 6 段 251 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

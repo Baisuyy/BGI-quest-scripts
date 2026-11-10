@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "3035 通向自我的歧途 2/6",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜尝试与阿佩普交涉 → 尝试与阿佩普交涉｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -538.3,
+      "y": 5350.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

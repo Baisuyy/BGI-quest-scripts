@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "8018 你所不在的时空 1/4",
+    "description": "第五章 第六幕·你存在的时空｜等候戴因斯雷布的出现 → 等候戴因斯雷布的出现｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1705.9,
+      "y": 9589.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

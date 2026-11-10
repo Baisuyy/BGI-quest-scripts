@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7017 仅此一着",
+  "version": "1.0.0",
+  "description": "第七章 第三幕·白夜似梦初醒 · 1 段 19 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

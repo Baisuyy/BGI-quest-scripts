@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6015 最初的那抹月光",
+  "version": "1.0.0",
+  "description": "空月之歌 第八幕·真实之月 · 3 段 19 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

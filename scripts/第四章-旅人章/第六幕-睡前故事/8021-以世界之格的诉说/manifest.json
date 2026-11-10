@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "8021 以世界之格的诉说",
+  "version": "1.0.0",
+  "description": "第四章 第六幕·睡前故事 · 1 段 44 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

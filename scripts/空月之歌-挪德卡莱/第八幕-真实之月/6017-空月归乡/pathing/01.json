@@ -1,0 +1,68 @@
+{
+  "info": {
+    "name": "6017 空月归乡 1/3",
+    "description": "空月之歌 第八幕·真实之月｜享受那夏镇的早晨 → 前往那夏镇中心广场｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1594.7,
+      "y": 9465.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1599.4,
+      "y": 9471.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1604.2,
+      "y": 9477.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1608.9,
+      "y": 9484.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1609.0,
+      "y": 9484.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1610.1,
+      "y": 9492.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1611.2,
+      "y": 9500.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1612.3,
+      "y": 9508.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1613.0,
+      "y": 9513.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

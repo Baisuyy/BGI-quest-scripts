@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "4008 真相隐于影中",
+  "version": "1.0.0",
+  "description": "第四章 第四幕·谕示胎动的终焉之刻 · 2 段 40 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

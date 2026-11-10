@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "5015 皆为崇高之名 2/3",
+    "description": "第五章 第三幕·镜与谜烟的彼方｜前往「回声之子」 → 前往约定地点与基尼奇会合｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1378.9,
+      "y": 7677.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1380.6,
+      "y": 7685.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1382.3,
+      "y": 7693.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1384.0,
+      "y": 7701.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1385.7,
+      "y": 7709.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1387.4,
+      "y": 7716.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1389.1,
+      "y": 7724.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1390.8,
+      "y": 7732.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1392.5,
+      "y": 7740.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1394.2,
+      "y": 7748.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1395.4,
+      "y": 7753.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

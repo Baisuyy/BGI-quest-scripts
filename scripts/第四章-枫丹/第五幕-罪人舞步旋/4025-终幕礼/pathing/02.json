@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4025 终幕礼 2/4",
+    "description": "第四章 第五幕·罪人舞步旋｜前往梅洛彼得堡 → 前往梅洛彼得堡｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4457.6,
+      "y": 4576.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

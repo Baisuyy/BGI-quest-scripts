@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7012 沉寂之地的枪声",
+  "version": "1.0.0",
+  "description": "第七章 第一幕·无神怜爱的雪国 · 3 段 103 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6036 虚空劫灰往世书 1/5",
+    "description": "空月之歌 第十幕·道成千壑，因果异灭｜前往赤王陵入口处 → 前往赤王陵入口处｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2350.2,
+      "y": 5339.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

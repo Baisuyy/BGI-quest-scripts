@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4025 终幕礼 4/4",
+    "description": "第四章 第五幕·罪人舞步旋｜与那维莱特对话 → 与那维莱特对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3329.2,
+      "y": 3811.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

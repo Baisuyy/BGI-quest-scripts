@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7018 邪眼",
+  "version": "1.0.0",
+  "description": "第七章 第四幕·往冥府的安魂歌 · 1 段 1 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

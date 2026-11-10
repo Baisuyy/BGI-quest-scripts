@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6023 循着过往的足迹",
+  "version": "1.0.0",
+  "description": "空月之歌 第七幕·如果在冬夜，一个旅人 · 9 段 222 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5026 为同一片土地 2/2",
+    "description": "第五章 幕间·万火归一｜制服奥科兰 → 制服奥科兰｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1128.9,
+      "y": 9538.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

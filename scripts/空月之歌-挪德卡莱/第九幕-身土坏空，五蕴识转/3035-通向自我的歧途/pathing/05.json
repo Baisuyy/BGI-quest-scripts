@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "3035 通向自我的歧途 5/6",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜准备守卫阿如村 → 准备守卫阿如村｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 5,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1992.5,
+      "y": 3999.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

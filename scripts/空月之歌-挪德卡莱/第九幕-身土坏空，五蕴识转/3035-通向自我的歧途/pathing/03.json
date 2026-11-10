@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "3035 通向自我的歧途 3/6",
+    "description": "空月之歌 第九幕·身土坏空，五蕴识转｜返回缄默之殿 → 返回缄默之殿｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2436.7,
+      "y": 4275.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

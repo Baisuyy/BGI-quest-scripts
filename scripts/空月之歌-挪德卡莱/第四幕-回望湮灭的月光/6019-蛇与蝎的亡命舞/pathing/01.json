@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6019 蛇与蝎的亡命舞 1/1",
+    "description": "空月之歌 第四幕·回望湮灭的月光｜前往阿如村 → 前往阿如村｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2012.0,
+      "y": 4106.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

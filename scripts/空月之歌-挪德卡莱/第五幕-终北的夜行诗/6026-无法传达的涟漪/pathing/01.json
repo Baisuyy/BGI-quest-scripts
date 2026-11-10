@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6026 无法传达的涟漪 1/8",
+    "description": "空月之歌 第五幕·终北的夜行诗｜去见哥伦比娅 → 去见哥伦比娅｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2124.7,
+      "y": 11205.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

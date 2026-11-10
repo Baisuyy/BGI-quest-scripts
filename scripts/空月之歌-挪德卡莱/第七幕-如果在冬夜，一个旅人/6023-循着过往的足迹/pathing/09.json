@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 9/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜与流浪者对话 → 与流浪者对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 9,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1843.7,
+      "y": 9552.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

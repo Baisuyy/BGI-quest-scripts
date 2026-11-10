@@ -1,0 +1,56 @@
+{
+  "info": {
+    "name": "6027 月亮回家的夜晚 1/1",
+    "description": "空月之歌 第六幕·散于晨雾的月芒｜前往那夏镇 → 继续享受「祈月之夜」，或与派蒙对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1664.6,
+      "y": 9456.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1659.7,
+      "y": 9462.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1654.8,
+      "y": 9468.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1651.0,
+      "y": 9473.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1645.2,
+      "y": 9479.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1639.5,
+      "y": 9484.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1637.8,
+      "y": 9486.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

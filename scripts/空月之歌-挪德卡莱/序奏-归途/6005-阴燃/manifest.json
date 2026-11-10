@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6005 阴燃",
+  "version": "1.0.0",
+  "description": "空月之歌 序奏·归途 · 2 段 178 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

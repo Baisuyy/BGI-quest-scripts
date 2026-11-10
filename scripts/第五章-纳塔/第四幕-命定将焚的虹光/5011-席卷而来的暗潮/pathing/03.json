@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5011 席卷而来的暗潮 3/4",
+    "description": "第五章 第四幕·命定将焚的虹光｜前往支援地点 → 前往支援地点｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1964.3,
+      "y": 7785.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

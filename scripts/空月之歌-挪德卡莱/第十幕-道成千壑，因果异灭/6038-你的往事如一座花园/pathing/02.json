@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "6038 你的往事如一座花园 2/4",
+    "description": "空月之歌 第十幕·道成千壑，因果异灭｜多莉与奈芙尔对话 → 前往净善宫｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -433.0,
+      "y": 2760.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -439.6,
+      "y": 2764.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -446.1,
+      "y": 2769.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -452.7,
+      "y": 2773.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -459.3,
+      "y": 2778.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -465.8,
+      "y": 2782.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -472.4,
+      "y": 2787.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -479.0,
+      "y": 2792.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -485.5,
+      "y": 2796.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -489.5,
+      "y": 2799.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -483.8,
+      "y": 2805.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -478.2,
+      "y": 2810.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -472.5,
+      "y": 2816.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -466.9,
+      "y": 2821.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -461.2,
+      "y": 2827.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -455.6,
+      "y": 2833.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -449.9,
+      "y": 2838.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -444.2,
+      "y": 2844.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -438.6,
+      "y": 2850.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -432.9,
+      "y": 2855.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -427.3,
+      "y": 2861.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -421.6,
+      "y": 2867.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -416.0,
+      "y": 2872.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -410.3,
+      "y": 2878.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -404.6,
+      "y": 2884.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -399.0,
+      "y": 2889.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -393.3,
+      "y": 2895.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -387.7,
+      "y": 2901.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -382.0,
+      "y": 2906.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -376.4,
+      "y": 2912.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -373.0,
+      "y": 2915.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

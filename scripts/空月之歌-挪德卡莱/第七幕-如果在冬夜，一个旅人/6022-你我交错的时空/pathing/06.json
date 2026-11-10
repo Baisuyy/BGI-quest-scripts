@@ -1,0 +1,80 @@
+{
+  "info": {
+    "name": "6022 你我交错的时空 6/10",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜跟随「博士」 → 跟随「博士」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 6,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4484.6,
+      "y": 9747.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4476.7,
+      "y": 9748.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4471.7,
+      "y": 9749.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4479.7,
+      "y": 9750.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4487.6,
+      "y": 9750.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4495.0,
+      "y": 9751.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4488.6,
+      "y": 9756.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4482.3,
+      "y": 9761.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4475.9,
+      "y": 9765.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4469.5,
+      "y": 9770.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4467.4,
+      "y": 9772.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

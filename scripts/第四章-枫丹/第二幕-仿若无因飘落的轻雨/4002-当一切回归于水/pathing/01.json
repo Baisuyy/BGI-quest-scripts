@@ -1,0 +1,836 @@
+{
+  "info": {
+    "name": "4002 当一切回归于水 1/3",
+    "description": "第四章 第二幕·仿若无因飘落的轻雨｜寻找潜入水下的方法 → 和「薇涅尔」对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3598.5,
+      "y": 4633.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3600.9,
+      "y": 4625.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3603.3,
+      "y": 4617.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3605.7,
+      "y": 4610.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3608.1,
+      "y": 4602.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3610.5,
+      "y": 4594.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3612.9,
+      "y": 4587.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3615.3,
+      "y": 4579.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3617.7,
+      "y": 4571.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3620.0,
+      "y": 4564.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3622.4,
+      "y": 4556.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3624.8,
+      "y": 4549.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3627.2,
+      "y": 4541.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3629.6,
+      "y": 4533.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3632.0,
+      "y": 4526.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3634.4,
+      "y": 4518.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3636.8,
+      "y": 4510.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3639.2,
+      "y": 4503.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3641.6,
+      "y": 4495.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3644.0,
+      "y": 4488.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3646.4,
+      "y": 4480.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3648.8,
+      "y": 4472.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3651.2,
+      "y": 4465.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3653.6,
+      "y": 4457.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3656.0,
+      "y": 4449.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3658.3,
+      "y": 4442.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3660.7,
+      "y": 4434.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3663.1,
+      "y": 4426.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3665.5,
+      "y": 4419.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3667.9,
+      "y": 4411.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3670.3,
+      "y": 4404.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3672.7,
+      "y": 4396.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3675.1,
+      "y": 4388.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3677.5,
+      "y": 4381.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3679.9,
+      "y": 4373.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3682.3,
+      "y": 4365.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3684.7,
+      "y": 4358.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3686.4,
+      "y": 4352.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3679.6,
+      "y": 4348.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3672.7,
+      "y": 4344.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3665.9,
+      "y": 4340.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3659.1,
+      "y": 4336.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3652.3,
+      "y": 4331.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3645.4,
+      "y": 4327.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3638.6,
+      "y": 4323.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3631.8,
+      "y": 4319.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3624.9,
+      "y": 4315.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3618.1,
+      "y": 4311.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3611.3,
+      "y": 4306.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3604.5,
+      "y": 4302.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3597.6,
+      "y": 4298.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3590.8,
+      "y": 4294.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3584.0,
+      "y": 4290.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3577.1,
+      "y": 4286.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3570.3,
+      "y": 4281.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3563.5,
+      "y": 4277.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3556.6,
+      "y": 4273.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3549.8,
+      "y": 4269.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3543.0,
+      "y": 4265.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3537.0,
+      "y": 4259.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3531.1,
+      "y": 4254.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3530.4,
+      "y": 4253.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3532.6,
+      "y": 4246.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3533.7,
+      "y": 4242.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3532.6,
+      "y": 4234.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3531.4,
+      "y": 4226.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3530.3,
+      "y": 4218.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3529.2,
+      "y": 4210.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3528.0,
+      "y": 4202.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3526.9,
+      "y": 4194.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3525.8,
+      "y": 4187.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3524.6,
+      "y": 4179.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3523.5,
+      "y": 4171.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3522.3,
+      "y": 4163.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3521.2,
+      "y": 4155.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3520.1,
+      "y": 4147.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3518.9,
+      "y": 4139.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3517.8,
+      "y": 4131.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3516.7,
+      "y": 4123.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3515.5,
+      "y": 4115.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3514.4,
+      "y": 4107.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3513.3,
+      "y": 4099.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3512.1,
+      "y": 4091.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3511.0,
+      "y": 4084.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3509.9,
+      "y": 4076.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3508.7,
+      "y": 4068.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3507.6,
+      "y": 4060.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3506.4,
+      "y": 4052.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3505.3,
+      "y": 4044.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3504.2,
+      "y": 4036.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3503.0,
+      "y": 4028.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3501.9,
+      "y": 4020.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3500.8,
+      "y": 4012.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3499.6,
+      "y": 4004.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3498.5,
+      "y": 3996.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3497.4,
+      "y": 3989.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3496.2,
+      "y": 3981.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3495.1,
+      "y": 3973.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3494.0,
+      "y": 3965.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3492.8,
+      "y": 3957.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3491.7,
+      "y": 3949.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3490.6,
+      "y": 3941.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3489.4,
+      "y": 3933.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3488.3,
+      "y": 3925.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3487.1,
+      "y": 3917.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3486.0,
+      "y": 3909.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3484.9,
+      "y": 3901.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3483.7,
+      "y": 3894.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3482.6,
+      "y": 3886.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3481.5,
+      "y": 3878.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3480.3,
+      "y": 3870.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3479.2,
+      "y": 3862.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3478.1,
+      "y": 3854.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3476.9,
+      "y": 3846.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3475.8,
+      "y": 3838.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3474.7,
+      "y": 3830.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3473.5,
+      "y": 3822.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3472.4,
+      "y": 3814.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3471.2,
+      "y": 3806.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3470.1,
+      "y": 3798.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3469.0,
+      "y": 3791.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3467.8,
+      "y": 3783.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3466.7,
+      "y": 3775.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3465.6,
+      "y": 3767.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3464.4,
+      "y": 3759.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3463.3,
+      "y": 3751.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3462.2,
+      "y": 3743.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3461.0,
+      "y": 3735.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3459.9,
+      "y": 3727.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3458.8,
+      "y": 3719.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3457.6,
+      "y": 3711.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3456.5,
+      "y": 3703.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3455.3,
+      "y": 3696.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3454.2,
+      "y": 3688.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3453.1,
+      "y": 3680.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3457.8,
+      "y": 3673.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3460.9,
+      "y": 3669.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

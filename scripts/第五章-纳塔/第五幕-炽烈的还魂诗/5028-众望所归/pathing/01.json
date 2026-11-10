@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5028 众望所归 1/1",
+    "description": "第五章 第五幕·炽烈的还魂诗｜前往「古斯托特」所在之处 → 前往「古斯托特」所在之处｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1906.6,
+      "y": 9066.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

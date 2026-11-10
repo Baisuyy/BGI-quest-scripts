@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6025 月影轮番登台",
+  "version": "1.0.0",
+  "description": "空月之歌 第五幕·终北的夜行诗 · 3 段 52 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

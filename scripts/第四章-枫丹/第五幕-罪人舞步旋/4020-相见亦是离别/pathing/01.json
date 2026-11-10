@@ -1,0 +1,770 @@
+{
+  "info": {
+    "name": "4020 相见亦是离别 1/1",
+    "description": "第四章 第五幕·罪人舞步旋｜前往遗迹 → 离开遗迹｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2273.6,
+      "y": 4131.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2281.6,
+      "y": 4131.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2289.6,
+      "y": 4132.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2297.5,
+      "y": 4132.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2305.5,
+      "y": 4133.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2313.5,
+      "y": 4134.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2321.5,
+      "y": 4134.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2329.5,
+      "y": 4135.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2337.4,
+      "y": 4135.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2345.4,
+      "y": 4136.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2353.4,
+      "y": 4137.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2361.4,
+      "y": 4137.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2369.3,
+      "y": 4138.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2377.3,
+      "y": 4138.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2385.3,
+      "y": 4139.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2393.3,
+      "y": 4139.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2401.3,
+      "y": 4140.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2409.2,
+      "y": 4141.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2417.2,
+      "y": 4141.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2425.2,
+      "y": 4142.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2433.2,
+      "y": 4142.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2441.2,
+      "y": 4143.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2449.1,
+      "y": 4144.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2457.1,
+      "y": 4144.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2465.1,
+      "y": 4145.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2473.1,
+      "y": 4145.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2481.1,
+      "y": 4146.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2489.0,
+      "y": 4146.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2497.0,
+      "y": 4147.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2505.0,
+      "y": 4148.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2513.0,
+      "y": 4148.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2520.9,
+      "y": 4149.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2528.9,
+      "y": 4149.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2536.9,
+      "y": 4150.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2544.9,
+      "y": 4150.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2552.9,
+      "y": 4151.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2560.8,
+      "y": 4152.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2568.8,
+      "y": 4152.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2576.8,
+      "y": 4153.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2584.8,
+      "y": 4153.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2592.8,
+      "y": 4154.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2600.7,
+      "y": 4155.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2608.7,
+      "y": 4155.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2616.7,
+      "y": 4156.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2624.7,
+      "y": 4156.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2632.7,
+      "y": 4157.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2640.6,
+      "y": 4157.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2648.6,
+      "y": 4158.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2656.6,
+      "y": 4159.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2664.6,
+      "y": 4159.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2672.5,
+      "y": 4160.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2680.5,
+      "y": 4160.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2688.5,
+      "y": 4161.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2696.5,
+      "y": 4161.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2704.5,
+      "y": 4162.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2712.4,
+      "y": 4163.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2720.4,
+      "y": 4163.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2728.4,
+      "y": 4164.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2736.4,
+      "y": 4164.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2744.4,
+      "y": 4165.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2752.3,
+      "y": 4166.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2760.3,
+      "y": 4166.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2760.7,
+      "y": 4166.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2752.7,
+      "y": 4166.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2744.7,
+      "y": 4165.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2736.8,
+      "y": 4164.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2728.8,
+      "y": 4164.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2720.8,
+      "y": 4163.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2712.8,
+      "y": 4163.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2704.8,
+      "y": 4162.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2696.9,
+      "y": 4162.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2688.9,
+      "y": 4161.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2680.9,
+      "y": 4160.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2672.9,
+      "y": 4160.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2665.0,
+      "y": 4159.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2657.0,
+      "y": 4159.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2649.0,
+      "y": 4158.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2641.0,
+      "y": 4157.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2633.0,
+      "y": 4157.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2625.1,
+      "y": 4156.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2617.1,
+      "y": 4156.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2609.1,
+      "y": 4155.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2601.1,
+      "y": 4155.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2593.1,
+      "y": 4154.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2585.2,
+      "y": 4153.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2577.2,
+      "y": 4153.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2569.2,
+      "y": 4152.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2561.2,
+      "y": 4152.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2553.2,
+      "y": 4151.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2545.3,
+      "y": 4150.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2537.3,
+      "y": 4150.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2529.3,
+      "y": 4149.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2521.3,
+      "y": 4149.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2513.4,
+      "y": 4148.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2505.4,
+      "y": 4148.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2497.4,
+      "y": 4147.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2489.4,
+      "y": 4146.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2481.4,
+      "y": 4146.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2473.5,
+      "y": 4145.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2465.5,
+      "y": 4145.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2457.5,
+      "y": 4144.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2449.5,
+      "y": 4144.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2441.5,
+      "y": 4143.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2433.6,
+      "y": 4142.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2425.6,
+      "y": 4142.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2417.6,
+      "y": 4141.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2409.6,
+      "y": 4141.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2401.6,
+      "y": 4140.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2393.7,
+      "y": 4139.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2385.7,
+      "y": 4139.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2377.7,
+      "y": 4138.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2369.7,
+      "y": 4138.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2361.8,
+      "y": 4137.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2353.8,
+      "y": 4137.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2345.8,
+      "y": 4136.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2337.8,
+      "y": 4135.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2329.8,
+      "y": 4135.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2321.9,
+      "y": 4134.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2313.9,
+      "y": 4134.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2305.9,
+      "y": 4133.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2297.9,
+      "y": 4133.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2289.9,
+      "y": 4132.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2282.0,
+      "y": 4131.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2274.0,
+      "y": 4131.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2273.6,
+      "y": 4131.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2269.9,
+      "y": 4133.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

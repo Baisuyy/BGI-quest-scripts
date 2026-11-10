@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "7016 星火交汇于冻原 3/3",
+    "description": "第七章 第三幕·白夜似梦初醒｜前往北国银行 → 前往北国银行｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 9596.5,
+      "y": 6563.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

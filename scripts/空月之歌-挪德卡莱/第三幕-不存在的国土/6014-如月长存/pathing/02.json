@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6014 如月长存 2/3",
+    "description": "空月之歌 第三幕·不存在的国土｜跟随「木偶」完成对机械的修理 → 跟随「木偶」完成对机械的修理｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3230.3,
+      "y": 9917.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

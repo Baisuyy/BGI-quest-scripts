@@ -1,0 +1,164 @@
+{
+  "info": {
+    "name": "6012 匿于阴影 1/2",
+    "description": "空月之歌 第三幕·不存在的国土｜前往那夏镇 → 到采石场与菲林斯会合｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1658.5,
+      "y": 9492.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1650.6,
+      "y": 9493.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1642.6,
+      "y": 9494.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1634.7,
+      "y": 9494.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1626.7,
+      "y": 9495.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1618.8,
+      "y": 9496.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1610.8,
+      "y": 9497.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1602.9,
+      "y": 9498.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1595.0,
+      "y": 9499.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1587.0,
+      "y": 9500.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1579.1,
+      "y": 9501.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1571.1,
+      "y": 9502.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1563.2,
+      "y": 9503.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1555.2,
+      "y": 9504.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1547.3,
+      "y": 9505.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1539.3,
+      "y": 9506.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1531.4,
+      "y": 9507.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1523.5,
+      "y": 9508.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1515.5,
+      "y": 9509.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1507.6,
+      "y": 9510.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1499.6,
+      "y": 9511.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1491.7,
+      "y": 9512.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1483.7,
+      "y": 9512.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1475.8,
+      "y": 9513.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1474.9,
+      "y": 9514.0,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

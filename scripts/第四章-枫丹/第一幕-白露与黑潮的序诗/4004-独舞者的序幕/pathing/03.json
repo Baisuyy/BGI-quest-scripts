@@ -1,0 +1,320 @@
+{
+  "info": {
+    "name": "4004 独舞者的序幕 3/3",
+    "description": "第四章 第一幕·白露与黑潮的序诗｜乘坐巡轨船前往枫丹廷 → 前往枫丹廷｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3231.2,
+      "y": 4262.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3237.0,
+      "y": 4267.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3242.8,
+      "y": 4273.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3248.6,
+      "y": 4278.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3254.4,
+      "y": 4284.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3260.2,
+      "y": 4289.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3266.0,
+      "y": 4295.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3271.9,
+      "y": 4300.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3277.7,
+      "y": 4306.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3283.5,
+      "y": 4311.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3289.3,
+      "y": 4317.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3295.1,
+      "y": 4322.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3300.9,
+      "y": 4328.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3306.7,
+      "y": 4333.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3312.5,
+      "y": 4339.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3318.3,
+      "y": 4344.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3324.1,
+      "y": 4350.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3329.9,
+      "y": 4355.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3335.7,
+      "y": 4361.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3341.6,
+      "y": 4366.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3347.4,
+      "y": 4372.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3353.2,
+      "y": 4377.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3359.0,
+      "y": 4383.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3364.8,
+      "y": 4388.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3370.6,
+      "y": 4394.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3376.4,
+      "y": 4399.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3382.2,
+      "y": 4405.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3388.0,
+      "y": 4410.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3393.8,
+      "y": 4416.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3399.6,
+      "y": 4421.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3405.4,
+      "y": 4427.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3411.3,
+      "y": 4432.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3417.1,
+      "y": 4438.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3422.9,
+      "y": 4443.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3428.7,
+      "y": 4449.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3434.5,
+      "y": 4454.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3440.3,
+      "y": 4460.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3446.1,
+      "y": 4465.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3451.9,
+      "y": 4471.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3457.7,
+      "y": 4476.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3463.5,
+      "y": 4482.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3469.3,
+      "y": 4487.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3475.1,
+      "y": 4493.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3481.0,
+      "y": 4498.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3486.8,
+      "y": 4504.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3492.6,
+      "y": 4509.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3498.4,
+      "y": 4515.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3504.2,
+      "y": 4520.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3510.0,
+      "y": 4526.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3515.8,
+      "y": 4531.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 3517.0,
+      "y": 4532.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

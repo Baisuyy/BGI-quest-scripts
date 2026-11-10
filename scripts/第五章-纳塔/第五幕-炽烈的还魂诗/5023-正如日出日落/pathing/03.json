@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5023 正如日出日落 3/3",
+    "description": "第五章 第五幕·炽烈的还魂诗｜到营地外检查古名 → 到营地外检查古名｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1503.0,
+      "y": 8453.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

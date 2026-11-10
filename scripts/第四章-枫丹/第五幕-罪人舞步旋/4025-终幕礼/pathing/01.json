@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4025 终幕礼 1/4",
+    "description": "第四章 第五幕·罪人舞步旋｜与夏洛蒂对话 → 与夏洛蒂对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 3454.9,
+      "y": 4479.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

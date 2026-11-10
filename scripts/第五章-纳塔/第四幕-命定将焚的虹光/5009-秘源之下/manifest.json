@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "5009 秘源之下",
+  "version": "1.0.0",
+  "description": "第五章 第四幕·命定将焚的虹光 · 1 段 56 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

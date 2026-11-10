@@ -1,0 +1,296 @@
+{
+  "info": {
+    "name": "7011 逆风向苦寒之北 4/6",
+    "description": "第七章 第一幕·无神怜爱的雪国｜通过眼前的桥梁 → 寻找出去的道路｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 4,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 7367.7,
+      "y": 8427.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7375.0,
+      "y": 8430.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7382.3,
+      "y": 8434.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7389.5,
+      "y": 8437.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7396.8,
+      "y": 8440.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7404.1,
+      "y": 8444.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7411.4,
+      "y": 8447.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7418.7,
+      "y": 8450.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7426.0,
+      "y": 8454.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7433.2,
+      "y": 8457.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7440.5,
+      "y": 8460.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7447.8,
+      "y": 8464.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7454.4,
+      "y": 8467.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7457.3,
+      "y": 8459.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7460.2,
+      "y": 8452.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7463.0,
+      "y": 8444.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7465.9,
+      "y": 8437.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7468.8,
+      "y": 8429.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7471.7,
+      "y": 8422.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7474.6,
+      "y": 8414.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7477.5,
+      "y": 8407.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7480.3,
+      "y": 8399.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7483.2,
+      "y": 8392.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7486.1,
+      "y": 8384.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7489.0,
+      "y": 8377.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7491.9,
+      "y": 8370.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7494.7,
+      "y": 8362.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7496.1,
+      "y": 8359.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7497.6,
+      "y": 8351.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7499.2,
+      "y": 8343.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7500.7,
+      "y": 8335.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7502.3,
+      "y": 8327.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7503.8,
+      "y": 8319.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7503.9,
+      "y": 8319.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7505.7,
+      "y": 8311.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7507.5,
+      "y": 8303.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7508.4,
+      "y": 8299.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7510.1,
+      "y": 8305.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7515.7,
+      "y": 8310.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7521.3,
+      "y": 8316.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7526.9,
+      "y": 8322.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7530.6,
+      "y": 8326.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7537.6,
+      "y": 8329.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7544.7,
+      "y": 8333.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7551.7,
+      "y": 8337.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7558.7,
+      "y": 8341.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 7558.9,
+      "y": 8341.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "info": {
+    "name": "6005 阴燃 2/2",
+    "description": "空月之歌 序奏·归途｜监视卓新 → 观察入口情况｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -1206.7,
+      "y": 9309.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1207.7,
+      "y": 9301.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1208.6,
+      "y": 9293.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1209.6,
+      "y": 9285.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1210.5,
+      "y": 9277.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1211.5,
+      "y": 9269.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1212.4,
+      "y": 9261.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1213.4,
+      "y": 9253.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1214.4,
+      "y": 9245.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1215.3,
+      "y": 9237.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1216.3,
+      "y": 9229.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1217.2,
+      "y": 9221.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1218.2,
+      "y": 9213.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1219.1,
+      "y": 9205.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1220.1,
+      "y": 9197.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1221.1,
+      "y": 9190.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1222.0,
+      "y": 9182.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1223.0,
+      "y": 9174.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1223.9,
+      "y": 9166.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1224.9,
+      "y": 9158.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1225.8,
+      "y": 9150.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1226.8,
+      "y": 9142.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1227.7,
+      "y": 9134.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1228.7,
+      "y": 9126.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1229.7,
+      "y": 9118.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1230.6,
+      "y": 9110.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1223.7,
+      "y": 9114.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1216.8,
+      "y": 9118.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1209.9,
+      "y": 9122.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1203.0,
+      "y": 9127.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1196.2,
+      "y": 9131.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1189.3,
+      "y": 9135.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1182.4,
+      "y": 9139.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1175.5,
+      "y": 9143.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1168.6,
+      "y": 9147.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": -1165.9,
+      "y": 9148.9,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 7/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜进入镜中的世界 → 继续探索这个空间｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 7,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2589.5,
+      "y": 10128.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2582.2,
+      "y": 10131.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2574.9,
+      "y": 10134.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2567.6,
+      "y": 10137.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2560.3,
+      "y": 10141.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2552.9,
+      "y": 10144.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2545.6,
+      "y": 10147.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2538.3,
+      "y": 10150.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2531.0,
+      "y": 10154.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2523.7,
+      "y": 10157.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2516.4,
+      "y": 10160.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2509.1,
+      "y": 10163.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2501.8,
+      "y": 10167.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2494.4,
+      "y": 10170.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2487.1,
+      "y": 10173.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2480.0,
+      "y": 10176.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

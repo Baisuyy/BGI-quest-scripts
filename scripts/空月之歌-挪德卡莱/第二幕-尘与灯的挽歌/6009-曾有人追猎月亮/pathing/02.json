@@ -1,0 +1,518 @@
+{
+  "info": {
+    "name": "6009 曾有人追猎月亮 2/2",
+    "description": "空月之歌 第二幕·尘与灯的挽歌｜帮助菲林斯 → 找辛查询问情况｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2137.1,
+      "y": 9033.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2130.9,
+      "y": 9038.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2124.6,
+      "y": 9043.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2118.4,
+      "y": 9048.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2112.2,
+      "y": 9053.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2105.9,
+      "y": 9058.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2099.7,
+      "y": 9063.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2093.4,
+      "y": 9068.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2087.2,
+      "y": 9073.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2081.0,
+      "y": 9078.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2074.7,
+      "y": 9083.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2068.5,
+      "y": 9088.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2062.3,
+      "y": 9093.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2056.0,
+      "y": 9098.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2049.8,
+      "y": 9103.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2043.6,
+      "y": 9108.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2037.3,
+      "y": 9113.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2031.1,
+      "y": 9118.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2024.8,
+      "y": 9123.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2018.6,
+      "y": 9128.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2012.4,
+      "y": 9133.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2006.1,
+      "y": 9138.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1999.9,
+      "y": 9143.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1993.7,
+      "y": 9148.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1987.4,
+      "y": 9153.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1981.2,
+      "y": 9158.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1974.9,
+      "y": 9163.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1968.7,
+      "y": 9168.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1962.5,
+      "y": 9173.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1956.2,
+      "y": 9178.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1950.0,
+      "y": 9183.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1943.8,
+      "y": 9188.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1937.5,
+      "y": 9193.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1931.3,
+      "y": 9198.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1925.1,
+      "y": 9203.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1918.8,
+      "y": 9208.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1912.6,
+      "y": 9213.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1906.3,
+      "y": 9218.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1900.1,
+      "y": 9223.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1893.9,
+      "y": 9228.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1887.6,
+      "y": 9233.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1881.4,
+      "y": 9238.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1875.2,
+      "y": 9243.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1868.9,
+      "y": 9248.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1862.7,
+      "y": 9253.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1856.5,
+      "y": 9258.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1850.2,
+      "y": 9263.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1844.0,
+      "y": 9268.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1837.7,
+      "y": 9273.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1831.5,
+      "y": 9278.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1825.3,
+      "y": 9283.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1819.0,
+      "y": 9288.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1812.8,
+      "y": 9293.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1806.6,
+      "y": 9299.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1800.3,
+      "y": 9304.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1794.1,
+      "y": 9309.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1787.9,
+      "y": 9314.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1781.6,
+      "y": 9319.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1775.4,
+      "y": 9324.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1769.1,
+      "y": 9329.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1762.9,
+      "y": 9334.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1756.7,
+      "y": 9339.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1750.4,
+      "y": 9344.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1744.2,
+      "y": 9349.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1738.0,
+      "y": 9354.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1731.7,
+      "y": 9359.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1725.5,
+      "y": 9364.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1719.2,
+      "y": 9369.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1713.0,
+      "y": 9374.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1706.8,
+      "y": 9379.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1700.5,
+      "y": 9384.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1696.6,
+      "y": 9387.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1688.6,
+      "y": 9387.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1680.6,
+      "y": 9388.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1672.6,
+      "y": 9388.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1664.6,
+      "y": 9388.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1656.6,
+      "y": 9389.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1648.7,
+      "y": 9389.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1640.7,
+      "y": 9389.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1632.7,
+      "y": 9390.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1624.7,
+      "y": 9390.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1616.7,
+      "y": 9391.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1608.7,
+      "y": 9391.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1602.6,
+      "y": 9391.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

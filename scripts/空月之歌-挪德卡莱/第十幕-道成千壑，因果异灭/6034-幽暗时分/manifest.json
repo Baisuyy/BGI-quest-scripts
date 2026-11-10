@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6034 幽暗时分",
+  "version": "1.0.0",
+  "description": "空月之歌 第十幕·道成千壑，因果异灭 · 6 段 105 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

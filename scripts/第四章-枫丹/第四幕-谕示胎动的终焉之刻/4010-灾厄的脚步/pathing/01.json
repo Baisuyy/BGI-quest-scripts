@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "4010 灾厄的脚步 1/4",
+    "description": "第四章 第四幕·谕示胎动的终焉之刻｜前往食堂 → 前往办公室｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4490.6,
+      "y": 4617.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4494.2,
+      "y": 4609.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4497.8,
+      "y": 4602.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4501.3,
+      "y": 4595.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4504.9,
+      "y": 4588.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4508.5,
+      "y": 4581.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4512.1,
+      "y": 4574.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4515.7,
+      "y": 4567.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4517.0,
+      "y": 4564.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4509.7,
+      "y": 4567.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4502.3,
+      "y": 4570.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4495.0,
+      "y": 4574.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4487.7,
+      "y": 4577.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4480.4,
+      "y": 4580.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4477.9,
+      "y": 4581.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4472.6,
+      "y": 4587.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4467.3,
+      "y": 4593.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4461.9,
+      "y": 4599.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4456.6,
+      "y": 4605.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4451.3,
+      "y": 4611.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 4448.4,
+      "y": 4614.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

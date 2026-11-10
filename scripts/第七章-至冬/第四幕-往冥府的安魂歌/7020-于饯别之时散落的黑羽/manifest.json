@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "7020 于饯别之时散落的黑羽",
+  "version": "1.0.0",
+  "description": "第七章 第四幕·往冥府的安魂歌 · 3 段 8 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

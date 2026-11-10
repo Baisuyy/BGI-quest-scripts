@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "5003 抉择",
+  "version": "1.0.0",
+  "description": "第五章 第二幕·黑石湮落白石下 · 2 段 70 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4011 锋芒难掩的茶会 3/3",
+    "description": "第四章 第三幕·向深水中的晨星｜跟随迪肯前进 → 跟随迪肯前进｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4340.9,
+      "y": 4526.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

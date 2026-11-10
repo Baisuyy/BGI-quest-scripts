@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6015 最初的那抹月光 2/3",
+    "description": "空月之歌 第八幕·真实之月｜继续前进 → 继续前进｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2506.1,
+      "y": 10121.8,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "6026 无法传达的涟漪 2/8",
+    "description": "空月之歌 第五幕·终北的夜行诗｜去那夏镇收集情报 → 去那夏镇收集情报｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1801.2,
+      "y": 9615.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "manifest_version": 1,
+  "name": "6026 无法传达的涟漪",
+  "version": "1.0.0",
+  "description": "空月之歌 第五幕·终北的夜行诗 · 8 段 237 点",
+  "authors": [
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
+  ],
+  "main": "main.js"
+}

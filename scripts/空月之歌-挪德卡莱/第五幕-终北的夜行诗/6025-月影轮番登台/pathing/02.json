@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "6025 月影轮番登台 2/3",
+    "description": "空月之歌 第五幕·终北的夜行诗｜跟随菈乌玛参观 → 继续跟随菈乌玛｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 2,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1759.8,
+      "y": 10450.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1760.6,
+      "y": 10442.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1761.3,
+      "y": 10434.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1762.1,
+      "y": 10426.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1762.8,
+      "y": 10418.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1763.6,
+      "y": 10410.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1764.3,
+      "y": 10402.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1764.7,
+      "y": 10398.5,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "info": {
+    "name": "6023 循着过往的足迹 1/9",
+    "description": "空月之歌 第七幕·如果在冬夜，一个旅人｜与同伴们对话 → 将资料交给「木偶」｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 2091.3,
+      "y": 9922.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2093.5,
+      "y": 9930.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2095.6,
+      "y": 9937.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2097.8,
+      "y": 9945.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2099.9,
+      "y": 9953.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2102.1,
+      "y": 9961.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2104.3,
+      "y": 9968.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2106.4,
+      "y": 9976.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2108.6,
+      "y": 9984.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2110.7,
+      "y": 9991.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2112.9,
+      "y": 9999.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2115.0,
+      "y": 10007.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2117.2,
+      "y": 10014.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2119.4,
+      "y": 10022.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2121.5,
+      "y": 10030.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2123.7,
+      "y": 10038.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2125.8,
+      "y": 10045.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2128.0,
+      "y": 10053.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2130.2,
+      "y": 10061.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2130.7,
+      "y": 10063.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2133.4,
+      "y": 10055.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2135.8,
+      "y": 10049.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2139.1,
+      "y": 10056.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2137.8,
+      "y": 10059.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2139.1,
+      "y": 10056.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2132.4,
+      "y": 10056.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 2139.1,
+      "y": 10056.3,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

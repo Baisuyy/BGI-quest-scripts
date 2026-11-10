@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "5003 抉择 1/2",
+    "description": "第五章 第二幕·黑石湮落白石下｜在「流泉之众」散步 → 在「流泉之众」散步｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": -2779.6,
+      "y": 9157.4,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

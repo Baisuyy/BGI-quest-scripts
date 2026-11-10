@@ -1,0 +1,20 @@
+{
+  "info": {
+    "name": "4009 守秘者与禁区 1/1",
+    "description": "第四章 第四幕·谕示胎动的终焉之刻｜与莱欧斯利对话 → 与莱欧斯利对话｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 1,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 4491.6,
+      "y": 4597.6,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "info": {
+    "name": "6026 无法传达的涟漪 8/8",
+    "description": "空月之歌 第五幕·终北的夜行诗｜抢在拉撒抹培前封锁大门 → 与拉撒抹培交谈｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 8,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 1973.3,
+      "y": 9356.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1972.4,
+      "y": 9348.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1971.4,
+      "y": 9340.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1970.5,
+      "y": 9332.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1969.6,
+      "y": 9324.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1968.6,
+      "y": 9317.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1967.7,
+      "y": 9309.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1966.8,
+      "y": 9301.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1965.9,
+      "y": 9293.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1964.9,
+      "y": 9285.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1964.0,
+      "y": 9277.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1963.1,
+      "y": 9269.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1962.1,
+      "y": 9261.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1961.2,
+      "y": 9253.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1960.3,
+      "y": 9245.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1959.3,
+      "y": 9237.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1958.4,
+      "y": 9229.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 1958.3,
+      "y": 9228.7,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}

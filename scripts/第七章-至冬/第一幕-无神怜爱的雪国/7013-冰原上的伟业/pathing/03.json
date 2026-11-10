@@ -1,0 +1,272 @@
+{
+  "info": {
+    "name": "7013 冰原上的伟业 3/4",
+    "description": "第七章 第一幕·无神怜爱的雪国｜赶往彩冰镇 → 在彩冰镇与木偶会合｜guide 坐标自动生成",
+    "author": "AnimeGameData 7.2.0",
+    "version": "1.0",
+    "type": "farming",
+    "order": 3,
+    "map_name": "Teyvat",
+    "map_match_method": "TemplateMatch"
+  },
+  "positions": [
+    {
+      "x": 8658.2,
+      "y": 6526.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8653.2,
+      "y": 6532.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8648.1,
+      "y": 6538.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8643.1,
+      "y": 6544.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8638.1,
+      "y": 6550.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8633.1,
+      "y": 6557.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8628.0,
+      "y": 6563.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8623.0,
+      "y": 6569.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8618.0,
+      "y": 6575.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8614.3,
+      "y": 6580.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8621.8,
+      "y": 6582.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8629.4,
+      "y": 6585.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8636.9,
+      "y": 6588.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8644.5,
+      "y": 6590.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8652.0,
+      "y": 6593.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8659.6,
+      "y": 6596.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8667.1,
+      "y": 6598.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8672.8,
+      "y": 6600.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8676.4,
+      "y": 6593.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8680.1,
+      "y": 6586.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8683.7,
+      "y": 6579.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8687.3,
+      "y": 6572.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8691.0,
+      "y": 6565.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8694.6,
+      "y": 6558.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8698.3,
+      "y": 6550.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8701.9,
+      "y": 6543.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8705.5,
+      "y": 6536.7,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8709.2,
+      "y": 6529.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8712.8,
+      "y": 6522.4,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8716.4,
+      "y": 6515.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8720.1,
+      "y": 6508.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8723.7,
+      "y": 6501.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8724.6,
+      "y": 6499.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8717.1,
+      "y": 6502.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8709.7,
+      "y": 6505.0,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8702.2,
+      "y": 6507.9,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8694.7,
+      "y": 6510.8,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8687.3,
+      "y": 6513.6,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8679.8,
+      "y": 6516.5,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8672.3,
+      "y": 6519.3,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8664.8,
+      "y": 6522.2,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8657.4,
+      "y": 6525.1,
+      "type": "path",
+      "move_mode": "run"
+    },
+    {
+      "x": 8654.7,
+      "y": 6526.1,
+      "type": "target",
+      "move_mode": "run"
+    }
+  ]
+}
