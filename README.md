@@ -210,6 +210,18 @@ startFrom: '7027/5',
 
 ## 数据来源
 
-脚本与路线由 `AnimeGameData`（CNRELWin 7.2.0 / R49086080）解析生成：任务坐标取自 `BinOutput/Quest/<id>.json` 的 `subQuests[].guide`，章节归属取自 `chapterId`，任务顺序由 `MainQuestFmtQuestRelate` 的前置关系拓扑排序得出。场景归属取 `guideScene` 的 `imageSceneId` 映射：`3` → 提瓦特，`103` → 空之神殿，其余视为局部坐标。
+脚本与路线由 `AnimeGameData`（CNRELWin 7.2.0 / R49086080）解析生成：任务坐标取自 `BinOutput/Quest/<id>.json` 的 `subQuests[].guide`，章节归属取自 `chapterId`，任务顺序由 `MainQuestFmtQuestRelate` 的前置关系拓扑排序得出。
+
+**坐标字段的轴序是个坑，务必注意。** BetterGI 内部把世界坐标拆成 `(a, b, c)` = (纵向, 高度, 横向)，写入路线 JSON 时 `x` 取横向 `c`、`y` 取纵向 `a`：
+
+```csharp
+// GiWorldPosition.cs
+public double X => (double)Position[2]; // c 横向
+public double Y => (double)Position[0]; // a 纵向
+```
+
+而 `AnimeGameData` 导出的 CSV 里，`X` 列是纵向、`Z` 列是横向，与字面意思相反。如果直接按 `x = X, y = Z` 写入，整条路线会沿对角线镜像，落点在游戏里偏移数百到数千米。本仓库已按 `x = Z, y = X` 校正，全部路点与 `tp.json` 锚点的中位距离 76 米、93% 在 200 米内。
+
+场景归属取 `guideScene` 的 `imageSceneId` 映射：`3` → 提瓦特，`103` → 空之神殿，其余视为局部坐标。
 
 `docs/主线解析/` 内含完整的 53 幕解析成果：可交互浏览器、261 行任务总表、章节统计与 JSON 树。
