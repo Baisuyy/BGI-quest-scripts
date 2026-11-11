@@ -110,7 +110,7 @@ install.ps1                        脚本 + 路线一键安装
 BetterGI → 脚本仓库 → 添加仓库，填：
 
 ```
-地址：https://github.com/Baisuyy/bettergi-quest-scripts
+地址：https://github.com/Baisuyy/BGI-quest-scripts
 分支：main
 ```
 

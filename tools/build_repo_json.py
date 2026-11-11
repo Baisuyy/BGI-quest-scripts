@@ -110,7 +110,7 @@ def main() -> None:
 
     index = {
         "time": datetime.now().strftime("%Y%m%d%H%M%S"),
-        "url": "https://github.com/Baisuyy/bettergi-quest-scripts/archive/refs/heads/main.zip",
+        "url": "https://github.com/Baisuyy/BGI-quest-scripts/archive/refs/heads/main.zip",
         "file": "repo.json",
         "build": {
             "version": 1,
