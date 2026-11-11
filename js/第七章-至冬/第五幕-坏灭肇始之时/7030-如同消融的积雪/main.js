@@ -12,7 +12,7 @@
 
 const CONFIG = {
     startSeg: 0,             // 从第几段开始（0 = 从头），断点续跑改这里
-    skipSegs: [2, 3],        // 要跳过的段号，空数组表示全跑
+    skipSegs: [],            // 要跳过的段号；2/3 段已放开（段间有 1.6-1.8km 跳跃，靠段前传送衔接）
     teleportBeforeSeg: true,   // 每段开始前先传送到首点附近
     autoSkip: true,            // 自动跳对话 + 自动选项
     chooseOption: '优先选择第一个选项',
