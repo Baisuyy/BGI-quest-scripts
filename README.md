@@ -205,3 +205,17 @@ startFrom: '7027/5',    // 全流程：从 7027 的第 5 段开始
 **传送不会精确到点。** `genshin.tp(x, y)` 传到离该点最近的锚点，然后步行过去。
 
 **路线是直线插值，不是录制的路径。** 中间有山体、河流、建筑就会撞上去，靠 `PathExecutor` 的卡死检测脱困，失败就停在原地。真正好用的路线需要在 BetterGI 的「路径录制」里跑一遍。
+
+## 特别版客户端
+
+[Releases](../../releases) 提供自编译的 BetterGI 特别版，只新增脚本宿主 API，不改动任何既有行为：
+
+| 接口 | 用途 |
+|---|---|
+| `ocr.read()` / `ocr.readRegion(x, y, w, h)` | 屏幕或指定区域转文字，返回带坐标与置信度的行 |
+| `quest.tracker()` | 读取左上角任务追踪面板的标题与当前步骤 |
+| `OcrFactory` / `Bv` | OCR 引擎与 BgiVision 静态判定，供脚本自行组合 |
+
+源码在 [`bgi-special`](../../tree/bgi-special) 分支，是单提交快照（不带上游历史，避免订阅脚本时多下载几百 MB）。构建和同步都在 Actions 里：手动跑 `Build BGI Special` 出包，`Sync Upstream BGI` 每天凌晨跟一次上游，同步失败会开 issue。
+
+下载的压缩包解压后是完整客户端目录，覆盖原目录即可（先备份 `User`）。`BetterGI.exe` 仍需同目录的 `Assets`、`dicts`，不能单独拷走运行。
