@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/banner.png" width="260" alt="BetterGI 主线跑图脚本">
+  <img src="assets/banner.png" width="260" alt="BGI 主线跑图脚本">
 </p>
 
-<h1 align="center">原神主线自动跑图脚本 · BetterGI</h1>
+<h1 align="center">主线自动跑图脚本 · BetterGI</h1>
 
 按 **篇章 → 幕 → 任务** 组织的 BetterGI 任务点位脚本库，覆盖 **第四章 枫丹（4.0）到第七章 至冬（7.2）**：100 个脚本项目、270 段路线、9,434 个路点。
 
