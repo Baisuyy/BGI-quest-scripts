@@ -104,4 +104,5 @@ startFrom: '7027/5',  // 全流程：从 7027 的第 5 段开始
 - [`docs/路线质量报告.md`](docs/路线质量报告.md) — 逐段点数、总长与风险分级
 - [`docs/AI-代理.md`](docs/AI-代理.md) — 脚本内自定义 AI 决策（可选）
 - [`docs/锚点开启-调研.md`](docs/锚点开启-调研.md) — 自动开锚点可行性与卡点
+- [`docs/任务点与地图指引-调研.md`](docs/任务点与地图指引-调研.md) — 靠任务点/地图指引自动到达任务目标
 - [SPECIAL-API.md](https://github.com/Baisuyy/BGI-quest-scripts/blob/bgi-special/Docs/SPECIAL-API.md) — 特别版脚本宿主 API
