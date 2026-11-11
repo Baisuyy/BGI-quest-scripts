@@ -40,6 +40,10 @@ KEEP = (
     "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.Ai.cs",
     "BetterGenshinImpact/View/Controls/AiSettingsCard.xaml",
     "BetterGenshinImpact/View/Controls/AiSettingsCard.xaml.cs",
+    # AI 助手页（模型配置 + 本地助手）
+    "BetterGenshinImpact/View/Pages/AiSettingsPage.xaml",
+    "BetterGenshinImpact/View/Pages/AiSettingsPage.xaml.cs",
+    "BetterGenshinImpact/ViewModel/Pages/AiSettingsPageViewModel.cs",
     "tools/bgi-special/",
 )
 

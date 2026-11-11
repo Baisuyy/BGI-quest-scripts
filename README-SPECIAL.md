@@ -1,6 +1,6 @@
 # BetterGI 特别版（源码分支）
 
-本分支是 [BetterGI](https://github.com/babalae/better-genshin-impact) 的源码快照，额外做了两件事：**开放脚本感知接口**，以及**把大模型做进内核**。
+本分支是 [BetterGI](https://github.com/babalae/better-genshin-impact) `0.67.0` 的源码快照，额外做了两件事：**开放脚本感知接口**，以及**把大模型做进内核**。
 
 ## 一、内置 AI 决策
 
@@ -11,13 +11,26 @@ BGI 自己调用大模型，不是脚本、不是外挂：
 - 到达或拉近 5 米即交还规则逻辑，失败则按官方逻辑放弃
 - 默认 6 步、45 秒、每小时 60 次；连续失败 3 次冷却 2 分钟
 
-配置入口：**任务设置 → AI 智能决策（内置）**，支持 OpenAI 兼容（DeepSeek / 通义 / 智谱 / Kimi / Ollama / LM Studio）与 Anthropic 两种协议，卡片底部有连通性测试。
+配置入口：侧边栏 **AI 助手**（也可以从「任务设置 → AI 智能决策（内置）」进），支持 OpenAI 兼容（DeepSeek / 通义 / 智谱 / Kimi / Ollama / LM Studio）与 Anthropic 两种协议，卡片底部有连通性测试。
 
 设计取舍、成本、失败行为、已知边界见 [`Docs/AI-内置决策.md`](Docs/AI-内置决策.md)。
 
 接管过程在日志里是**一整块**：`[AI] ┌` 开头写触发原因与起点，中间每步标出「拉近 / 后退 / 无进展」，`[AI] └` 收尾写步数、请求数与耗时。日志文件在安装目录 `log/better-genshin-impact<日期>.log`，搜 `[AI]` 即可。
 
 上机验证步骤与判定标准见 [`Docs/上机测试-内置AI.md`](Docs/上机测试-内置AI.md)。
+
+## 一之二、本地助手（Agent）
+
+`AI 助手` 页下半部分可以下一句自然语言任务，由模型自己 `list_dir / read_file / write_file / make_dir / run` 完成任务。权限只有两条：
+
+| 范围 | 行为 |
+|---|---|
+| 软件目录（沙箱）内读 | 直接放行 |
+| 软件目录内写 / 建目录 | 默认放行，可关掉改成逐次确认 |
+| 软件目录内运行程序 | 默认逐次确认（`.exe / .bat / .cmd / .ps1`，参数不经过 shell）|
+| 软件目录外任何操作 | 一律弹窗申请，拒绝不中断任务，模型会换做法 |
+
+沙箱默认是 `BetterGI.exe` 所在目录，可在页面上改成别的路径。每一步都会写 `[AI] │ [n/步数] 动作 → 结果`，授权决定单独记一行「沙箱内/外 · 允许/拒绝」。没有界面在跑（无人值守）时，授权请求一律按拒绝处理。
 
 ## 二、脚本宿主接口
 
@@ -53,7 +66,8 @@ Actions 页运行 **Build BGI Special**（仅手动触发），可选分支、�
 ## 与上游的关系
 
 - 本分支**只有一个提交**，不含上游历史，避免脚本仓库被几百 MB 历史撑大
-- `Sync Upstream BGI` 每天 05:17 拉上游默认分支，覆盖源码后用 `tools/bgi-special/patch_special.py` 重新注入宿主注册、AI 配置与卡死接管
+- 基线跟随上游 `refactor/20260930`（.NET 10 重构线）；上游 `main` 的版本号与 AutoBoss 路径数据按增量手动合入，不做整树覆盖——`main` 仍是 .NET 8，整树覆盖会把重构版打回旧架构
+- `Sync Upstream BGI` 每天 05:17 拉上游默认分支，覆盖源码后用 `tools/bgi-special/patch_special.py` 重新注入宿主注册、AI 配置、卡死接管、AI 助手页与更新改道
 - 新增文件在 `tools/bgi-special/sync_source.py` 的 KEEP 白名单里；上游文件上的改动用锚点补丁，锚点失效时同步会失败并开 issue
 
 默认全部关闭：不开 AI、不调用新 API 时，行为与官方版完全一致。

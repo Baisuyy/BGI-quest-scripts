@@ -107,6 +107,15 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
+                <!-- 特别版：模型配置与本地助手入口，避免埋在「独立任务」长页里找不到 -->
+                <ui:NavigationViewItem Content="AI 助手"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:AiSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Glyph="&#xf544;" Style="{StaticResource FaFontIconStyle}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <ui:NavigationViewItem Content="{i18n:T 任务计划}"
                                        NavigationCacheMode="Enabled"
                                        TargetPageType="{x:Type pages:PuloniaTaskPlanPage}">

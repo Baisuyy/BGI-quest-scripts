@@ -111,6 +111,44 @@ public partial class AiConfig : ObservableObject
     [ObservableProperty]
     private string _systemPromptExtra = "";
 
+    /// <summary>
+    /// 本地助手（Agent）开关。打开后可以在「AI 助手」页直接下任务，由模型读写文件、运行程序。
+    /// </summary>
+    [ObservableProperty]
+    private bool _agentEnabled;
+
+    /// <summary>
+    /// 沙箱根目录。留空表示软件自身目录；相对路径同样相对软件目录。
+    /// 沙箱内的操作默认放行，沙箱外一律逐次申请授权。
+    /// </summary>
+    [ObservableProperty]
+    private string _agentSandboxRoot = "";
+
+    /// <summary>
+    /// 允许直接写入沙箱内的文件，不再逐次确认。关闭后连沙箱内的写入也要点同意。
+    /// </summary>
+    [ObservableProperty]
+    private bool _agentAllowWrite = true;
+
+    /// <summary>
+    /// 允许直接运行沙箱内的程序，不再逐次确认。默认关闭，执行任何命令都要点头。
+    /// </summary>
+    [ObservableProperty]
+    private bool _agentAllowRun;
+
+    /// <summary>
+    /// 单次任务最多几步（一步一次工具调用）。
+    /// </summary>
+    [ObservableProperty]
+    private int _agentMaxSteps = 10;
+
+    /// <summary>
+    /// 单次任务总超时（秒）。
+    /// </summary>
+    [ObservableProperty]
+    private int _agentTimeoutSeconds = 300;
+
+
     /// <summary>是否使用 Anthropic 原生协议。</summary>
     [JsonIgnore]
     public bool IsAnthropic => string.Equals(Provider, "anthropic", System.StringComparison.OrdinalIgnoreCase);

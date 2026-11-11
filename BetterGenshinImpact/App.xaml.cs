@@ -293,6 +293,7 @@ public partial class App : Application
                 services.AddView<MacroSettingsPage, MacroSettingsPageViewModel>();
                 services.AddView<KeyMacroPage, KeyMacroPageViewModel>();
                 services.AddView<CommonSettingsPage, CommonSettingsPageViewModel>();
+                services.AddView<AiSettingsPage, AiSettingsPageViewModel>();
                 services.AddView<TaskSettingsPage, TaskSettingsPageViewModel>();
                 services.AddView<HotKeyPage, HotKeyPageViewModel>();
                 services.AddView<NotificationSettingsPage, NotificationSettingsPageViewModel>();

@@ -88,7 +88,7 @@ DeepSeek 这类模型单次几厘钱，**一条卡死的路线通常几毛钱以
 
 ## 6. 配置项
 
-**任务设置 → AI 智能决策（内置）**
+**侧边栏 → AI 助手**（同一张卡片也在「任务设置 → AI 智能决策（内置）」里，改任一处两边一致）
 
 | 配置 | 默认 | 建议 |
 |---|---|---|
@@ -201,11 +201,15 @@ DeepSeek 这类模型单次几厘钱，**一条卡死的路线通常几毛钱以
 | `Core/Ai/LlmClient.cs` | 传输层：OpenAI 兼容 / Anthropic 两种协议、工具声明、多轮展开 |
 | `Core/Ai/AiKernel.cs` | 预算、熔断、超时、审计；全进程唯一出口 |
 | `Core/Ai/AiOperator.cs` | 工具定义与循环执行，直接操作游戏 |
+| `Core/Ai/LocalAgent.cs` | 本地助手：文件读写、建目录、运行程序的工具循环 |
+| `Core/Ai/AgentSandbox.cs` | 沙箱路径解析：规范化后再判越界，`..` 绕不过去 |
+| `Core/Ai/AgentConsent.cs` | 授权闸门：界面层注入回调，没有回调一律拒绝 |
 | `Core/Ai/AiLog.cs` | 日志块：块头 / 每步 / 块尾，统一 `[AI]` 前缀 |
 | `Core/Ai/GameStateProbe.cs` | 状态快照：坐标、运动状态、任务面板文字、压缩截图 |
 | `Core/Config/AiConfig.cs` | 配置项 |
 | `GameTask/AutoPathing/PathExecutor.Ai.cs` | 卡死接管入口与成功判定 |
 | `View/Controls/AiSettingsCard.xaml` | 设置卡片（独立文件，便于上游同步） |
+| `View/Pages/AiSettingsPage.xaml` | 「AI 助手」页：模型配置 + 本地助手 |
 
 ## 11. 已知边界
 
@@ -214,3 +218,42 @@ DeepSeek 这类模型单次几厘钱，**一条卡死的路线通常几毛钱以
 - **地图匹配失败时**：坐标读不到会沿用上一次有效值，连续失败时接管会主动结束，避免瞎走
 - **战斗不在范围内**：接管期间只做移动与交互，不打怪；需要战斗时由原有逻辑切回
 - **传送会重置路线状态**：开启传送后，落点可能偏离路线，接管结束时若距离仍远，按失败处理
+
+## 12. 本地助手（Agent）
+
+跑图接管是「模型操作游戏」，本地助手是「模型操作这台机器上的软件目录」。两者共用同一个内核、同一份密钥与预算，只是工具集不同。
+
+### 权限模型
+
+只有两层，没有中间态：
+
+| 操作 | 沙箱内 | 沙箱外 |
+|---|---|---|
+| `list_dir` / `read_file` | 放行 | 弹窗申请 |
+| `write_file` / `make_dir` | `AgentAllowWrite` 开（默认）放行，关掉则申请 | 弹窗申请 |
+| `run`（exe/bat/cmd/ps1） | `AgentAllowRun` 开才放行（默认关） | 弹窗申请 |
+
+「沙箱」默认就是 `BetterGI.exe` 所在目录，可以在页面上改成别的路径；相对路径、`~` 之外的环境变量都会先展开再规范化，`..\..\Windows` 这种写法在规范化之后判定，绕不过去。
+
+被拒绝不会抛异常：模型收到的是「用户拒绝了这次操作，不要重复申请同一路径」，它会自己换方案或者 `done(success=false)`。无人值守（窗口没开）时回调为空，一律按拒绝处理。
+
+### 工具与限制
+
+- 单次读写 200k 字符封顶，回给模型的结果 8k 字符封顶，避免把几十兆日志塞进上下文
+- 运行程序不经过 shell 拼接：参数按引号切成数组传给 `ArgumentList`，`.bat/.cmd` 走 `cmd /c`，`.ps1` 走 `powershell -File`
+- 单条命令默认 30 秒超时，最长 300 秒，超时杀进程树
+- 没有 `delete` 工具：要删东西必须走 `run` 调系统命令，并且会先触发授权，保证有一道人工确认
+
+### 日志
+
+```
+[AI] ┌ 本地助手 #1 · 把 User 下的配置备份一份
+[AI] │ 沙箱 D:\BetterGI
+[AI] │ 预算 10 步 / 300s · 本次已用 0/300 · 模型 deepseek-chat
+[AI] │ [1/10] list_dir . → User/
+[AI] │ [2/10] read_file User/config.json → {...
+[AI] │ [3/10] write_file User/config.backup.json → 已写入，当前 4821 字节
+[AI] └ 完成 · 已备份到 User/config.backup.json · 3 步 / 4 请求 / 12.6s
+```
+
+沙箱外的请求会多一行 `[AI] │ 授权 write_file · 沙箱外 允许/拒绝 · C:\...`。

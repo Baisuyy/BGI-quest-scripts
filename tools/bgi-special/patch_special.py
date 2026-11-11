@@ -11,6 +11,8 @@
 5. TaskSettingsPage.xaml         —— 插入内置 AI 设置卡片
 6. TaskSettingsPageViewModel     —— 连通性测试命令
 7. UpdateService.CheckUpdateAsync —— 特别版更新检查改道，不接官方更新通道
+8. App.xaml.cs                   —— 注册「AI 助手」页（模型配置 + 本地助手）
+9. MainWindow.xaml               —— 侧边栏加「AI 助手」入口
 
 每一处都先判断是否已存在（幂等），锚点找不到就返回非 0，由 workflow 报警并开 issue。
 新增文件（Core/Ai 等）不在这里处理，由 sync_source.py 的 KEEP 清单保留。
@@ -28,6 +30,7 @@ PATH_EXECUTOR = "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.cs"
 SETTINGS_PAGE = "BetterGenshinImpact/View/Pages/TaskSettingsPage.xaml"
 SETTINGS_VM = "BetterGenshinImpact/ViewModel/Pages/TaskSettingsPageViewModel.cs"
 UPDATE_SERVICE = "BetterGenshinImpact/Service/UpdateService.cs"
+MAIN_WINDOW = "BetterGenshinImpact/View/MainWindow.xaml"
 
 # ---------------------------------------------------------------- 1. 脚本宿主
 
@@ -195,6 +198,36 @@ UPDATE_HOOK = '''            // ---- 特别版：官方三条更新通道都会�
 '''
 
 
+# ---------------------------------------------------------------- 8. AI 助手页注册
+
+PAGE_REG_ANCHOR = "                services.AddView<CommonSettingsPage, CommonSettingsPageViewModel>();"
+
+PAGE_REG_BLOCK = """
+                services.AddView<AiSettingsPage, AiSettingsPageViewModel>();"""
+
+# ---------------------------------------------------------------- 9. 侧边栏入口
+
+NAV_ANCHOR = '''                <ui:NavigationViewItem Content="{i18n:T 独立任务}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:TaskSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="TaskListSquareLtr24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+'''
+
+NAV_BLOCK = NAV_ANCHOR + '''
+                <!-- 特别版：模型配置与本地助手入口，避免埋在「独立任务」长页里找不到 -->
+                <ui:NavigationViewItem Content="AI 助手"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:AiSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Glyph="&#xf544;" Style="{StaticResource FaFontIconStyle}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+'''
+
+
 def patch(rel: str, marker: str, anchor: str, replacement: str, label: str) -> bool:
     """在 anchor 处插入/替换；marker 已存在则跳过。返回是否改动。"""
     path = ROOT / rel
@@ -256,6 +289,10 @@ def main() -> int:
           VM_BLOCK + VM_ANCHOR, "设置页测试命令")
     patch(UPDATE_SERVICE, "SpecialUpdater.TryHandleAsync", UPDATE_ANCHOR,
           UPDATE_HOOK + UPDATE_ANCHOR, "更新检查改道")
+    patch(APP, "AddView<AiSettingsPage", PAGE_REG_ANCHOR,
+          PAGE_REG_ANCHOR + PAGE_REG_BLOCK, "注册 AI 助手页")
+    patch(MAIN_WINDOW, "pages:AiSettingsPage", NAV_ANCHOR,
+          NAV_BLOCK, "侧边栏 AI 助手入口")
 
     # AllConfig / App / VM 需要额外的 using
     for rel, anchor, line in (

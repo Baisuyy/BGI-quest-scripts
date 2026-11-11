@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using BetterGenshinImpact.Core.Config;
 using Microsoft.Extensions.Logging;
@@ -86,6 +87,36 @@ internal sealed class AiLog
     /// <summary>块外的单行失败。</summary>
     public static void Fail(string scene, string error)
         => Warn("· {0} 失败 · {1}", scene, Truncate(error, 200));
+
+    /// <summary>开一个本地助手块。</summary>
+    public static int BeginAgent(string task, string sandboxRoot, AiConfig settings, int usedCalls)
+    {
+        var id = Interlocked.Increment(ref _sequence);
+        Warn("┌ 本地助手 #{0} · {1}", id, Truncate(task, 80));
+        Info("│ 沙箱 {0}", sandboxRoot);
+        Info("│ 预算 {0} 步 / {1}s · 本次已用 {2}/{3} · 模型 {4}",
+            settings.AgentMaxSteps, settings.AgentTimeoutSeconds,
+            usedCalls, settings.MaxCallsPerRun,
+            string.IsNullOrWhiteSpace(settings.ModelName) ? "未填写" : settings.ModelName);
+        return id;
+    }
+
+    /// <summary>本地助手一步：动作与结果首行。</summary>
+    public static void AgentStep(int id, int step, int max, string action, string result)
+    {
+        var firstLine = (result ?? "").Split('\n').FirstOrDefault(l => !string.IsNullOrWhiteSpace(l)) ?? "";
+        Info("│ [{0}/{1}] {2} → {3}", step, max, Truncate(action, 110), Truncate(firstLine, 90));
+    }
+
+    /// <summary>收本地助手块。</summary>
+    public static void AgentEnd(int id, bool success, string summary, int steps, int calls, TimeSpan elapsed)
+        => Info("└ {0} · {1} · {2} 步 / {3} 请求 / {4:F1}s",
+            success ? "完成" : "未完成", Truncate(summary, 80), steps, calls, elapsed.TotalSeconds);
+
+    /// <summary>授权判定：沙箱内/外的操作，用户允许还是拒绝。</summary>
+    public static void Consent(string action, string target, bool inside, bool allowed)
+        => Info("│ 授权 {0} · {1} {2} · {3}", action, inside ? "沙箱内" : "沙箱外",
+            allowed ? "允许" : "拒绝", Truncate(target, 120));
 
     private static void Info(string format, params object?[] args)
         => Logger.LogInformation(Tag + " " + format, args);

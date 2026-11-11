@@ -1,0 +1,200 @@
+<Page x:Class="BetterGenshinImpact.View.Pages.AiSettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:controls="clr-namespace:BetterGenshinImpact.View.Controls"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="AI 助手">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16,16,16,24">
+            <!-- 模型连接：与「任务设置」里那张卡是同一份配置 -->
+            <controls:AiSettingsCard />
+
+            <!-- 本地助手 -->
+            <ui:CardExpander Margin="0,0,0,12" ContentPadding="0">
+                <ui:CardExpander.Icon>
+                    <ui:FontIcon Glyph="&#xf5fc;" Style="{StaticResource FaFontIconStyle}" />
+                </ui:CardExpander.Icon>
+                <ui:CardExpander.Header>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ui:TextBlock FontTypography="Body" Text="本地助手（Agent）" TextWrapping="Wrap" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="下一句自然语言任务，由模型自己读写文件、运行程序；软件目录内按配置放行，目录外逐次弹窗授权"
+                                      TextWrapping="Wrap" />
+                    </Grid>
+                </ui:CardExpander.Header>
+
+                <StackPanel>
+                    <Grid Margin="16,16,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="启用本地助手" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Grid.Column="0"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      TextWrapping="Wrap"
+                                      Text="关闭后这个入口不发出任何请求；与跑图接管共用同一份密钥与预算" />
+                        <ui:ToggleSwitch Grid.Row="0"
+                                         Grid.RowSpan="2"
+                                         Grid.Column="1"
+                                         Margin="0,0,36,0"
+                                         IsChecked="{Binding Config.AiConfig.AgentEnabled, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="沙箱目录" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Grid.Column="0"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      TextWrapping="Wrap"
+                                      Text="留空表示软件自身目录；相对路径也相对软件目录。目录内的读写默认允许，目录外一律先问" />
+                        <TextBox Grid.Row="0"
+                                 Grid.RowSpan="2"
+                                 Grid.Column="1"
+                                 Width="300"
+                                 Margin="0,0,36,0"
+                                 VerticalAlignment="Top"
+                                 Text="{Binding Config.AiConfig.AgentSandboxRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
+                            <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                          Text="{Binding SandboxRoot, StringFormat=实际使用：{0}}"
+                                          TextTrimming="CharacterEllipsis" />
+                            <ui:Button Margin="12,0,0,0" Command="{Binding OpenSandboxCommand}" Content="打开目录" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="16,0,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="沙箱内写入免确认" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Grid.Column="0"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      TextWrapping="Wrap"
+                                      Text="关闭后连目录内的写入也要逐次点同意，适合第一次试用时观察模型动作" />
+                        <ui:ToggleSwitch Grid.Row="0"
+                                         Grid.RowSpan="2"
+                                         Grid.Column="1"
+                                         Margin="0,0,36,0"
+                                         IsChecked="{Binding Config.AiConfig.AgentAllowWrite, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="沙箱内运行免确认" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Grid.Column="0"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      TextWrapping="Wrap"
+                                      Text="默认关闭：执行任何程序或脚本都要先问你。只允许 .exe / .bat / .cmd / .ps1，参数不经过 shell 拼接" />
+                        <ui:ToggleSwitch Grid.Row="0"
+                                         Grid.RowSpan="2"
+                                         Grid.Column="1"
+                                         Margin="0,0,36,0"
+                                         IsChecked="{Binding Config.AiConfig.AgentAllowRun, Mode=TwoWay}" />
+                    </Grid>
+
+                    <Grid Margin="16,0,16,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="单次任务步数 / 超时" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Grid.Column="0"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      TextWrapping="Wrap"
+                                      Text="一步一次工具调用；到点或到步数即停，避免在死循环里烧额度" />
+                        <ui:NumberBox Grid.Row="0"
+                                      Grid.RowSpan="2"
+                                      Grid.Column="1"
+                                      Width="120"
+                                      Margin="0,0,12,0"
+                                      VerticalAlignment="Top"
+                                      Minimum="1"
+                                      Maximum="30"
+                                      SmallChange="1"
+                                      Value="{Binding Config.AiConfig.AgentMaxSteps, Mode=TwoWay}" />
+                        <ui:NumberBox Grid.Row="0"
+                                      Grid.RowSpan="2"
+                                      Grid.Column="2"
+                                      Width="140"
+                                      Margin="0,0,36,0"
+                                      VerticalAlignment="Top"
+                                      Minimum="10"
+                                      Maximum="1800"
+                                      SmallChange="30"
+                                      Value="{Binding Config.AiConfig.AgentTimeoutSeconds, Mode=TwoWay}" />
+                    </Grid>
+
+                    <ui:TextBlock Margin="16,8,36,0" FontTypography="Body" Text="任务" />
+                    <TextBox Margin="16,8,36,0"
+                             Height="80"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalContentAlignment="Top"
+                             VerticalScrollBarVisibility="Auto"
+                             Text="{Binding TaskInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <StackPanel Margin="16,12,36,0" Orientation="Horizontal">
+                        <ui:Button Appearance="Primary"
+                                   Command="{Binding RunCommand}"
+                                   Content="{Binding RunButtonText}" />
+                        <ui:Button Margin="8,0,0,0" Command="{Binding ClearCommand}" Content="清空输出" />
+                        <ui:TextBlock Margin="16,0,0,0"
+                                      VerticalAlignment="Center"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="{Binding BudgetText, StringFormat=本次运行请求：{0}}" />
+                    </StackPanel>
+
+                    <TextBox Margin="16,12,36,16"
+                             Height="220"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             FontFamily="Consolas"
+                             VerticalContentAlignment="Top"
+                             VerticalScrollBarVisibility="Auto"
+                             Text="{Binding Output, Mode=OneWay}" />
+                </StackPanel>
+            </ui:CardExpander>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
