@@ -16,6 +16,9 @@ const HAS = {
     quest: typeof quest !== 'undefined',
 };
 
+// 特别版宿主：存在就用它，密钥、超时、次数都由客户端管
+const HAS_AI = typeof ai !== 'undefined';
+
 function call(obj, names) {
     const args = Array.prototype.slice.call(arguments, 2);
     for (let i = 0; i < names.length; i++) {
@@ -32,8 +35,11 @@ function pick(obj, names) {
     return undefined;
 }
 
-function release(r) {
-    if (!r) return;
+function val(v) {
+    return (v === undefined || v === null) ? '' : String(v);
+}
+
+function release(r) {    if (!r) return;
     try {
         if (typeof r.Dispose === 'function') r.Dispose();
         else if (typeof r.dispose === 'function') r.dispose();
@@ -281,27 +287,35 @@ function saveShot() {
 }
 
 async function askAI(s) {
-    if (aiCalls >= CFG.ai.maxCalls) throw new Error('已达到单次运行 AI 调用上限 ' + CFG.ai.maxCalls);
-    aiCalls++;
-
     const state = Object.assign({}, s);
     const shot = saveShot();
     if (shot) state.shot = shot;      // 代理看到这个字段就去读图，没配多模态就没有
 
+    const userContent = JSON.stringify({
+        goal: CFG.goal,
+        target: CFG.plan[planIndex] || null,
+        state: state,
+        recent: history.slice(-3),
+    });
+
+    const limit = HAS_AI ? (ai.MaxCalls || CFG.ai.maxCalls) : CFG.ai.maxCalls;
+    if (aiCalls >= limit) throw new Error('已达到单次运行 AI 调用上限 ' + limit);
+    aiCalls++;
+
+    // 首选：BGI 自带的 ai 宿主。密钥不出客户端，也不需要 JS HTTP 权限与白名单。
+    if (HAS_AI) {
+        if (!ai.Enabled) throw new Error('设置页「AI 代理（脚本）」未启用');
+        const text = await ai.Chat(userContent, SYSTEM_PROMPT);
+        return parseAction(text);
+    }
+
+    // 退化：没有特别版宿主时自己发请求，需要 HTTP 权限 + manifest 白名单
     const payload = {
         model: CFG.ai.model,
         temperature: CFG.ai.temperature,
         messages: [
             { role: 'system', content: SYSTEM_PROMPT },
-            {
-                role: 'user',
-                content: JSON.stringify({
-                    goal: CFG.goal,
-                    target: CFG.plan[planIndex] || null,
-                    state: state,
-                    recent: history.slice(-3),
-                }),
-            },
+            { role: 'user', content: userContent },
         ],
     };
 
@@ -319,16 +333,24 @@ async function askAI(s) {
 
 // ---------- 主循环 ----------
 async function run() {
-    const useAI = !!(CFG.ai.enabled && CFG.ai.endpoint && CFG.ai.model);
+    // 装了特别版就看设置页的开关，否则看 config.json
+    const useAI = HAS_AI
+        ? !!ai.Enabled
+        : !!(CFG.ai.enabled && CFG.ai.endpoint && CFG.ai.model);
+    const modelName = HAS_AI ? (ai.Model || '(未配置)') : (CFG.ai.model || '(未配置)');
 
     log.info('===== AI 代理启动 =====');
-    log.info('决策：' + (useAI ? 'AI（' + CFG.ai.model + '）' : '纯规则'));
+    log.info('决策：' + (useAI ? 'AI（' + modelName + '）' : '纯规则'));
+    log.info('通道：' + (HAS_AI ? 'BGI ai 宿主（密钥不出客户端）' : (CFG.ai.endpoint ? '脚本 HTTP 直连' : '无')));
     log.info('感知：' + (HAS.bv ? 'Bv ' : '') + (HAS.ocr ? 'ocr ' : '') + (HAS.quest ? 'quest' : '(基础)'));
     log.info('目标：' + (CFG.goal || '(未设置)'));
 
     loadProgress();
 
     let fails = 0;
+    let repeat = 0;
+    let lastActKey = '';
+    let lastPosKey = '';
     for (let step = 0; step < CFG.maxSteps; step++) {
         const s = snapshot();
         log.info(
@@ -352,6 +374,21 @@ async function run() {
         }
 
         history.push({ step: step + 1, action: act.action, why: act.why || '' });
+
+        // 模型原地打转的保护：同一个动作 + 位置没变，连续 4 次就跳过当前目标
+        const posKey = s.pos ? Math.round(s.pos.x) + ',' + Math.round(s.pos.y) : '-';
+        const actKey = act.action + '|' + val(act.x) + '|' + val(act.y) + '|' + val(act.seconds);
+        if (actKey === lastActKey && posKey === lastPosKey) {
+            repeat++;
+        } else {
+            repeat = 0;
+            lastActKey = actKey;
+            lastPosKey = posKey;
+        }
+        if (repeat >= 4) {
+            log.warn('连续 4 次相同动作且位置未变，判定为原地打转，结束本次运行');
+            break;
+        }
 
         if (act.action === 'done') {
             log.info('目标达成：' + (act.why || ''));

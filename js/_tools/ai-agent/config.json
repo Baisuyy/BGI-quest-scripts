@@ -1,5 +1,5 @@
 {
-  "_说明": "ai.enabled=false 时完全不联网，只按 plan 顺序跑；true 时在规则拿不准的节点才请求一次。",
+  "_说明": "装特别版后走 设置页→AI 代理（脚本），下面的 ai.endpoint/model/apiKey 只在没有 ai 宿主时生效。",
   "ai": {
     "enabled": false,
     "endpoint": "http://127.0.0.1:8765/v1/chat/completions",
