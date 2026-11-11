@@ -1,10 +1,10 @@
 {
-  "time": "20261111110555",
+  "time": "20261111135723",
   "url": "https://github.com/Baisuyy/BGI-quest-scripts/archive/refs/heads/main.zip",
   "file": "repo.json",
   "build": {
     "version": 1,
-    "sourceCommit": "7e3bc2384066446449d1dec1cfc1b9b64381d15c"
+    "sourceCommit": "d49d569564cc29dc9be9274a51b881020590bedc"
   },
   "indexes": [
     {
@@ -1724,6 +1724,27 @@
                   "lastUpdated": "2026-11-10 23:54:00"
                 }
               ]
+            }
+          ]
+        },
+        {
+          "name": "_tools",
+          "type": "directory",
+          "children": [
+            {
+              "name": "ai-agent",
+              "type": "directory",
+              "version": "0.1.0",
+              "author": "Baisuyy",
+              "authors": [
+                {
+                  "name": "Baisuyy",
+                  "link": "https://github.com/Baisuyy"
+                }
+              ],
+              "description": "BGI 特别版已内置 AI 决策（跑图卡死接管），无需本脚本；此工具仅用于脚本内自定义决策，默认纯规则、不联网。",
+              "tags": [],
+              "lastUpdated": "2026-11-11 13:57:20"
             }
           ]
         }
