@@ -21,6 +21,7 @@ KEEP = (
     ".github/workflows/build-special.yml",
     ".github/workflows/sync-upstream.yml",
     ".bgi-upstream",
+    "README-SPECIAL.md",
     "Docs/SPECIAL-API.md",
     "Docs/示例-读任务面板/",
     "BetterGenshinImpact/Core/Script/Dependence/VisionHost.cs",
