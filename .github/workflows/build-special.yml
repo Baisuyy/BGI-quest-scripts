@@ -1,7 +1,7 @@
 name: Build BGI Special
 
-# 特别版客户端构建：workflow_dispatch 手动触发（可选分支/版本/是否发 Release），
-# 或向 bgi-special 分支推送代码时自动构建。
+# 特别版客户端构建：只手动触发（workflow_dispatch），可选分支/版本/是否发 Release。
+# 推代码不再自动构建；每日上游同步成功后由 sync-upstream.yml 显式派发一次。
 run-name: "BGI Special ${{ inputs.version || format('build-{0}', github.run_number) }}"
 
 on:
@@ -21,18 +21,13 @@ on:
         required: true
         default: true
         type: boolean
-  push:
-    branches: [bgi-special]
-    paths:
-      - "BetterGenshinImpact/**"
-      - "Directory.Build.props"
-      - ".github/workflows/build-special.yml"
 
 permissions:
   contents: write
 
 concurrency:
-  group: build-special-${{ github.ref }}
+  # 构建很重，手动触发与同步派发共用一组，避免两个 runner 同时打包
+  group: build-special
   cancel-in-progress: true
 
 env:
@@ -123,7 +118,7 @@ jobs:
           compression-level: 0
 
       - name: 创建 Release
-        if: ${{ github.event_name == 'push' || inputs.make_release }}
+        if: ${{ inputs.make_release }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -132,31 +127,16 @@ jobs:
           SHA: ${{ steps.ver.outputs.sha }}
           ARCHIVE: ${{ steps.pack.outputs.archive }}
           SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
-          REF: ${{ inputs.ref || github.ref_name }}
+          REF: ${{ inputs.ref || 'bgi-special' }}
         run: |
           $tag = "special-v$env:VERSION"
 
-          $lines = @(
-            "BetterGI 特别版，基于上游 **$env:BASE** 构建，源码 $env:REF @ $env:SHA。",
-            "",
-            "## 与官方版的差异",
-            "",
-            "只新增脚本宿主 API，不改动任何既有行为：",
-            "",
-            "- **ocr.read()** / **ocr.readRegion(x, y, w, h)**：屏幕或指定区域转文字，返回带坐标与置信度的行",
-            "- **quest.tracker()**：读取左上角任务追踪面板的标题与当前步骤",
-            "- **OcrFactory** / **Bv**：暴露 OCR 引擎与 BgiVision 静态判定，供脚本自行组合",
-            "",
-            "坐标按 1080P 基准书写，内部按窗口尺寸自动缩放。完整说明见仓库 Docs/SPECIAL-API.md。",
-            "",
-            "## 安装",
-            "",
-            "下载 7z 解压得到 BetterGI 目录，整体替换原客户端目录（先备份 User 文件夹）。",
-            "BetterGI.exe 是单文件自包含版本，但仍需同目录的 Assets、dicts 等资源，不能单独拷走运行。",
-            "",
-            "> 个人构建的非官方版本。向上游反馈问题前，请先用官方版复现。"
-          )
-          $lines | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
+          $notes = Get-Content '.github/release-notes-template.md' -Raw
+          $notes = $notes.Replace('{{VERSION}}', $env:VERSION)
+          $notes = $notes.Replace('{{BASE}}', $env:BASE)
+          $notes = $notes.Replace('{{REF}}', $env:REF)
+          $notes = $notes.Replace('{{SHA}}', $env:SHA)
+          $notes | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
 
           gh release delete $tag -y --cleanup-tag 2>$null
           gh release create $tag `
