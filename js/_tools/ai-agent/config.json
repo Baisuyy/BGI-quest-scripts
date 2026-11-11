@@ -1,0 +1,23 @@
+{
+  "_说明": "ai.enabled=false 时完全不联网，只按 plan 顺序跑；true 时在规则拿不准的节点才请求一次。",
+  "ai": {
+    "enabled": false,
+    "endpoint": "http://127.0.0.1:8765/v1/chat/completions",
+    "model": "qwen2.5:14b",
+    "apiKey": "",
+    "maxCalls": 30,
+    "temperature": 0.2
+  },
+  "vision": {
+    "mode": "off"
+  },
+  "goal": "走到凯瑟琳面前并对话",
+  "plan": [
+    { "desc": "凯瑟琳", "x": 2280, "y": -820, "interact": ["对话", "凯瑟琳"] }
+  ],
+  "maxSteps": 120,
+  "arriveRadius": 6,
+  "stuckSeconds": 5,
+  "maxGotoMeters": 150,
+  "saveProgress": true
+}

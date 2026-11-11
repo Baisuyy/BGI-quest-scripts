@@ -1,0 +1,14 @@
+{
+  "manifest_version": 1,
+  "name": "AI 代理（BGI 当手脚）",
+  "version": "0.1.0",
+  "description": "内置识别负责感知、路线追踪负责执行，大模型只在关键节点做决策。默认纯规则模式，不联网。",
+  "authors": [
+    { "name": "Baisuyy", "link": "https://github.com/Baisuyy" }
+  ],
+  "main": "main.js",
+  "http_allowed_urls": [
+    "http://127.0.0.1:8765/*",
+    "http://localhost:8765/*"
+  ]
+}
