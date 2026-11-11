@@ -1,13 +1,10 @@
 {
   "manifest_version": 1,
-  "name": "示例 读任务面板",
+  "name": "特别版 API 自检",
   "version": "1.0.0",
-  "description": "读取左上角任务追踪的标题与当前步骤，需要 BetterGI 特别版",
+  "description": "读取任务追踪面板与指定区域，打印 OCR 结果，用于确认特别版宿主是否生效",
   "authors": [
-    {
-      "name": "Baisuyy",
-      "link": "https://github.com/Baisuyy"
-    }
+    { "name": "Baisuyy", "link": "https://github.com/Baisuyy" }
   ],
   "main": "main.js"
 }

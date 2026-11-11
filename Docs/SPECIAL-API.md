@@ -109,21 +109,29 @@ function similarity(a, b) {
 
 ---
 
-## 编译
+## 获取构建产物
 
-需要 .NET 10 SDK 与 Windows（WPF 项目）。
+推荐走 Actions：在仓库 Actions 页运行 **Build BGI Special**，可指定分支、版本号、是否发 Release；向 `bgi-special` 分支推送代码也会自动构建。产物为完整目录压缩包 `BetterGI_v<版本>_special-win-x64.7z` 与单独的 `BetterGI.exe`，挂在 Releases（prerelease）。
+
+本地编译需要 .NET 10 SDK 与 Windows（WPF）：
 
 ```powershell
-dotnet build BetterGenshinImpact/BetterGenshinImpact.csproj -c Release
+dotnet publish BetterGenshinImpact/BetterGenshinImpact.csproj -c Release -p:PublishProfile=FolderProfile
 ```
 
-产物在 `BetterGenshinImpact/bin/Release/net10.0-windows10.0.22621.0/`，用新生成的 `BetterGenshinImpact.exe` 覆盖官方版目录下的同名文件即可（其余依赖不变）。
+产物在 `BetterGenshinImpact/bin/x64/Release/net10.0-windows10.0.22621.0/publish/win-x64/`，单文件自包含，但 `Assets`、`dicts` 等资源仍需同目录。
 
-Linux 上仅验证语法：
+Linux 上只能验证能否编译：
 
 ```bash
 dotnet build BetterGenshinImpact/BetterGenshinImpact.csproj -c Debug -p:EnableWindowsTargeting=true
 ```
+
+## 跟随上游
+
+`bgi-special` 是单提交的源码快照，不带上游历史。`.github/workflows/sync-upstream.yml` 每天 05:17 拉一次上游默认分支，用 `tools/bgi-special/sync_source.py` 覆盖源码，再用 `patch_engine_extend.py` 把宿主注册重新注入，成功后自动触发构建。
+
+上游若改动 `EngineExtend.InitHost` 的结构导致注入锚点失效，同步会失败并开 issue，需要人工调整脚本或 `VisionHost.cs`。
 
 ## 改动清单
 
