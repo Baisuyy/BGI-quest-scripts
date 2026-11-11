@@ -4,7 +4,7 @@
 
 <h1 align="center">主线自动跑图脚本 · BetterGI</h1>
 
-<p align="center">第四章 枫丹 → 第七章 至冬 · 100 个脚本项目 · 270 段路线 · 9,434 个路点</p>
+<p align="center">第四章 枫丹 → 第七章 至冬 · 100 个任务脚本 · 270 段路线 · 9,434 个路点</p>
 
 按 **篇章 → 幕 → 任务** 组织。每个任务一个独立项目：`manifest.json` 声明元信息，`main.js` 负责传送与串段，路线放在 `pathing/*.json`，由 `pathingScript.runFile()` 调用。
 
@@ -89,7 +89,7 @@ startFrom: '7027/5',  // 全流程：从 7027 的第 5 段开始
 
 | 接口 | 用途 |
 |---|---|
-| `ocr.read()` / `ocr.readRegion(x, y, w, h)` | 屏幕或指定区域转文字，返回带坐标与置信度的行 |
+| `ocr.readScreen()` / `ocr.readRegion(x, y, w, h)` | 屏幕或指定区域转文字，返回带坐标与置信度的行 |
 | `quest.tracker()` | 读左上角任务面板的标题与当前步骤 |
 | `ai.Chat(text)` | 调大模型，密钥留在客户端，脚本拿不到 |
 | `OcrFactory` / `Bv` | OCR 引擎与 BgiVision 判定，供脚本自行组合 |
