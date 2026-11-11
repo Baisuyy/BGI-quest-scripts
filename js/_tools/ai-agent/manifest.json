@@ -1,10 +1,13 @@
 {
   "manifest_version": 1,
-  "name": "AI 代理（BGI 当手脚）",
+  "name": "脚本侧 AI（可选）",
   "version": "0.1.0",
-  "description": "内置识别负责感知、路线追踪负责执行，大模型只在关键节点做决策。默认纯规则模式，不联网。",
+  "description": "BGI 特别版已内置 AI 决策（跑图卡死接管），无需本脚本；此工具仅用于脚本内自定义决策，默认纯规则、不联网。",
   "authors": [
-    { "name": "Baisuyy", "link": "https://github.com/Baisuyy" }
+    {
+      "name": "Baisuyy",
+      "link": "https://github.com/Baisuyy"
+    }
   ],
   "main": "main.js",
   "http_allowed_urls": [

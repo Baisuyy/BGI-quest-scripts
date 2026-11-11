@@ -1,13 +1,18 @@
 # 内置 AI 配置
 
-BetterGI 自带两处 AI，都能指向自己的服务：
+特别版自带三处 AI，都能指向自己的服务：
 
 | 功能 | 用途 | 服务类型 |
 |---|---|---|
+| AI 智能决策（特别版新增） | 跑图卡死时接管角色脱困；脚本 `ai.Chat()` 共用 | OpenAI 兼容 / Anthropic |
 | 自动连招（实验） | 识别队伍后让大模型生成连招行为树 | OpenAI 兼容 / Anthropic |
 | 任务语音 | 把任务文本念出来 | OpenAI 兼容 TTS / VOICEVOX / VITS |
 
-下面主要讲第一处，它是真正的「大模型」。
+**新装的特别版只需要配第一处**：任务设置 → AI 智能决策（内置），字段与下表一致，
+另外多了接管开关与预算。完整说明见 [`AI-内置决策.md`](<https://github.com/Baisuyy/BGI-quest-scripts/blob/bgi-special/Docs/AI-内置决策.md>)。
+
+下面主要讲自动连招，它的配置项与内置决策同源（`provider` / `endpoint` / `modelName` / `apiKey`），
+可以照抄。
 
 ## 自动连招的 AI
 
