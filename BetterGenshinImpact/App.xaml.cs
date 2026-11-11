@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Core.Mask;
 using BetterGenshinImpact.Core.Recognition.OCR;
@@ -107,6 +108,9 @@ public partial class App : Application
                 var all = configService.Get();
                 // 只读的配置根，与 IConfigService.Get() 是同一个实例；需要保存的继续使用 IConfigService
                 services.AddSingleton(all);
+
+                // 内置大模型内核：跑图救援与脚本 ai.Chat 共用同一个出口，共用密钥与预算
+                services.AddSingleton<AiKernel>();
 
                 // 网络：在任何请求发出前接管默认代理，第三方 SDK 和自建的 HttpClient 也跟随“网络与代理”设置
                 var appWebProxy = new AppWebProxy(all.NetworkConfig, HttpClient.DefaultProxy);

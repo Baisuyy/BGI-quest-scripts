@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/bgi-special/sync_source.py /tmp/upstream
-          python3 tools/bgi-special/patch_engine_extend.py
+          python3 tools/bgi-special/patch_special.py
           echo "${{ steps.up.outputs.sha }}" > .bgi-upstream
 
       - name: 提交并推送
@@ -114,11 +114,11 @@ jobs:
           BODY=$(printf '%s\n' \
             "自动同步上游 \`${REF}\`（${SHA}）失败，源码未推送。" \
             "" \
-            "常见原因：上游改动了 \`EngineExtend.InitHost\` 的结构，注入锚点匹配不到；" \
+            "常见原因：上游改动了 \`EngineExtend.InitHost\`、\`PathExecutor.MoveTo\` 或任务设置页的结构，补丁锚点匹配不到；" \
             "或 \`VisionHost.cs\` 依赖的接口（\`ImageRegion\` / \`OcrFactory\` / \`IOcrService\`）签名变化。" \
             "" \
             "处理方式：本地按 SPECIAL-API.md 的说明调整" \
-            "\`tools/bgi-special/patch_engine_extend.py\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
+            "\`tools/bgi-special/patch_special.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
             "" \
             "构建日志：${RUN_URL}")
           EXIST=$(gh issue list --state open --search "上游同步失败 in:title" \

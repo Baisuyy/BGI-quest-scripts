@@ -25,6 +25,7 @@ using BetterGenshinImpact.GameTask.AutoStygianOnslaught;
 using BetterGenshinImpact.GameTask.CharacterDevelopment;
 using BetterGenshinImpact.GameTask.Model.GameUI;
 using BetterGenshinImpact.GameTask.Runtime;
+using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Service;
 using Region = BetterGenshinImpact.GameTask.Model.Area.Region;
@@ -127,7 +128,7 @@ public class EngineExtend
         engine.AddHostObject("keyMouseScript", new KeyMouseScript(runtime, workDir, ct));
         engine.AddHostObject("pathingScript", new AutoPathingScript(runtime, allConfig, workDir, config, ct, repositoryResources));
         engine.AddHostObject("genshin", new Dependence.Genshin(runtime, allConfig, ct, screenshots));
-        // ===== 特别版扩展：识图 / OCR / 任务追踪 =====
+        // ===== 特别版扩展：识图 / OCR / 任务追踪 / 内置 AI =====
         // OCR：屏幕或指定区域转文字，供脚本做条件判断
         var ocrHost = new OcrHost(runtime);
         engine.AddHostObject("ocr", ocrHost);
@@ -136,7 +137,9 @@ public class EngineExtend
         // 直接暴露 OCR 引擎与 BgiVision 静态方法，给高级脚本自行组合
         engine.AddHostType("OcrFactory", typeof(BetterGenshinImpact.Core.Recognition.OCR.OcrFactory));
         engine.AddHostType("Bv", typeof(BetterGenshinImpact.GameTask.Common.BgiVision.Bv));
-
+        // 内置大模型：脚本拿到的是内核的一层薄壳，密钥与预算都留在 C# 侧
+        var aiKernel = App.GetService<AiKernel>() ?? new AiKernel(allConfig, App.GetLogger<AiKernel>());
+        engine.AddHostObject("ai", new AiAgentHost(aiKernel));
 
         engine.AddHostObject("characterDevelopmentTask", new CharacterDevelopmentTask(runtime, ct));
         engine.AddHostObject("log", new Log());

@@ -1,0 +1,39 @@
+name: Update Release Notes
+
+# 用 .github/release-notes-template.md 重写已发布 Release 的说明。
+# 只改正文，不动 tag 与附件；基线版本与源码提交从原正文第一行取，改不动就跳过。
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "只更新指定 tag（留空 = 全部 special-v*）"
+        required: false
+        type: string
+  push:
+    branches: [bgi-special]
+    paths:
+      - ".github/release-notes-template.md"
+      - "tools/bgi-special/update_release_notes.py"
+      - ".github/workflows/update-release-notes.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-notes
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v4
+        with:
+          ref: bgi-special
+
+      - name: 重写说明
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ONLY_TAG: ${{ inputs.tag }}
+        run: python3 tools/bgi-special/update_release_notes.py

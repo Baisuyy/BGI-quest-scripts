@@ -20,11 +20,24 @@ import sys
 KEEP = (
     ".github/workflows/build-special.yml",
     ".github/workflows/sync-upstream.yml",
+    ".github/workflows/update-release-notes.yml",
+    ".github/release-notes-template.md",
     ".bgi-upstream",
     "README-SPECIAL.md",
     "Docs/SPECIAL-API.md",
+    "Docs/AI-内置决策.md",
+    "Docs/上机测试-内置AI.md",
     "Docs/示例-读任务面板/",
+    # 识图与脚本宿主
     "BetterGenshinImpact/Core/Script/Dependence/VisionHost.cs",
+    "BetterGenshinImpact/Core/Script/Dependence/AiAgentHost.cs",
+    # 内置大模型内核
+    "BetterGenshinImpact/Core/Ai/",
+    "BetterGenshinImpact/Core/Config/AiConfig.cs",
+    # 跑图 AI 接管与设置卡片
+    "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.Ai.cs",
+    "BetterGenshinImpact/View/Controls/AiSettingsCard.xaml",
+    "BetterGenshinImpact/View/Controls/AiSettingsCard.xaml.cs",
     "tools/bgi-special/",
 )
 

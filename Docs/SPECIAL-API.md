@@ -76,7 +76,39 @@ const bigMap = Bv.IsInBigMapUi(captureGameRegion());
 
 ---
 
-## 4. 用任务文字选路线段
+## 4. `ai` — 大模型调用
+
+脚本不需要自己配密钥：**任务设置 → AI 智能决策（内置）** 卡片里填一次，内置决策与所有脚本共用同一份配置、同一份预算。
+内置决策（跑图卡死接管）的完整说明见 [`AI-内置决策.md`](AI-内置决策.md)。
+
+`ai` 只是内核 `AiKernel` 的一层薄壳：能聊天、能读状态，读不到 apiKey，也绕不过每小时上限与熔断。
+
+| 属性 | 含义 |
+|---|---|
+| `ai.Enabled` | 总开关，关掉后 `Chat` 直接抛异常，不发请求 |
+| `ai.Model` / `ai.Endpoint` | 当前配置，只读，可用于打日志 |
+| `ai.VisionEnabled` | 视觉模式是否为 `multimodal` |
+| `ai.Calls` / `ai.MaxCalls` | 本次已用次数 / 上限 |
+
+| 方法 | 说明 |
+|---|---|
+| `ai.Chat(user)` | 单轮对话，返回文本 |
+| `ai.Chat(user, system)` | 带系统提示的单轮对话 |
+
+```js
+if (ai.Enabled) {
+    const text = await ai.Chat(
+        '目标：走到凯瑟琳面前。当前坐标 2280,-820。只输出一个 JSON 动作。',
+        '你是原神自动化脚本的决策模块，动作只有 goto/tp/interact/wait/done/fail。'
+    );
+    log.info(text);
+}
+```
+
+服务地址填到 `/v1`，客户端自行拼 `/chat/completions`；选 Anthropic 协议则填根地址，客户端拼 `/v1/messages`。
+密钥只在宿主内存里，脚本拿不到原文；HTTPS 强制、超时、每小时与单次运行上限、连续失败冷却也都在宿主侧，脚本绕不过去。
+
+## 5. 用任务文字选路线段
 
 把 `quest.tracker()` 的步骤文字和脚本里的段标签做匹配，就能从「当前该做哪一步」决定跑哪段：
 
@@ -111,7 +143,7 @@ function similarity(a, b) {
 
 ## 获取构建产物
 
-推荐走 Actions：在仓库 Actions 页运行 **Build BGI Special**，可指定分支、版本号、是否发 Release；向 `bgi-special` 分支推送代码也会自动构建。产物为完整目录压缩包 `BetterGI_v<版本>_special-win-x64.7z` 与单独的 `BetterGI.exe`，挂在 Releases（prerelease）。
+推荐走 Actions：在仓库 Actions 页运行 **Build BGI Special**（仅手动触发，推代码不会自动构建），可指定分支、版本号、是否发 Release。产物为完整目录压缩包 `BetterGI_v<版本>_special-win-x64.7z` 与单独的 `BetterGI.exe`，挂在 Releases（prerelease）。
 
 本地编译需要 .NET 10 SDK 与 Windows（WPF）：
 
@@ -129,15 +161,27 @@ dotnet build BetterGenshinImpact/BetterGenshinImpact.csproj -c Debug -p:EnableWi
 
 ## 跟随上游
 
-`bgi-special` 是单提交的源码快照，不带上游历史。`.github/workflows/sync-upstream.yml` 每天 05:17 拉一次上游默认分支，用 `tools/bgi-special/sync_source.py` 覆盖源码，再用 `patch_engine_extend.py` 把宿主注册重新注入，成功后自动触发构建。
+`bgi-special` 是单提交的源码快照，不带上游历史。`.github/workflows/sync-upstream.yml` 每天 05:17 拉一次上游默认分支，用 `tools/bgi-special/sync_source.py` 覆盖源码，再用 `patch_special.py` 把宿主注册、内置 AI 配置与卡死接管重新注入，成功后显式派发一次构建（`gh workflow run`），失败则开 issue。
 
-上游若改动 `EngineExtend.InitHost` 的结构导致注入锚点失效，同步会失败并开 issue，需要人工调整脚本或 `VisionHost.cs`。
+新增文件按 `sync_source.py` 的 KEEP 白名单保留；改到上游文件里的补丁集中在 `patch_special.py`。上游若改动 `EngineExtend.InitHost`、`PathExecutor.MoveTo` 或任务设置页的结构导致锚点失效，同步会失败并开 issue，需要人工调整脚本。
 
 ## 改动清单
 
 | 文件 | 改动 |
 |---|---|
 | `Core/Script/Dependence/VisionHost.cs` | 新增 `OcrHost` / `QuestHost` / `OcrLine` / `QuestTracker` |
-| `Core/Script/EngineExtend.cs` | `InitHost` 中注册 `ocr` `quest` `OcrFactory` `Bv`，共 4 行 |
+| `Core/Ai/LlmClient.cs` | 传输层：OpenAI 兼容与 Anthropic 协议、工具声明、多轮展开 |
+| `Core/Ai/AiKernel.cs` | 预算、熔断、超时、审计，全进程唯一大模型出口 |
+| `Core/Ai/AiOperator.cs` | 工具循环：模型直接操作角色、传送、开关 BGI 功能 |
+| `Core/Ai/GameStateProbe.cs` | 状态快照：坐标、运动状态、任务面板文字、压缩截图 |
+| `Core/Config/AiConfig.cs` | 内置 AI 配置项（协议、地址、模型、密钥、接管开关、预算） |
+| `Core/Script/Dependence/AiAgentHost.cs` | `ai` 宿主，薄壳调用 `AiKernel` |
+| `GameTask/AutoPathing/PathExecutor.Ai.cs` | 第 3 次卡死时交给内置 AI 接管，成功率判定与交还 |
+| `View/Controls/AiSettingsCard.xaml` | 独立设置卡片，避免同步时与页面耦合 |
+| `Core/Config/AllConfig.cs` | 挂载 `AiConfig`，并兼容旧 `aiAgentConfig` 键 |
+| `View/Pages/TaskSettingsPage.xaml` | 插入一行 `<controls:AiSettingsCard />` |
+| `ViewModel/Pages/TaskSettingsPageViewModel.cs` | 新增连通性测试命令 |
+| `Core/Script/EngineExtend.cs` | `InitHost` 中注册 `ocr` `quest` `OcrFactory` `Bv` `ai` |
+| `App.xaml.cs` | 注册 `AiKernel` 单例 |
 
-没有修改任何既有方法、配置项或默认行为。
+默认全部关闭：`AiConfig.Enabled` 为 `false` 时不抓帧、不发请求，脚本不调用 `ai.Chat()`、路线不卡死时与官方版完全一致。

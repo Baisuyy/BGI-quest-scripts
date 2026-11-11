@@ -1,0 +1,117 @@
+using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
+
+namespace BetterGenshinImpact.Core.Config;
+
+/// <summary>
+/// 内置大模型配置（特别版）。
+/// <para>
+/// 这是 BGI 自身的决策能力：跑图卡死、路线走不通时，由内置模型直接读取游戏状态并操作角色，
+/// 而不是靠脚本调接口。密钥只存在于客户端配置里，日志与导出都不会带出原文。
+/// </para>
+/// </summary>
+public partial class AiConfig : ObservableObject
+{
+    /// <summary>
+    /// 总开关。关闭后内核不会发出任何请求，所有接入点退回纯规则逻辑。
+    /// </summary>
+    [ObservableProperty]
+    private bool _enabled;
+
+    /// <summary>
+    /// 服务协议：<c>openai</c>（OpenAI 兼容，含 DeepSeek / 通义 / 智谱 / Kimi / Ollama / LM Studio）
+    /// 或 <c>anthropic</c>（Claude 原生协议）。
+    /// </summary>
+    [ObservableProperty]
+    private string _provider = "openai";
+
+    /// <summary>
+    /// 服务地址。OpenAI 兼容协议填到 <c>/v1</c>；Anthropic 填根地址，客户端自行拼 <c>/v1/messages</c>。
+    /// 非本机回环地址必须是 HTTPS。
+    /// </summary>
+    [ObservableProperty]
+    private string _endpoint = "https://api.deepseek.com/v1";
+
+    /// <summary>
+    /// 模型名，如 <c>deepseek-chat</c>、<c>qwen2.5:14b</c>。必须支持工具调用（function calling）才能接管操作。
+    /// </summary>
+    [ObservableProperty]
+    private string _modelName = "deepseek-chat";
+
+    /// <summary>
+    /// 服务密钥。本机回环地址可留空。
+    /// </summary>
+    [ObservableProperty]
+    private string _apiKey = "";
+
+    /// <summary>
+    /// 采样温度。决策类任务建议 0–0.3，太高会做出无意义动作。
+    /// </summary>
+    [ObservableProperty]
+    private double _temperature = 0.2;
+
+    /// <summary>
+    /// 单次请求超时（秒）。本地小模型加载慢时可调大。
+    /// </summary>
+    [ObservableProperty]
+    private int _timeoutSeconds = 60;
+
+    /// <summary>
+    /// 每小时调用上限。内置决策和脚本共用同一个预算，防止循环里把额度烧光。
+    /// </summary>
+    [ObservableProperty]
+    private int _maxCallsPerHour = 60;
+
+    /// <summary>
+    /// 本次运行调用上限，重启 BGI 后清零。
+    /// </summary>
+    [ObservableProperty]
+    private int _maxCallsPerRun = 300;
+
+    /// <summary>
+    /// 跑图卡死接管：路线连续卡死、即将放弃时，让内置模型直接操作角色脱困。
+    /// </summary>
+    [ObservableProperty]
+    private bool _rescueOnStuck = true;
+
+    /// <summary>
+    /// 单次接管允许的模型步数（一步一次工具调用）。
+    /// </summary>
+    [ObservableProperty]
+    private int _rescueMaxSteps = 6;
+
+    /// <summary>
+    /// 单次接管总超时（秒），超时立刻交还规则逻辑。
+    /// </summary>
+    [ObservableProperty]
+    private int _rescueTimeoutSeconds = 45;
+
+    /// <summary>
+    /// 允许模型在距离过远时直接传送到目标点位。关闭后模型只能用走位脱困。
+    /// </summary>
+    [ObservableProperty]
+    private bool _allowTeleport = true;
+
+    /// <summary>
+    /// 视觉模式：<c>false</c> 只发结构化状态（坐标、距离、运动状态、任务面板文字），
+    /// <c>true</c> 额外附带一张压缩截图，供多模态模型判断地形。
+    /// </summary>
+    [ObservableProperty]
+    private bool _visionMode;
+
+    /// <summary>
+    /// 把每次决策写进日志（请求摘要、动作、耗时），便于回看模型到底做了什么。
+    /// </summary>
+    [ObservableProperty]
+    private bool _logDecisions = true;
+
+    /// <summary>
+    /// 追加到系统提示末尾的额外约束，留空则不追加。
+    /// </summary>
+    [ObservableProperty]
+    private string _systemPromptExtra = "";
+
+    /// <summary>是否使用 Anthropic 原生协议。</summary>
+    [JsonIgnore]
+    public bool IsAnthropic => string.Equals(Provider, "anthropic", System.StringComparison.OrdinalIgnoreCase);
+}

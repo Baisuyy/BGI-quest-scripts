@@ -926,6 +926,17 @@ public partial class PathExecutor
                         if (Math.Abs(delta.X) + Math.Abs(delta.Y) < 3)
                         {
                             _inTrap++;
+
+                            // 第三次卡死本来要放弃整段路线：先给内置 AI 一次接管机会
+                            if (_inTrap == 3 && await TryAiRescueAsync(screen, waypoint, position))
+                            {
+                                _inTrap = 0;
+                                prevPositions.Clear();
+                                lastPositionRecord = DateTime.UtcNow;
+                                InputHub.Foreground.SimulateAction(GIActions.MoveForward, KeyType.KeyDown);
+                                continue;
+                            }
+
                             if (_inTrap > 2)
                             {
                                 throw new RetryException("此路线出现3次卡死，重试一次路线或放弃此路线！");

@@ -1,4 +1,5 @@
 using BetterGenshinImpact.GameTask.AutoFight.Strategy;
+using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Core.Script;
 using BetterGenshinImpact.Core.Script.Project;
@@ -503,6 +504,35 @@ public partial class TaskSettingsPageViewModel : ViewModel
         return [];
     }
 
+
+    /// <summary>内置 AI 连通性测试的展示文本。</summary>
+    [ObservableProperty]
+    private string _aiTestResult = "";
+
+    /// <summary>
+    /// 用当前配置发一条最小请求，验证地址、密钥、模型名是否可用。不占本次运行额度，也不参与熔断。
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = false)]
+    private async Task TestAiConnection()
+    {
+        var kernel = App.GetService<AiKernel>();
+        if (kernel == null)
+        {
+            AiTestResult = "内核未初始化";
+            return;
+        }
+
+        AiTestResult = "正在测试…";
+        try
+        {
+            var reply = await kernel.TestConnectionAsync(CancellationToken.None);
+            AiTestResult = "连接正常：" + reply;
+        }
+        catch (Exception e)
+        {
+            AiTestResult = "测试失败：" + e.Message;
+        }
+    }
 
     [RelayCommand]
     private void OnStrategyDropDownOpened(string type)
