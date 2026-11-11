@@ -33,6 +33,8 @@ KEEP = (
     "BetterGenshinImpact/Core/Script/Dependence/AiAgentHost.cs",
     # 内置大模型内核
     "BetterGenshinImpact/Core/Ai/",
+    # 特别版更新检查（改走自己的 Release）
+    "BetterGenshinImpact/Core/Special/",
     "BetterGenshinImpact/Core/Config/AiConfig.cs",
     # 跑图 AI 接管与设置卡片
     "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.Ai.cs",

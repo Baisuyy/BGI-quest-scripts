@@ -1,4 +1,5 @@
 using BetterGenshinImpact.Core.Config;
+using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.Helpers;
 using BetterGenshinImpact.Infrastructure.Network;
 using BetterGenshinImpact.Model;
@@ -59,6 +60,13 @@ public class UpdateService : IUpdateService
 #if DEBUG && false
             return;
 #endif
+            // ---- 特别版：官方三条更新通道都会把客户端覆盖回官方版，改走自己的 Release ----
+            if (await SpecialUpdater.TryHandleAsync(option, _httpClientFactory, _logger))
+            {
+                return;
+            }
+            // ---- 特别版 ----
+
             string newVersion = await GetLatestVersionAsync(option);
 
             if (string.IsNullOrWhiteSpace(newVersion))

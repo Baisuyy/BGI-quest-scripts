@@ -109,6 +109,44 @@ jobs:
           "sizeMB=$sizeMB"   >> $env:GITHUB_OUTPUT
           Write-Host "压缩包：$archive（$sizeMB MB）"
 
+      - name: 生成自解压安装包
+        id: sfx
+        shell: pwsh
+        run: |
+          $v = '${{ steps.ver.outputs.version }}'
+          $archive = '${{ steps.pack.outputs.archive }}'
+
+          # 7-Zip 自带的自解压模块，双击后选目录解压，不做任何在线更新
+          $module = Join-Path ${env:ProgramFiles} '7-Zip\7z.sfx'
+          if (-not (Test-Path $module)) { $module = Join-Path ${env:ProgramFiles(x86)} '7-Zip\7z.sfx' }
+          if (-not (Test-Path $module)) { throw '未找到 7z.sfx，无法生成自解压安装包' }
+
+          $config = @"
+          ;!@Install@!UTF-8!
+          Title="BetterGI 特别版 $v"
+          BeginPrompt="解压到所选目录，完成后自动启动 BetterGI？"
+          Progress="yes"
+          RunProgram="BetterGI\BetterGI.exe"
+          ;!@InstallEnd@!
+          "@
+          # 必须是 UTF-8 无 BOM，否则 7z 会把 BOM 当作配置内容
+          $configPath = 'dist/sfx-config.txt'
+          [IO.File]::WriteAllText((Resolve-Path 'dist').Path + '/sfx-config.txt', $config.Trim(), (New-Object System.Text.UTF8Encoding $false))
+
+          $setup = "dist/BetterGI_v${v}_Setup.exe"
+          $out = [IO.File]::Create($setup)
+          try {
+              foreach ($part in @($module, $configPath, $archive)) {
+                  $in = [IO.File]::OpenRead($part)
+                  try { $in.CopyTo($out) } finally { $in.Dispose() }
+              }
+          } finally { $out.Dispose() }
+
+          $sizeMB = [math]::Round((Get-Item $setup).Length / 1MB, 1)
+          "setup=$setup"    >> $env:GITHUB_OUTPUT
+          "setupMB=$sizeMB" >> $env:GITHUB_OUTPUT
+          Write-Host "自解压安装包：$setup（$sizeMB MB）"
+
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
@@ -127,6 +165,8 @@ jobs:
           SHA: ${{ steps.ver.outputs.sha }}
           ARCHIVE: ${{ steps.pack.outputs.archive }}
           SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
+          SETUP: ${{ steps.sfx.outputs.setup }}
+          SETUP_MB: ${{ steps.sfx.outputs.setupMB }}
           REF: ${{ inputs.ref || 'bgi-special' }}
           FULL_SHA: ${{ github.sha }}
         run: |
@@ -142,13 +182,14 @@ jobs:
           gh release delete $tag -y --cleanup-tag 2>$null
           gh release create $tag `
             $env:ARCHIVE `
+            $env:SETUP `
             (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe') `
             --target $env:FULL_SHA `
             --title "BetterGI 特别版 $env:VERSION" `
             --notes-file 'RELEASE_NOTES.md' `
             --prerelease
           if ($LASTEXITCODE -ne 0) { throw "Release 创建失败，退出码 $LASTEXITCODE" }
-          Write-Host "已发布 $tag（压缩包 $env:SIZE_MB MB）"
+          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB）"
 
       - name: 写入运行摘要
         if: always()
@@ -161,6 +202,8 @@ jobs:
             "| 上游基线 | ${{ steps.ver.outputs.base }} |",
             "| 源码 ref | ${{ inputs.ref || github.ref_name }} |",
             "| 压缩包 | ${{ steps.pack.outputs.archive }} |",
-            "| 体积 | ${{ steps.pack.outputs.sizeMB }} MB |"
+            "| 体积 | ${{ steps.pack.outputs.sizeMB }} MB |",
+            "| 安装包 | ${{ steps.sfx.outputs.setup }} |",
+            "| 安装包体积 | ${{ steps.sfx.outputs.setupMB }} MB |"
           )
           $rows | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append

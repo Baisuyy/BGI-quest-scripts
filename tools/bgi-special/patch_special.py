@@ -10,6 +10,7 @@
 4. PathExecutor.MoveTo           —— 第三次卡死放弃前让内置 AI 接管
 5. TaskSettingsPage.xaml         —— 插入内置 AI 设置卡片
 6. TaskSettingsPageViewModel     —— 连通性测试命令
+7. UpdateService.CheckUpdateAsync —— 特别版更新检查改道，不接官方更新通道
 
 每一处都先判断是否已存在（幂等），锚点找不到就返回非 0，由 workflow 报警并开 issue。
 新增文件（Core/Ai 等）不在这里处理，由 sync_source.py 的 KEEP 清单保留。
@@ -26,6 +27,7 @@ APP = "BetterGenshinImpact/App.xaml.cs"
 PATH_EXECUTOR = "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.cs"
 SETTINGS_PAGE = "BetterGenshinImpact/View/Pages/TaskSettingsPage.xaml"
 SETTINGS_VM = "BetterGenshinImpact/ViewModel/Pages/TaskSettingsPageViewModel.cs"
+UPDATE_SERVICE = "BetterGenshinImpact/Service/UpdateService.cs"
 
 # ---------------------------------------------------------------- 1. 脚本宿主
 
@@ -179,6 +181,20 @@ VM_BLOCK = '''    /// <summary>内置 AI 连通性测试的展示文本。</summ
 '''
 
 
+# ---------------------------------------------------------------- 7. 更新检查改道
+
+UPDATE_ANCHOR = "            string newVersion = await GetLatestVersionAsync(option);"
+
+UPDATE_HOOK = '''            // ---- 特别版：官方三条更新通道都会把客户端覆盖回官方版，改走自己的 Release ----
+            if (await SpecialUpdater.TryHandleAsync(option, _httpClientFactory, _logger))
+            {
+                return;
+            }
+            // ---- 特别版 ----
+
+'''
+
+
 def patch(rel: str, marker: str, anchor: str, replacement: str, label: str) -> bool:
     """在 anchor 处插入/替换；marker 已存在则跳过。返回是否改动。"""
     path = ROOT / rel
@@ -238,6 +254,8 @@ def main() -> int:
     patch_page()
     patch(SETTINGS_VM, "TestAiConnection", VM_ANCHOR,
           VM_BLOCK + VM_ANCHOR, "设置页测试命令")
+    patch(UPDATE_SERVICE, "SpecialUpdater.TryHandleAsync", UPDATE_ANCHOR,
+          UPDATE_HOOK + UPDATE_ANCHOR, "更新检查改道")
 
     # AllConfig / App / VM 需要额外的 using
     for rel, anchor, line in (
@@ -253,6 +271,19 @@ def main() -> int:
                 return 3
             path.write_text(text.replace(anchor, line + anchor, 1), encoding="utf-8")
             print(f"[+] {rel} 补充 using")
+
+    # UpdateService 需要引用 SpecialUpdater
+    update_path = ROOT / UPDATE_SERVICE
+    update_text = update_path.read_text(encoding="utf-8")
+    if "using BetterGenshinImpact.Core.Special;" not in update_text:
+        using_anchor = "using BetterGenshinImpact.Helpers;"
+        if using_anchor not in update_text:
+            print(f"[x] {UPDATE_SERVICE} 缺少 using 锚点：{using_anchor}", file=sys.stderr)
+            return 3
+        update_path.write_text(
+            update_text.replace(using_anchor, "using BetterGenshinImpact.Core.Special;\n" + using_anchor, 1),
+            encoding="utf-8")
+        print(f"[+] {UPDATE_SERVICE} 补充 using")
 
     print("完成")
     return 0

@@ -32,7 +32,23 @@ BGI 自己调用大模型，不是脚本、不是外挂：
 
 ## 构建
 
-Actions 页运行 **Build BGI Special**（仅手动触发），可选分支、版本号、是否发 Release。产物挂到 Releases（prerelease），含完整目录 7z 与单独的 `BetterGI.exe`。
+Actions 页运行 **Build BGI Special**（仅手动触发），可选分支、版本号、是否发 Release。产物挂到 Releases（prerelease），一次构建出三样：
+
+| 文件 | 说明 |
+|---|---|
+| `BetterGI_v<版本>_Setup.exe` | 自解压安装包（7z.sfx），双击选目录、解压完直接启动 |
+| `BetterGI_v<版本>_special-win-x64.7z` | 完整目录，手动解压 |
+| `BetterGI.exe` | 单文件主程序，只用于替换已有目录里的旧 exe |
+
+## 更新检查
+
+特别版**不接官方更新通道**。官方的稳定版更新读 `notice.json`、Alpha 读 Mirror 酱、点更新拉起 Kachina 的 `BetterGI.update.exe`，三条路都会把客户端整体替换成官方版——内置 AI 随之消失。
+
+所以 `UpdateService` 里加了一个前置钩子（`Core/Special/SpecialUpdater.cs`）：
+
+- 启动时的自动检查直接跳过，不弹版本提醒
+- 手动「检查更新」只读本仓库的 Release，比较 `special-v` 标签上的版本号
+- 有新版本时提示并打开 GitHub 下载页，不做任何静默替换
 
 ## 与上游的关系
 
