@@ -6,7 +6,7 @@
 #   .\install.ps1 -BgiRoot "D:\BetterGI" -NoPathing    # 只装脚本，不装路线
 #
 # 做两件事：
-#   1. 把 scripts/ 下每个脚本项目（含 manifest.json 的目录）平铺复制到 User\JsScript
+#   1. 把 js/ 下每个脚本项目（含 manifest.json 的目录）平铺复制到 User\JsScript
 #   2. 把每个项目的 pathing\*.json 复制到 User\AutoPathing\<篇章>\<幕>\<任务>\
 #
 # 为什么脚本要平铺：BetterGI 的 JsListViewModel.LoadScriptFolder 只枚举
@@ -21,9 +21,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$scriptsDir = Join-Path $PSScriptRoot "scripts"
+$scriptsDir = Join-Path $PSScriptRoot "js"
 if (-not (Test-Path $scriptsDir)) {
-    Write-Error "找不到 scripts 目录：$scriptsDir"
+    Write-Error "找不到 js 目录：$scriptsDir"
 }
 
 $jsTarget = Join-Path $BgiRoot "User\JsScript"
@@ -40,7 +40,7 @@ if (-not $NoPathing -and -not (Test-Path $pathingRoot)) {
 
 $projects = Get-ChildItem -Path $scriptsDir -Recurse -Filter "manifest.json" -File | ForEach-Object { $_.Directory }
 if ($projects.Count -eq 0) {
-    Write-Error "scripts 下没有找到任何 manifest.json，请确认仓库完整。"
+    Write-Error "js 下没有找到任何 manifest.json，请确认仓库完整。"
 }
 
 $installed = 0

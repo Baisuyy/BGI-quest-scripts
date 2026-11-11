@@ -8,7 +8,7 @@
 
 每个任务是一个独立脚本项目：`manifest.json` 声明元信息，`main.js` 负责传送与串段，路线放在项目内的 `pathing\*.json`，由 `pathingScript.runFile()` 调用。传送 → 沿路线跑图 → 途中自动跳对话、自动选选项。
 
-> ⚠️ **BetterGI 只认文件夹，不认单个 .js。** 必须把整个任务文件夹放进 `User\JsScript\`，直接把 `main.js` 拖进去是识别不了的。用 [`install.ps1`](install.ps1) 可一键装好脚本和路线。
+> ⚠️ **BetterGI 只认文件夹，不认单个 .js。** 最省事是[订阅本仓库](#订阅安装推荐)，列表里直接能跑；手动装则必须把整个任务文件夹放进 `User\JsScript\`，不能带层级。
 
 > 它不一键通关：不解谜、不战斗、不判断任务是否激活。见 [能力边界](#能力边界)。
 
@@ -17,7 +17,8 @@
 ## 目录结构
 
 ```
-scripts/
+repo.json                          仓库索引，BetterGI 订阅用（由 tools 生成）
+js/
   第四章-枫丹/                      5 幕，19 个任务
     第一幕-白露与黑潮的序诗/
       4004-独舞者的序幕/
@@ -34,12 +35,16 @@ scripts/
 docs/
   主线解析/                        53 幕解析成果（浏览器 + 总表）
   路线质量报告.md                   逐段点数、总长与风险分级
+tools/
+  build_repo_json.py               新增任务后重建 repo.json
 install.ps1                        脚本 + 路线一键安装
 ```
 
 目录名带编号也带标题（`第七章-至冬` / `第六幕-寄自彼岸的昨日` / `7023-僭越者的试炼`），`ls` 一眼能对上游戏里的任务列表。跨地区章节单独成组：第四章第六幕「睡前故事」、第五章第六幕「你存在的时空」属旅人章，分别放在 `第四章-旅人章`、`第五章-旅人章`。
 
-路线跟着脚本走，没有顶层 `routes/` 目录——`runFile` 的根就是脚本项目目录，`LimitedFile` 拒绝越界。仓库的三层结构只服务于浏览，BetterGI 的 `User\JsScript\` 是平铺单层，装的时候必须拍平，这是 `install.ps1` 存在的唯一原因。路线不受此限：`User\AutoPathing\` 递归加载，篇章/幕层级原样保留。
+路线跟着脚本走，没有顶层 `routes/` 目录——`runFile` 的根就是脚本项目目录，`LimitedFile` 拒绝越界。
+
+顶层目录必须叫 `js`：BetterGI 仓库索引里脚本根节点名是硬编码的（`prefix = "js"`），换个名字订阅后列表是空的。
 
 ## 覆盖进度
 
@@ -100,16 +105,35 @@ install.ps1                        脚本 + 路线一键安装
 
 ## 安装
 
-先关掉 BetterGI，在仓库根目录打开 PowerShell：
+### 订阅安装（推荐）
+
+BetterGI → 脚本仓库 → 添加仓库，填：
+
+```
+地址：https://github.com/Baisuyy/bettergi-quest-scripts
+分支：main
+```
+
+订阅后可以直接在仓库页浏览 `篇章 → 幕 → 任务` 并运行，脚本留在原有层级里，不用拍平——仓库索引这条通道是递归的，只看目录节点下有没有 `manifest.json`。首次会整仓 clone，约 4 MB。
+
+新增任务后要重跑一次 `python tools/build_repo_json.py` 重建 `repo.json`，否则新项目不会出现在列表里。
+
+### 本地安装
+
+不订阅、直接把仓库放到本地时，用 `install.ps1`。先关掉 BetterGI，在仓库根目录打开 PowerShell：
 
 ```powershell
 .\install.ps1 -BgiRoot "D:\BetterGI"              # 换成你的安装目录
 .\install.ps1 -BgiRoot "D:\BetterGI" -NoPathing   # 只装脚本，不装路线
 ```
 
-脚本递归找出 `scripts/` 下含 `manifest.json` 的文件夹，平铺复制到 `<BetterGI>\User\JsScript\`；再把各项目的 `pathing\*.json` 复制到 `<BetterGI>\User\AutoPathing\<篇章>\<幕>\<任务>\`。同名目录先删后拷，可反复执行。
+脚本递归找出 `js/` 下含 `manifest.json` 的文件夹，平铺复制到 `<BetterGI>\User\JsScript\`；再把各项目的 `pathing\*.json` 复制到 `<BetterGI>\User\AutoPathing\<篇章>\<幕>\<任务>\`。同名目录先删后拷，可反复执行。
 
-手动安装：把**整个任务文件夹**（如 `7023-僭越者的试炼`）拖进 `User\JsScript\`，成为 `User\JsScript\7023-僭越者的试炼\`，然后刷新脚本列表。别拖成多层路径，那样 BetterGI 会把 `第七章-至冬` 当成一个项目并因缺少 `manifest.json` 报错。
+走这条路必须拍平：`User\JsScript\` 只枚举一层，多层会让 BetterGI 把 `第七章-至冬` 当成一个项目并因缺少 `manifest.json` 报错。
+
+### 手动安装
+
+把**整个任务文件夹**（如 `7023-僭越者的试炼`）拖进 `User\JsScript\`，成为 `User\JsScript\7023-僭越者的试炼\`，然后刷新脚本列表。同样不能带层级。
 
 ## 使用
 
