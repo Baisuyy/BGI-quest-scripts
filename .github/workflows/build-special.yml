@@ -128,6 +128,7 @@ jobs:
           ARCHIVE: ${{ steps.pack.outputs.archive }}
           SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
           REF: ${{ inputs.ref || 'bgi-special' }}
+          FULL_SHA: ${{ github.sha }}
         run: |
           $tag = "special-v$env:VERSION"
 
@@ -142,6 +143,7 @@ jobs:
           gh release create $tag `
             $env:ARCHIVE `
             (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe') `
+            --target $env:FULL_SHA `
             --title "BetterGI 特别版 $env:VERSION" `
             --notes-file 'RELEASE_NOTES.md' `
             --prerelease
