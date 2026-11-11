@@ -1,0 +1,236 @@
+using BetterGenshinImpact.GameTask.Common.Resin;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using BetterGenshinImpact.GameTask.AutoGeniusInvokation.Exception;
+using BetterGenshinImpact.GameTask.SoloTask;
+using BetterGenshinImpact.GameTask.AutoBoss;
+using BetterGenshinImpact.Pulonia.Models;
+using BetterGenshinImpact.Pulonia.Services;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace BetterGenshinImpact.Pulonia.Executors;
+
+/// <summary>
+/// 把独立任务注册表接入任务计划：注册表中带 Plan 范围的任务都成为任务计划能力，任务类型写作 solo.{TaskId}。
+/// 参数在节点 JSON 与强类型参数之间按 SoloTaskJson 约定转换，结果原样映射为节点结果。
+/// </summary>
+public sealed class PuloniaSoloTaskExecutor : IPuloniaTaskExecutor
+{
+    /// <summary>
+    /// 独立任务在任务计划中的类型前缀。
+    /// </summary>
+    public const string TaskTypePrefix = "solo.";
+
+    /// <summary>首领讨伐累计成功领奖上限，由编排层维护，0 表示不限制。</summary>
+    public const string BossTotalRunCountLimitParameter = "total_run_count_limit";
+
+    /// <summary>累计次数清空批次；修改批次只在保存配置后生效。</summary>
+    public const string BossRewardCountResetParameter = "reward_count_reset_id";
+
+    /// <summary>
+    /// 独立任务注册表。
+    /// </summary>
+    private readonly SoloTaskRegistry _registry;
+
+    /// <summary>
+    /// 创建任务实例时解析其余依赖的服务容器。
+    /// </summary>
+    private readonly IServiceProvider _services;
+
+    /// <summary>
+    /// 按任务类型索引的能力定义。
+    /// </summary>
+    private readonly Dictionary<string, PuloniaTaskDefinition> _definitions;
+
+    /// <inheritdoc />
+    public IReadOnlyList<PuloniaTaskDefinition> Definitions { get; }
+
+    /// <summary>
+    /// 从注册表建立执行器与全部能力定义。
+    /// </summary>
+    /// <param name="registry">独立任务注册表。</param>
+    /// <param name="services">服务容器。</param>
+    public PuloniaSoloTaskExecutor(SoloTaskRegistry registry, IServiceProvider services)
+    {
+        _registry = registry;
+        _services = services;
+        Definitions = registry.GetByScope(SoloTaskScopes.Plan).Select(BuildDefinition).ToList().AsReadOnly();
+        _definitions = Definitions.ToDictionary(d => d.TaskType, StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// 把独立任务标识转换为任务计划的任务类型。
+    /// </summary>
+    /// <param name="taskId">独立任务标识。</param>
+    /// <returns>任务类型。</returns>
+    public static string ToTaskType(string taskId) => TaskTypePrefix + taskId;
+
+    /// <summary>
+    /// 判断任务类型是否为独立任务。
+    /// </summary>
+    /// <param name="taskType">任务类型。</param>
+    /// <returns>以 solo. 开头时返回 true。</returns>
+    public static bool IsSoloTaskType(string? taskType) => taskType?.StartsWith(TaskTypePrefix, StringComparison.Ordinal) == true;
+
+    /// <summary>
+    /// 从任务类型取出独立任务标识。
+    /// </summary>
+    /// <param name="taskType">任务类型。</param>
+    /// <returns>独立任务标识；不是独立任务时返回 null。</returns>
+    public static string? ToTaskId(string? taskType) => IsSoloTaskType(taskType) ? taskType![TaskTypePrefix.Length..] : null;
+
+    /// <summary>
+    /// 判断能力是否有需要在创建时填写的参数。没有参数的独立任务可以跳过创建对话框直接插入。
+    /// </summary>
+    /// <param name="definition">能力定义。</param>
+    /// <returns>Schema 声明了至少一个参数时返回 true。</returns>
+    public static bool HasEditableParameters(PuloniaTaskDefinition definition)
+        => definition.ParameterSchema["properties"] is JObject properties
+           && properties.Properties().Any();
+
+    /// <inheritdoc />
+    public async Task<PuloniaTaskOutcome> ExecuteAsync(PuloniaTaskPreparedTask task, PuloniaTaskExecutionContext context,
+        CancellationToken ct)
+    {
+        if (!_registry.TryGet(ToTaskId(task.TaskType), out var descriptor)
+            || !_definitions.ContainsKey(task.TaskType))
+        {
+            return PuloniaTaskOutcome.Failure($"未注册独立任务 {task.TaskType}。");
+        }
+
+        // 1. 任务只使用本节点租约记录的运行环境；它已停止时当前节点失败
+        if (!context.TryGetRuntime(out var runtime, out var runtimeError))
+        {
+            return PuloniaTaskOutcome.Failure(runtimeError, reasonCode: SoloTaskReasons.RuntimeStopped);
+        }
+
+        // 2. 节点 JSON → 强类型参数 → 运行任务；只修改副本，不改变快照中的参数
+        var values = (JObject)task.Parameters.DeepClone();
+        // 累计统计属于编排层，不传入独立任务的业务参数。
+        var totalLimit = values.Value<int?>(BossTotalRunCountLimitParameter) ?? 0;
+        var resetId = values.Value<string>(BossRewardCountResetParameter) ?? string.Empty;
+        values.Remove(BossTotalRunCountLimitParameter);
+        values.Remove(BossRewardCountResetParameter);
+        var param = descriptor.DeserializeParam(values.ToString(Formatting.None));
+        if (param is AutoBossParam boss)
+        {
+            // 领奖次数属于运行账户的进度（accounts/<账户 ID>/boss-rewards.json）；游戏节点的运行一定已确定运行账户。
+            if (context.AccountId is not { } accountId)
+                return PuloniaTaskOutcome.Failure("本次运行没有确定运行账户，无法按账户记录首领领奖次数，未开始讨伐。");
+            var accounts = _services.GetRequiredService<IPuloniaAccountService>();
+            var completed = await accounts.GetBossRewardCountAsync(accountId, task.PlanId, task.SourceTaskId, resetId, ct)
+                .ConfigureAwait(false);
+            if (!ApplyBossRewardLimit(boss, totalLimit, completed))
+                return new PuloniaTaskOutcome(PuloniaTaskOutcomeKind.Skipped,
+                    $"首领累计成功领奖已达上限（{completed}/{totalLimit}）。");
+            // 回调来自任务线程，每次成功领奖立即持久化；取消时也必须保留刚刚确认的次数。
+            boss.RewardClaimedCallback = () => accounts.IncrementBossRewardCountAsync(accountId, task.PlanId, task.SourceTaskId,
+                resetId).GetAwaiter().GetResult();
+        }
+        ISoloTaskResult result;
+        try
+        {
+            result = await descriptor.InvokeAsync(_services, runtime, param, ct).ConfigureAwait(false);
+        }
+        catch (NormalEndException e) when (!ct.IsCancellationRequested)
+        {
+            // 运行环境停止引起的正常结束：当前节点失败，下一节点重新准备运行环境
+            return PuloniaTaskOutcome.Failure(e.Message, reasonCode: SoloTaskReasons.RuntimeStopped);
+        }
+        catch (NormalEndException) when (ct.IsCancellationRequested)
+        {
+            throw new OperationCanceledException(ct);
+        }
+
+        ct.ThrowIfCancellationRequested();
+        return ToOutcome(result);
+    }
+
+    /// <summary>把累计剩余额度作为本次领奖上限；复制后整体替换设置，保留允许的树脂及补充开关。</summary>
+    internal static bool ApplyBossRewardLimit(AutoBossParam boss, int totalLimit, int completed)
+    {
+        if (totalLimit <= 0) return true;
+        var remaining = Math.Max(0, totalLimit - completed);
+        if (remaining == 0) return false;
+        var usage = boss.ResinUsage.Clone();
+        if (usage.Mode == ResinUsageMode.Exhaust)
+        {
+            usage.Mode = ResinUsageMode.RunCount;
+            usage.RunCount = remaining;
+        }
+        else if (usage.Mode == ResinUsageMode.RunCount)
+        {
+            usage.RunCount = Math.Min(usage.RunCount, remaining);
+        }
+        boss.ResinUsage = usage;
+        return true;
+    }
+
+    /// <summary>
+    /// 把独立任务结果映射为节点结果，附加数据按 SoloTaskJson 约定写入 Data。
+    /// </summary>
+    /// <param name="result">独立任务结果。</param>
+    /// <returns>节点结果。</returns>
+    private static PuloniaTaskOutcome ToOutcome(ISoloTaskResult result)
+    {
+        var kind = result.Kind switch
+        {
+            SoloTaskResultKind.Succeeded => PuloniaTaskOutcomeKind.Succeeded,
+            SoloTaskResultKind.Unverified => PuloniaTaskOutcomeKind.ExecutedUnverified,
+            SoloTaskResultKind.Partial => PuloniaTaskOutcomeKind.PartiallySucceeded,
+            SoloTaskResultKind.Skipped => PuloniaTaskOutcomeKind.Skipped,
+            _ => PuloniaTaskOutcomeKind.Failed
+        };
+        var data = result.Data is null or NoData
+            ? null
+            : PuloniaTaskJson.Read<JObject>(SoloTaskJson.Serialize(result.Data, result.Data.GetType()));
+        var message = string.IsNullOrEmpty(result.Message) ? kind.ToString() : result.Message;
+        return new PuloniaTaskOutcome(kind, message, data, reasonCode: result.ReasonCode);
+    }
+
+    /// <summary>
+    /// 由独立任务描述符建立能力定义：默认参数来自参数类的无参构造，Schema 按参数 JSON 合同生成。
+    /// </summary>
+    /// <param name="descriptor">独立任务描述符。</param>
+    /// <returns>能力定义。</returns>
+    private static PuloniaTaskDefinition BuildDefinition(SoloTaskDescriptor descriptor)
+    {
+        var defaults = PuloniaTaskJson.Read<JObject>(descriptor.SerializeParam(descriptor.CreateDefaultParam()));
+        // 材料目标是独立任务页的专属设置，任务计划节点不继承全局配置，避免节点改动首领或秘境后目标不匹配
+        if (defaults["target_items"] is not null)
+        {
+            defaults["target_items"] = new JArray();
+        }
+
+        var schema = PuloniaSoloTaskSchema.Create(descriptor.ParamType);
+        var properties = schema["properties"] as JObject ?? new JObject();
+        if (descriptor.TaskId == AutoBossTask.TaskId)
+        {
+            properties[BossTotalRunCountLimitParameter] = new JObject { ["type"] = "integer", ["minimum"] = 0 };
+            properties[BossRewardCountResetParameter] = new JObject { ["type"] = "string" };
+        }
+        schema["properties"] = properties;
+        schema["additionalProperties"] = false;
+        return new PuloniaTaskDefinition
+        {
+            TaskType = ToTaskType(descriptor.TaskId),
+            DisplayName = descriptor.DisplayName,
+            Description = string.IsNullOrWhiteSpace(descriptor.Description)
+                ? $"执行独立任务“{descriptor.DisplayName}”。"
+                : descriptor.Description,
+            RequiresGameSession = true,
+            DefaultParameters = defaults,
+            ParameterSchema = schema,
+            // 首批不让独立任务参与共享设置，参数都是只属于本任务的任务参数。
+            IsSoloTask = true,
+            Group = descriptor.Group,
+            Order = descriptor.Order,
+            OneDragonOrder = descriptor.OneDragonOrder
+        };
+    }
+}

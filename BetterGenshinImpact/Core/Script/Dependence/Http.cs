@@ -1,0 +1,184 @@
+using BetterGenshinImpact.Core.Script.Utils;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using OpenCvSharp;
+using System.Linq;
+using System.Text.Json;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using BetterGenshinImpact.GameTask;
+using BetterGenshinImpact.Infrastructure.Network;
+using Microsoft.Extensions.Logging;
+
+namespace BetterGenshinImpact.Core.Script.Dependence;
+
+public class Http
+{
+    /// <summary>
+    /// 最多跟随的重定向次数
+    /// </summary>
+    private const int MaxRedirects = 5;
+
+    private readonly ILogger<Http> _logger = App.GetLogger<Http>();
+
+    /// <summary>
+    /// 是否为需要跟随的重定向状态码
+    /// </summary>
+    private static bool IsRedirect(HttpStatusCode statusCode) => statusCode is HttpStatusCode.MovedPermanently
+        or HttpStatusCode.Found or HttpStatusCode.SeeOther or HttpStatusCode.TemporaryRedirect or HttpStatusCode.PermanentRedirect;
+
+    /// <summary>
+    /// 构造一次请求。请求头写在请求上；内容相关的头（如 content-encoding）写在请求体上
+    /// </summary>
+    private static HttpRequestMessage CreateRequest(HttpMethod method, Uri uri, string? body, string contentType,
+        Dictionary<string, string> headers)
+    {
+        var request = new HttpRequestMessage(method, uri)
+        {
+            Content = body == null ? null : new StringContent(body, Encoding.UTF8, contentType),
+        };
+        foreach (var header in headers)
+        {
+            if (!request.Headers.TryAddWithoutValidation(header.Key, header.Value))
+            {
+                request.Content?.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+        }
+
+        return request;
+    }
+
+    private void CheckHttpPermission(string url)
+    {
+        var currentProject = RunnerContext.Instance.CurrentScriptProject;
+        if (!currentProject?.AllowJsHTTP ?? false)
+        {
+            throw new UnauthorizedAccessException("当前JS脚本不允许使用HTTP请求，请在调度器通用设置中启用“JS HTTP权限”");
+        }
+        var allowedUrls = currentProject?.Project?.Manifest.HttpAllowedUrls ?? [];
+        if (allowedUrls.Length == 0)
+        {
+            throw new UnauthorizedAccessException("当前JS脚本没有配置允许请求的URL，请在脚本的manifest.json中配置http_allowed_urls");
+        }
+        if (allowedUrls.Any(allowedUrl =>
+        {
+            // fuzzy match
+            var pattern = "^" + System.Text.RegularExpressions.Regex.Escape(allowedUrl).Replace("\\*", ".*") + "$";
+            _logger.LogDebug($"[HTTP] 检查URL {url} 是否符合: {pattern}");
+            var regex = new System.Text.RegularExpressions.Regex(pattern);
+            return regex.IsMatch(url);
+        }))
+        {
+            return;
+        }
+        throw new UnauthorizedAccessException($"当前JS脚本不允许请求此URL: {url}，请在脚本的manifest.json中配置http_allowed_urls，当前允许的URL列表: [{string.Join(", ", allowedUrls)}]");
+    }
+
+    public class HttpReponse
+    {
+        public int status_code { get; set; }
+        public Dictionary<string, string> headers { get; set; } = new();
+        public string body { get; set; } = "";
+    }
+
+
+    /// <summary>
+    /// 执行HTTP请求
+    /// </summary>
+    /// <param name="method">HTTP方法</param>
+    /// <param name="url">请求URL</param>
+    /// <param name="body">请求体</param>
+    /// <param name="headersJson">请求头，JSON格式</param>
+    /// <returns></returns>
+    public async Task<HttpReponse> Request(string method, string url, string? body = null, string? headersJson = null)
+    {
+        _logger.LogDebug($"[HTTP] 发送HTTP请求: {method} {url} Body: {(body != null ? body : "null")} Headers: {(headersJson != null ? headersJson : "null")}");
+        CheckHttpPermission(url);
+
+        var dictHeaders = new Dictionary<string, string>();
+        if (!string.IsNullOrWhiteSpace(headersJson))
+        {
+            try
+            {
+                var headers = JsonSerializer.Deserialize<Dictionary<string, string>>(headersJson);
+                if (headers != null)
+                {
+                    dictHeaders = headers;
+                }
+            }
+            catch (JsonException)
+            {
+                throw new ArgumentException("Headers JSON格式错误");
+            }
+        }
+
+        // header全部小写
+        dictHeaders = dictHeaders.ToDictionary(kvp => kvp.Key.ToLowerInvariant(), kvp => kvp.Value);
+
+        // 提前取出来Content-Type，防止被覆盖
+        string contentType = "application/json";
+        if (dictHeaders.TryGetValue("content-type", out var ct))
+        {
+            contentType = ct;
+            dictHeaders.Remove("content-type");
+        }
+
+        // 使用脚本专用客户端发送请求：跟随网络与代理设置，且不自动跟随重定向
+        var httpClient = App.GetService<IHttpClientFactory>()!.CreateClient(HttpClientNames.Script);
+        var currentUri = new Uri(url);
+        var currentMethod = new HttpMethod(method);
+        var currentBody = body;
+        HttpResponseMessage response;
+        for (var redirectCount = 0; ; redirectCount++)
+        {
+            using var request = CreateRequest(currentMethod, currentUri, currentBody, contentType, dictHeaders);
+            response = await httpClient.SendAsync(request);
+            if (!IsRedirect(response.StatusCode) || response.Headers.Location is not { } location)
+            {
+                break;
+            }
+
+            if (redirectCount >= MaxRedirects)
+            {
+                response.Dispose();
+                throw new HttpRequestException($"重定向次数超过 {MaxRedirects} 次：{url}");
+            }
+
+            var nextUri = location.IsAbsoluteUri ? location : new Uri(currentUri, location);
+            if (currentUri.Scheme == Uri.UriSchemeHttps && nextUri.Scheme != Uri.UriSchemeHttps)
+            {
+                response.Dispose();
+                throw new HttpRequestException($"拒绝从 HTTPS 重定向到非 HTTPS 地址：{nextUri}");
+            }
+
+            // 每一跳都按脚本的允许列表重新校验，防止经重定向访问未授权的地址
+            CheckHttpPermission(nextUri.AbsoluteUri);
+
+            // 301、302、303 按浏览器惯例改为不带请求体的 GET；307、308 保持原方法和请求体
+            if (response.StatusCode is HttpStatusCode.MovedPermanently or HttpStatusCode.Found or HttpStatusCode.SeeOther
+                && currentMethod != HttpMethod.Get && currentMethod != HttpMethod.Head)
+            {
+                currentMethod = HttpMethod.Get;
+                currentBody = null;
+            }
+
+            currentUri = nextUri;
+            response.Dispose();
+        }
+
+        using var finalResponse = response;
+
+        var responseCode = (int)response.StatusCode;
+        var responseHeaders = response.Headers.ToDictionary(h => h.Key, h => h.Value.First()); // 只取第一个值
+        var responseBody = await response.Content.ReadAsStringAsync();
+        return new HttpReponse
+        {
+            status_code = responseCode,
+            headers = responseHeaders,
+            body = responseBody,
+        };
+    }
+}

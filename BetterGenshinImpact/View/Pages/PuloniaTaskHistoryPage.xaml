@@ -1,0 +1,26 @@
+<UserControl x:Class="BetterGenshinImpact.View.Pages.PuloniaTaskHistoryPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:BetterGenshinImpact.View.Controls"
+             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             FontFamily="{StaticResource TextThemeFontFamily}"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="Loaded">
+            <b:InvokeCommandAction Command="{Binding ViewModel.OpenPageCommand, Mode=OneWay}" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
+    <!-- 全局执行记录：只显示运行记录；路线 CD 统一在账户页的“路线 CD”中查看。 -->
+    <Grid Margin="16,12,16,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,14">
+            <TextBlock FontSize="26" FontWeight="SemiBold" Text="执行记录" />
+            <TextBlock Margin="0,4,0,0" Text="查看任务计划和一条龙每次执行的结果。记录只保存在本机，重启后仍可查看；各条路线的 CD 在账户页查看。"
+                       TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <controls:PuloniaTaskHistoryView Grid.Row="1" DataContext="{Binding ViewModel, Mode=OneWay}" />
+    </Grid>
+</UserControl>

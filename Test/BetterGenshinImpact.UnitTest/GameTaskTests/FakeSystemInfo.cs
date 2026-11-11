@@ -1,0 +1,51 @@
+using BetterGenshinImpact.GameTask.Model;
+using BetterGenshinImpact.GameTask.Model.Area;
+using OpenCvSharp;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Vanara.PInvoke;
+
+namespace BetterGenshinImpact.UnitTest.GameTaskTests
+{
+    internal class FakeSystemInfo : ISystemInfo
+    {
+        public FakeSystemInfo(RECT gameScreenSize, double assetScale)
+        {
+            DesktopRectArea = new(gameScreenSize.Width, gameScreenSize.Height);
+
+            GameScreenSize = gameScreenSize;
+            // 0.28 改动，素材缩放比例不可以超过 1，也就是图像识别时分辨率大于 1920x1080 的情况下直接进行缩放
+            // 取宽高相对于 1920x1080 的缩放比中的较小值，和 SystemInfo 保持一致
+            ScaleTo1080PRatio = Math.Min(GameScreenSize.Width / 1920d, GameScreenSize.Height / 1080d); // 1080P 为标准
+            if (ScaleTo1080PRatio < 1)
+            {
+                ZoomOutMax1080PRatio = ScaleTo1080PRatio;
+                AssetScale = ZoomOutMax1080PRatio;
+            }
+        }
+
+        public System.Drawing.Size DisplaySize => throw new NotImplementedException();
+
+        public RECT GameScreenSize { get; }
+
+        public double AssetScale { get; } = 1;
+
+        public double ZoomOutMax1080PRatio { get; }
+
+        public double ScaleTo1080PRatio { get; }
+
+        public RECT CaptureAreaRect { get ; set ; }
+        public Rect ScaleMax1080PCaptureRect { get; set; } = new Rect(0, 0, 1920, 1080);
+
+        public DesktopRegion DesktopRectArea { get; set; }
+
+        /// <summary>
+        /// 测试中固定为 1
+        /// </summary>
+        public float DpiScale { get; } = 1;
+    }
+}

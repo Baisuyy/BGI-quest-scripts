@@ -1,0 +1,202 @@
+# BetterGI 多实例命名管道协议
+
+状态：Pulonia 跨实例运行部分于 2026-10-31 按[实例、账户与路线 CD 统筹设计](instance-account-model.md)更新，代码已于 2026-11-01 实施，待用户验收；其余内容为当前协议。
+
+三种实例在执行、配置、界面、定时和快捷键上的分工，以及当前能力与后续规划的区别，见[三种实例的能力边界与 IPC 规划](instance-capability-boundaries.md)。本文聚焦协议细节。
+
+## 设计目标
+
+协议不再使用 InstanceId，也不要求根实例保存“由谁启动了谁”的进程树。实例关系只由
+当前 Windows 用户、Windows Session、进程用途和进程 ID 决定。
+
+当前协议版本为 `v2`，规则如下：
+
+- 每个 Windows 用户最多有一个根 BetterGI；
+- 根 BetterGI 是该用户固定根管道的持有者，通常运行在主桌面 Session；
+- 与根不在同一个 Session 的 BetterGI 是桌面分身 BetterGI；
+- WebView 无论在哪个 Session 启动，都是根 BetterGI 的直接客户端；
+- 桌面分身 BetterGI 只能查询和访问相同 Session 中的 WebView；
+- 同一个 Session 只允许一个 BetterGI，WebView 则允许多个并通过进程 ID 精确寻址。
+
+独立任务可以由根实例下发到在线子实例，并回传运行状态：
+
+- 启动请求 `SoloTaskStartRequest` 携带字符串任务标识 `TaskId`（如 `auto_wood`）和按 `SoloTaskJson` 约定序列化的完整参数；
+- 子实例按 `TaskId` 从 `SoloTaskRegistry` 取得任务，反序列化参数后运行；
+- 状态快照 `SoloTaskStatusSnapshot` 同样用 `TaskId` 标识任务。主实例与子实例要求版本相同，不做旧版本兼容。
+
+合同细节见 [task-contract.md](task-contract.md)。
+
+## 管道和 Windows 用户隔离
+
+每个 Windows 用户只有一个固定根管道：
+
+```text
+BetterGI.v2.user-<Windows用户SID>.root
+```
+
+命名管道名称在整台计算机上可见，而不是按 Windows Session 隔离。因此根 BetterGI、
+桌面分身 BetterGI 和 WebView 即使运行在不同 Session，也能连接同一个固定端点。
+管道 ACL 只允许当前 Windows 用户 SID 完全控制，并显式拒绝 `Network` SID，所以
+不同 Windows 用户分别拥有自己的根 BetterGI，彼此不会注册到对方的实例组中。
+
+协议内容不敏感，不使用密钥、令牌、InstanceId 或父实例 ID。根端从已连接的命名管道
+句柄调用 Windows API 获取客户端真实进程 ID，再由进程 ID取得真实 Windows Session；
+客户端提交的用途只用于区分 BetterGI 与 WebView，不能伪造进程或 Session 身份。
+
+## 启动参数
+
+客户端用途仅使用：
+
+```text
+--instance <childSession|webview>
+```
+
+- `--instance childSession` 表示该进程只能作为桌面分身客户端，根暂时不存在时也不会
+  自行成为根；
+- `--instance webview` 表示该进程只能作为 WebView 客户端，必须同时用
+  `--instance-name <实例名>` 指定实例名（云原神网页版，见 [GameRuntime 设计](game-runtime.md) 7.1）。
+  实例名随 `connection.open` 提交，根把它写入该 WebView 的端点（`InstanceEndpoint.InstanceName`），
+  只用于识别和展示；同名互斥由实例名互斥体保证，根不判重；
+- 不带 `--instance` 的 BetterGI 会先竞争固定根管道。竞争成功即成为根；竞争失败则
+  连接已有根，由根根据真实 Session 决定是转发重复启动还是注册为桌面分身。
+
+应用自身重启时额外传递：
+
+```text
+--restart-from-pid <旧进程ID>
+```
+
+新进程会等待旧进程退出，再竞争根管道或替换同 Session 中的旧客户端连接。该参数只用于
+消除重启交接期间的竞态，不作为长期身份。
+
+## 连接拓扑和访问规则
+
+```text
+某个 Windows 用户的根 BetterGI
+├─ Session 2 的桌面分身 BetterGI（最多一个）
+├─ Session 3 的桌面分身 BetterGI（最多一个）
+├─ Session 1 的 WebView（可多个，以进程 ID 区分）
+├─ Session 2 的 WebView（可多个，以进程 ID 区分）
+└─ Session 3 的 WebView（可多个，以进程 ID 区分）
+```
+
+所有客户端都直接连接根管道，不在桌面分身下面建立二级管道。这样根重启后只需恢复一个
+固定端点，客户端也只需重连一个固定名称。
+
+WebView 访问规则：
+
+- 根 BetterGI 可以查询和访问全部 WebView；
+- 桌面分身 BetterGI 只能查询与自己 Windows Session 相同的 WebView；
+- 单播通过 WebView 进程 ID 精确定位；
+- 组播由调用方先查询可见 WebView，再逐个发送，不在协议中维护易失的实例组。
+
+## 连接建立和重复启动
+
+客户端连接固定根管道后，首先发送 `connection.open`。根根据管道连接的真实进程 ID 和
+Session 处理：
+
+1. `webview`：按进程 ID 注册，可在断线后替换旧连接。
+2. BetterGI 与根位于相同 Session：视为重复启动，把业务启动参数转发给根窗口，然后
+   新进程退出。
+3. BetterGI 与根位于不同 Session：注册为桌面分身。
+4. 同一 Session 已有桌面分身：把业务启动参数转发给已有进程，然后新进程退出。
+5. 旧连接已经失效，或 `--restart-from-pid` 指向该 Session 中被替换的进程：接受新连接。
+
+## 断线、闪退和退出语义
+
+桌面分身 BetterGI 与 WebView 在根管道断开后，每秒尝试重新连接固定根管道，且没有总
+超时时间。因此根 BetterGI 闪退、被结束进程或隔很久后才重新启动，都不改变客户端的
+发现地址；新根取得固定管道后，仍存活的客户端会自动重新注册。
+
+当前主窗口关闭和托盘退出入口会检查在线 WebView 及活动桌面分身，提示先关闭子实例。
+实际进入根 BetterGI 的退出释放流程时，`ChildSessionService.Dispose` 仍会主动断开 RDP 并
+尝试注销桌面分身 Session。未执行释放流程的闪退场景下，仍存活的客户端会等待根恢复。
+按统筹设计，子实例已接受的 Pulonia 运行不因根断开而取消；重新连接后，子实例补发一次
+根所下发、尚未结束的运行状态（`pulonia.run.changed`）。已实施：根连接登记成功（含首次连接）时，
+子实例的 `PuloniaRunDispatchHost` 补发尚未结束的下发运行，以及本进程中最近一次没有送达的结束状态。
+
+连接断开即移除对应运行时记录，不把客户端清单持久化。根重启后的关系由仍存活的客户端
+重新连接重建，避免把已经退出的 PID 当作在线实例。
+
+## 帧格式
+
+同一条连接同时承载 JSON 控制消息和二进制相对鼠标批次。整数使用小端序。
+
+```text
+uint32 payloadLength
+byte   payloadType
+byte[] payload
+```
+
+`payloadLength` 最大为 1 MiB。
+
+| payloadType | 内容 |
+| --- | --- |
+| `1` | UTF-8 JSON 控制消息 |
+| `2` | 相对鼠标二进制批次 |
+
+JSON 信封的主要字段：
+
+```json
+{
+  "version": 2,
+  "requestId": "00000000-0000-0000-0000-000000000000",
+  "operation": "ping",
+  "success": true,
+  "errorCode": null,
+  "errorMessage": null,
+  "data": {}
+}
+```
+
+响应使用相同 `requestId`，并将 `operation` 设为 `response`。信封中不再传输
+`sourceInstanceId`。
+
+控制操作（`pulonia.run.*` 的实现位置见表后说明）：
+
+| 操作 | 用途 |
+| --- | --- |
+| `ping` | 检查连接并读取端点描述 |
+| `connection.open` | 客户端声明用途，根按真实 PID/Session 注册或转发激活 |
+| `activation.dispatch` | 根向已有 BetterGI 转发二次启动参数 |
+| `input.relativeMouse.subscribe` | 桌面分身请求根开始转发相对鼠标 |
+| `input.relativeMouse.unsubscribe` | 桌面分身停止转发相对鼠标 |
+| `input.relativeMouse.state` | 预留的相对鼠标状态通知名称 |
+| `webview.list` | 查询当前调用方可见的 WebView，按实例名排序 |
+| `webview.send` | 根按目标进程 ID 向 WebView 单播 |
+| `webview.message` | 根向目标 WebView 下发消息 |
+| `application.shutdown` | 根请求子实例在响应写回后正常退出 |
+| `task.start` / `task.stop` | 根在子实例上启动或停止独立任务，按运行 ID 幂等 |
+| `task.status.get` / `task.status.changed` | 根查询子实例独立任务状态 / 子实例主动上报状态 |
+| `pulonia.run.submit` | 根请求子实例运行一个 Pulonia 计划。负载为计划 ID、计划修订号、执行范围（`target_task_id`）；子实例校验修订号后放入本实例队列，立即回复运行 ID |
+| `pulonia.run.cancel` | 根请求子实例停止一个由根下发的运行，按运行 ID 指定 |
+| `pulonia.run.changed` | 子实例回报根所下发运行的运行 ID、状态和当前节点消息，只用于根显示；重新连接后补发一次尚未结束的运行 |
+
+Pulonia 跨实例运行采用一步下发，见[统筹设计 6.3](instance-account-model.md#63-一步下发)：
+
+- 根只请求子实例“运行计划 P”，不逐个派发节点。负载只有计划 ID、修订号等字段，不携带快照，不再需要约 900 KB 的派发负载上限。
+- 子实例收到 `pulonia.run.submit` 后读取共享的计划文件。修订号不一致时拒绝，提示“计划已变更，请重新运行”；一致时生成快照，放入本实例队列，立即回复运行 ID。
+- 之后由子实例协调和落盘：按自己的当前账户确定运行账户，执行节点，把运行状态写入本实例的 `User/Pulonia/instances/<目录名>/state.json`，完成记录写入运行账户的 `User/Pulonia/accounts/<账户 ID>/`，历史写入共享的 `User/Pulonia/history/`。根不为下发的运行另存记录。
+- 每个实例有自己的队列。同一实例串行，不同实例之间并行；同一账户不能同时在两个实例运行，由账户占用文件保证，不经过 IPC。
+- 根崩溃或管道断开时，子实例已接受的运行照常执行；断开期间根页面把这些运行显示为“连接断开，状态未知”，不能远程停止。子实例重新连上根后，补发一次根所下发、尚未结束的运行状态。根的正常退出仍受退出保护限制（统筹设计 A2）。
+- `pulonia.run.changed` 只回报根下发的运行。子实例自己从界面、定时触发器或 `--pulonia-run` 提交的运行不经过 IPC，也不回报。
+- 一步下发只用于根界面上的手动运行（“运行于”选了子实例）。定时由执行实例自己检查，计划热键只在根（主实例）执行，都不经过 IPC，见[统筹设计 6.4](instance-account-model.md#64-触发器)。
+- 方向不变：子实例不能向根或其他子实例下发运行。
+
+实施状态（2026-11-01 已实施）：根由 `PuloniaRunDispatcher` 下发、停止并在内存中跟踪本次进程下发的运行；子实例由 `PuloniaRunDispatchHost` 接受（请求来源记为 `dispatch`，运行记录的 `instance` 为子实例），停止只发出取消、不等待运行结束；两侧经 `IPuloniaRunTransport`（由 `InstanceService` 实现）通信，方向校验在 `PuloniaRunMessageHandler`。根等待 submit 响应最多 30 秒。“运行于”多选和执行记录页显示所有实例的运行也已实施。
+
+相对鼠标批次结构：
+
+```text
+uint16 sampleCount            // 1..64
+uint64 firstSequence
+int64  baseUtcTicks
+repeat sampleCount:
+    int32 deltaX
+    int32 deltaY
+    int32 timestampOffsetUs
+```
+
+发送端最多等待 5 ms 或累计 64 个样本后发送。队列拥塞时将后续位移合并，避免阻塞
+Raw Input 采集线程。根 BetterGI 仅在游戏鼠标模式已启用、桌面分身窗口可见、RDP 已连接且
+`Input Capture Window` 具有键盘焦点时转发。

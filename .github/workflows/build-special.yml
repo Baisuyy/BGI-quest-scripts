@@ -1,0 +1,184 @@
+name: Build BGI Special
+
+# 特别版客户端构建：workflow_dispatch 手动触发（可选分支/版本/是否发 Release），
+# 或向 bgi-special 分支推送代码时自动构建。
+run-name: "BGI Special ${{ inputs.version || format('build-{0}', github.run_number) }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "要构建的分支或标签"
+        required: true
+        default: "bgi-special"
+        type: string
+      version:
+        description: "版本号（留空 = csproj 版本 + -special.<构建号>）"
+        required: false
+        type: string
+      make_release:
+        description: "构建完成后创建 GitHub Release"
+        required: true
+        default: true
+        type: boolean
+  push:
+    branches: [bgi-special]
+    paths:
+      - "BetterGenshinImpact/**"
+      - "Directory.Build.props"
+      - ".github/workflows/build-special.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-special-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+
+      - name: 安装 .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: 计算版本号
+        id: ver
+        shell: pwsh
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          $csproj = 'BetterGenshinImpact/BetterGenshinImpact.csproj'
+          $m = Select-String -Path $csproj -Pattern '<Version>([^<]+)</Version>'
+          if (-not $m) { throw '未能从 csproj 读取 <Version>' }
+          $base = $m.Matches[0].Groups[1].Value
+          $override = $env:INPUT_VERSION
+          if ([string]::IsNullOrWhiteSpace($override)) {
+              $version = "$base-special.$env:GITHUB_RUN_NUMBER"
+          } else {
+              $version = $override.Trim()
+          }
+          "base=$base"       >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "sha=$($env:GITHUB_SHA.Substring(0,7))" >> $env:GITHUB_OUTPUT
+          Write-Host "构建版本：$version（基线 $base）"
+
+      - name: 编译并发布
+        shell: pwsh
+        run: |
+          dotnet publish BetterGenshinImpact/BetterGenshinImpact.csproj `
+            -c Release `
+            -p:PublishProfile=FolderProfile `
+            -p:Version=${{ steps.ver.outputs.version }} `
+            --nologo
+          if ($LASTEXITCODE -ne 0) { throw "dotnet publish 失败，退出码 $LASTEXITCODE" }
+
+      - name: 整理并打包
+        id: pack
+        shell: pwsh
+        run: |
+          $src = 'BetterGenshinImpact/bin/x64/Release/net10.0-windows10.0.22621.0/publish/win-x64'
+          if (-not (Test-Path "$src/BetterGI.exe")) { throw "未找到 $src/BetterGI.exe" }
+
+          # 与官方发布一致：剔除符号文件与 ffmpeg 运行库
+          Get-ChildItem $src -Recurse -Include *.pdb, *.lib -File | Remove-Item -Force
+          Get-ChildItem $src -Recurse -Filter '*ffmpeg*.dll' -File | Remove-Item -Force
+
+          New-Item -ItemType Directory -Path 'dist/BetterGI' -Force | Out-Null
+          Copy-Item "$src/*" 'dist/BetterGI' -Recurse -Force
+
+          $v = '${{ steps.ver.outputs.version }}'
+          $name = "BetterGI_v${v}_special-win-x64.7z"
+          Push-Location dist
+          7z a $name 'BetterGI' -t7z -mx=5 -mf=BCJ2 -r -y | Out-Null
+          $code = $LASTEXITCODE
+          Pop-Location
+          if ($code -ne 0) { throw "7z 打包失败，退出码 $code" }
+
+          $archive = "dist/$name"
+          $sizeMB = [math]::Round((Get-Item $archive).Length / 1MB, 1)
+          "archive=$archive" >> $env:GITHUB_OUTPUT
+          "sizeMB=$sizeMB"   >> $env:GITHUB_OUTPUT
+          Write-Host "压缩包：$archive（$sizeMB MB）"
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterGI-special-${{ steps.ver.outputs.version }}
+          path: ${{ steps.pack.outputs.archive }}
+          retention-days: 14
+          compression-level: 0
+
+      - name: 创建 Release
+        if: ${{ github.event_name == 'push' || inputs.make_release }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          BASE: ${{ steps.ver.outputs.base }}
+          SHA: ${{ steps.ver.outputs.sha }}
+          ARCHIVE: ${{ steps.pack.outputs.archive }}
+          SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
+          REF: ${{ inputs.ref || github.ref_name }}
+        run: |
+          $tag = "special-v$env:VERSION"
+
+          $lines = @(
+            "BetterGI 特别版，基于上游 **$env:BASE** 构建，源码 $env:REF @ $env:SHA。",
+            "",
+            "## 与官方版的差异",
+            "",
+            "只新增脚本宿主 API，不改动任何既有行为：",
+            "",
+            "- **ocr.read()** / **ocr.readRegion(x, y, w, h)**：屏幕或指定区域转文字，返回带坐标与置信度的行",
+            "- **quest.tracker()**：读取左上角任务追踪面板的标题与当前步骤",
+            "- **OcrFactory** / **Bv**：暴露 OCR 引擎与 BgiVision 静态判定，供脚本自行组合",
+            "",
+            "坐标按 1080P 基准书写，内部按窗口尺寸自动缩放。完整说明见仓库 Docs/SPECIAL-API.md。",
+            "",
+            "## 安装",
+            "",
+            "下载 7z 解压得到 BetterGI 目录，整体替换原客户端目录（先备份 User 文件夹）。",
+            "BetterGI.exe 是单文件自包含版本，但仍需同目录的 Assets、dicts 等资源，不能单独拷走运行。",
+            "",
+            "> 个人构建的非官方版本。向上游反馈问题前，请先用官方版复现。"
+          )
+          $lines | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
+
+          gh release delete $tag -y --cleanup-tag 2>$null
+          gh release create $tag `
+            $env:ARCHIVE `
+            (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe') `
+            --title "BetterGI 特别版 $env:VERSION" `
+            --notes-file 'RELEASE_NOTES.md' `
+            --prerelease
+          if ($LASTEXITCODE -ne 0) { throw "Release 创建失败，退出码 $LASTEXITCODE" }
+          Write-Host "已发布 $tag（压缩包 $env:SIZE_MB MB）"
+
+      - name: 写入运行摘要
+        if: always()
+        shell: pwsh
+        run: |
+          $rows = @(
+            "| 项目 | 值 |",
+            "| --- | --- |",
+            "| 版本 | ${{ steps.ver.outputs.version }} |",
+            "| 上游基线 | ${{ steps.ver.outputs.base }} |",
+            "| 源码 ref | ${{ inputs.ref || github.ref_name }} |",
+            "| 压缩包 | ${{ steps.pack.outputs.archive }} |",
+            "| 体积 | ${{ steps.pack.outputs.sizeMB }} MB |"
+          )
+          $rows | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append

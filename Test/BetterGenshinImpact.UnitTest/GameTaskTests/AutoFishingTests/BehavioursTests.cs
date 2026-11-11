@@ -1,0 +1,42 @@
+using BetterGenshinImpact.Core.Recognition.OCR;
+using BetterGenshinImpact.Core.Recognition.ONNX;
+using BetterGenshinImpact.GameTask.AutoFishing;
+using BetterGenshinImpact.GameTask.Common.Job;
+using BetterGenshinImpact.UnitTest.CoreTests.RecognitionTests.OCRTests;
+using BetterGenshinImpact.UnitTest.GameTaskTests.GetGridIconsTests;
+using Microsoft.Extensions.Localization;
+
+namespace BetterGenshinImpact.UnitTest.GameTaskTests.AutoFishingTests
+{
+    [Collection("Init Collection")]
+    public partial class BehavioursTests
+    {
+#pragma warning disable CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑添加 "required" 修饰符或声明为可为 null。
+        private static BgiYoloPredictor predictor;
+#pragma warning restore CS8618 // 在退出构造函数时，不可为 null 的字段必须包含非 null 值。请考虑添加 "required" 修饰符或声明为可为 null。
+
+        private readonly PaddleFixture paddle;
+        private readonly IStringLocalizer<AutoFishingTask> stringLocalizer;
+        private static readonly Lazy<ItemRecognizer> itemRecognizerLazy = new(() => new ItemRecognizer());
+        private static ItemRecognizer itemRecognizer => itemRecognizerLazy.Value;
+
+
+        public BehavioursTests(PaddleFixture paddle, LocalizationFixture localization, GridIconModelFixture iconModel)
+        {
+            this.paddle = paddle;
+            this.stringLocalizer = localization.CreateStringLocalizer<AutoFishingTask>();
+        }
+
+        private IOcrService OcrService => paddle.Get();
+
+        private static BgiYoloPredictor Predictor
+        {
+            get
+            {
+                return LazyInitializer.EnsureInitialized(ref predictor,
+                    () => new BgiOnnxSessionFactory(new FakeLogger<BgiOnnxFactory>(), ResolvedInferenceRuntime.Cpu())
+                        .CreateYoloPredictor(BgiOnnxModel.BgiFish));
+            }
+        }
+    }
+}

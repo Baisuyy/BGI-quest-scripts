@@ -1,0 +1,141 @@
+name: Sync Upstream BGI
+
+# 每天定时（或手动）把上游 babalae/better-genshin-impact 的默认分支同步进 bgi-special。
+# bgi-special 是单提交的源码快照（不带上游历史，避免脚本仓库膨胀），
+# 因此同步方式为「覆盖上游源码 + 重新注入特别版改动」，而不是 git merge。
+run-name: "Sync upstream ${{ inputs.upstream_ref || 'auto' }}"
+
+on:
+  schedule:
+    - cron: "17 21 * * *" # 北京时间每天 05:17
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: "上游分支或标签（留空自动探测默认分支）"
+        required: false
+        type: string
+      build_after_sync:
+        description: "同步成功后立即触发特别版构建"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: 检出 bgi-special
+        uses: actions/checkout@v4
+        with:
+          ref: bgi-special
+          fetch-depth: 1
+
+      - name: 拉取上游快照
+        id: up
+        env:
+          INPUT_REF: ${{ inputs.upstream_ref }}
+        run: |
+          set -euo pipefail
+          URL="https://github.com/babalae/better-genshin-impact.git"
+          REF="${INPUT_REF:-}"
+          if [ -z "$REF" ]; then
+            REF=$(git ls-remote --symref "$URL" HEAD \
+                  | awk '/^ref:/ {sub("refs/heads/", "", $2); print $2; exit}')
+          fi
+          echo "上游分支：$REF"
+
+          if ! git clone --quiet --depth 1 --branch "$REF" "$URL" /tmp/upstream 2>/dev/null; then
+            git clone --quiet --depth 1 "$URL" /tmp/upstream
+            git -C /tmp/upstream fetch --quiet --depth 1 origin "$REF"
+            git -C /tmp/upstream checkout --quiet FETCH_HEAD
+          fi
+
+          SHA=$(git -C /tmp/upstream rev-parse --short HEAD)
+          OLD=$(cat .bgi-upstream 2>/dev/null || echo none)
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "本地记录 $OLD，上游 $SHA"
+          if [ "$OLD" = "$SHA" ]; then
+            echo "state=noop" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=changed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 覆盖源码并重新注入
+        if: ${{ steps.up.outputs.state == 'changed' }}
+        id: apply
+        run: |
+          set -euo pipefail
+          python3 tools/bgi-special/sync_source.py /tmp/upstream
+          python3 tools/bgi-special/patch_engine_extend.py
+          echo "${{ steps.up.outputs.sha }}" > .bgi-upstream
+
+      - name: 提交并推送
+        if: ${{ steps.up.outputs.state == 'changed' }}
+        id: push
+        env:
+          REF: ${{ steps.up.outputs.ref }}
+          SHA: ${{ steps.up.outputs.sha }}
+        run: |
+          set -euo pipefail
+          git config user.name  "bgi-special-bot"
+          git config user.email "bgi-special-bot@users.noreply.github.com"
+          git add -A
+          git commit -q -m "chore(sync): 同步上游 ${REF} @ ${SHA}" --allow-empty
+          git push origin HEAD:bgi-special
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: 触发特别版构建
+        if: ${{ steps.push.outputs.pushed == 'true' && (github.event_name == 'schedule' || inputs.build_after_sync) }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run build-special.yml --ref main -f ref=bgi-special -f make_release=true
+          echo "已触发构建"
+
+      - name: 同步失败时开 issue
+        if: ${{ failure() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ steps.up.outputs.ref }}
+          SHA: ${{ steps.up.outputs.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          BODY=$(printf '%s\n' \
+            "自动同步上游 \`${REF}\`（${SHA}）失败，源码未推送。" \
+            "" \
+            "常见原因：上游改动了 \`EngineExtend.InitHost\` 的结构，注入锚点匹配不到；" \
+            "或 \`VisionHost.cs\` 依赖的接口（\`ImageRegion\` / \`OcrFactory\` / \`IOcrService\`）签名变化。" \
+            "" \
+            "处理方式：本地按 SPECIAL-API.md 的说明调整" \
+            "\`tools/bgi-special/patch_engine_extend.py\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
+            "" \
+            "构建日志：${RUN_URL}")
+          EXIST=$(gh issue list --state open --search "上游同步失败 in:title" \
+                  --json number --jq '.[0].number // empty')
+          if [ -n "$EXIST" ]; then
+            gh issue comment "$EXIST" --body "$BODY"
+          else
+            gh issue create --title "上游同步失败（${REF} @ ${SHA}）" --body "$BODY"
+          fi
+
+      - name: 汇总
+        if: always()
+        run: |
+          {
+            echo "| 项目 | 值 |"
+            echo "| --- | --- |"
+            echo "| 上游分支 | ${{ steps.up.outputs.ref }} |"
+            echo "| 上游 HEAD | ${{ steps.up.outputs.sha }} |"
+            echo "| 结果 | ${{ steps.up.outputs.state }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

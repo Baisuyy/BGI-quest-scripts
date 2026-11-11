@@ -1,0 +1,11 @@
+<UserControl x:Class="BetterGenshinImpact.View.Controls.PuloniaOneDragonHistoryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:BetterGenshinImpact.View.Controls"
+             Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+    <!--
+        一条龙执行记录窗口：运行记录与任务计划页、全局执行记录页共用同一个执行记录视图，不再维护单独的一份布局；
+        DataContext 为窗口专属的 PuloniaTaskHistoryViewModel。路线 CD 统一在账户页查看，本窗口不再有“路线 CD”页签。
+    -->
+    <controls:PuloniaTaskHistoryView />
+</UserControl>
