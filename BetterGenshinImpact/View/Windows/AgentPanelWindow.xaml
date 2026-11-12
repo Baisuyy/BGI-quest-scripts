@@ -1,0 +1,136 @@
+<Window x:Class="BetterGenshinImpact.View.Windows.AgentPanelWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="BetterGI 助手"
+        Width="430"
+        Height="330"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        FontFamily="Microsoft YaHei UI"
+        FontSize="13"
+        Deactivated="OnDeactivated">
+
+    <Window.Resources>
+        <!-- 深色半透明：压在游戏画面上也不刺眼，且不挡住背后的战斗信息 -->
+        <SolidColorBrush x:Key="PanelBackground" Color="#F21A1A1C" />
+        <SolidColorBrush x:Key="PanelBorder" Color="#33FFFFFF" />
+        <SolidColorBrush x:Key="MutedText" Color="#99FFFFFF" />
+        <SolidColorBrush x:Key="AccentBrush" Color="#4CC2FF" />
+
+        <Style x:Key="FlatButton" TargetType="Button">
+            <Setter Property="Background" Value="#22FFFFFF" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="10,4" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#3DFFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+    </Window.Resources>
+
+    <Border Background="{StaticResource PanelBackground}"
+            BorderBrush="{StaticResource PanelBorder}"
+            BorderThickness="1"
+            CornerRadius="12"
+            MouseLeftButtonDown="OnDragArea">
+        <Grid Margin="12,10,12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- 顶部：状态灯 + 标题 + 快捷键 + 关窗 -->
+            <Grid Grid.Row="0" Margin="0,0,0,8">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#FFB020"
+                             VerticalAlignment="Center" Margin="0,0,7,0" />
+                    <TextBlock Text="BGI 助手" FontWeight="SemiBold" Foreground="White"
+                               VerticalAlignment="Center" />
+                    <TextBlock x:Name="HintText" Text="Ctrl+Alt+A" Foreground="{StaticResource MutedText}"
+                               FontSize="11" Margin="10,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="SettingsButton" Content="⚙" Style="{StaticResource IconButton}"
+                            ToolTip="打开 AI 助手设置" Click="OnOpenSettings" />
+                    <Button x:Name="CloseButton" Content="✕" Style="{StaticResource IconButton}"
+                            ToolTip="隐藏（快捷键可再次唤起）" Click="OnHide" />
+                </StackPanel>
+            </Grid>
+
+            <!-- 中部：步骤流 -->
+            <Border Grid.Row="1" Background="#14FFFFFF" CornerRadius="8" Padding="10,8">
+                <ScrollViewer x:Name="OutputScroll" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="OutputText"
+                               Foreground="#E6FFFFFF"
+                               FontFamily="Consolas, Microsoft YaHei UI"
+                               FontSize="12"
+                               TextWrapping="Wrap"
+                               LineHeight="18"
+                               Text="说一句要做什么，例如：&#x0a;· 把今天的体力清掉&#x0a;· 领一下每日和邮件&#x0a;· 跑「第七章第五幕」脚本" />
+                </ScrollViewer>
+            </Border>
+
+            <!-- 底部：输入 + 发送/停止 -->
+            <Grid Grid.Row="2" Margin="0,8,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Background="#1FFFFFFF" CornerRadius="8" Padding="8,4">
+                    <TextBox x:Name="InputBox"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Foreground="White"
+                             CaretBrush="White"
+                             TextWrapping="Wrap"
+                             AcceptsReturn="False"
+                             MaxHeight="56"
+                             VerticalScrollBarVisibility="Auto"
+                             VerticalContentAlignment="Center"
+                             KeyDown="OnInputKeyDown" />
+                </Border>
+                <Button x:Name="SendButton" Grid.Column="1" Content="发送"
+                        Style="{StaticResource FlatButton}"
+                        Background="{StaticResource AccentBrush}"
+                        Foreground="#0B0B0C"
+                        FontWeight="SemiBold"
+                        Margin="8,0,0,0"
+                        MinWidth="64"
+                        Click="OnSend" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

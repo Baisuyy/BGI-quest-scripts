@@ -13,6 +13,7 @@
 7. UpdateService.CheckUpdateAsync —— 特别版更新检查改道，不接官方更新通道
 8. App.xaml.cs                   —— 注册「AI 助手」页（模型配置 + 本地助手）
 9. MainWindow.xaml               —— 侧边栏加「AI 助手」入口
+10. ApplicationHostService       —— 启动时注册助手小面板的全局快捷键
 
 每一处都先判断是否已存在（幂等），锚点找不到就返回非 0，由 workflow 报警并开 issue。
 新增文件（Core/Ai 等）不在这里处理，由 sync_source.py 的 KEEP 清单保留。
@@ -31,6 +32,7 @@ SETTINGS_PAGE = "BetterGenshinImpact/View/Pages/TaskSettingsPage.xaml"
 SETTINGS_VM = "BetterGenshinImpact/ViewModel/Pages/TaskSettingsPageViewModel.cs"
 UPDATE_SERVICE = "BetterGenshinImpact/Service/UpdateService.cs"
 MAIN_WINDOW = "BetterGenshinImpact/View/MainWindow.xaml"
+APP_HOST = "BetterGenshinImpact/Service/ApplicationHostService.cs"
 
 # ---------------------------------------------------------------- 1. 脚本宿主
 
@@ -228,6 +230,17 @@ NAV_BLOCK = NAV_ANCHOR + '''
 '''
 
 
+# ---------------------------------------------------------------- 10. 助手小面板快捷键
+
+APP_HOST_ANCHOR = "        await HandleActivationAsync();"
+
+APP_HOST_BLOCK = """
+
+        // 特别版：注册助手小面板的全局快捷键。失败只记日志，不阻断启动
+        BetterGenshinImpact.View.Windows.AgentPanelWindow.EnsureGlobalHotkey();
+"""
+
+
 def patch(rel: str, marker: str, anchor: str, replacement: str, label: str) -> bool:
     """在 anchor 处插入/替换；marker 已存在则跳过。返回是否改动。"""
     path = ROOT / rel
@@ -293,6 +306,8 @@ def main() -> int:
           PAGE_REG_ANCHOR + PAGE_REG_BLOCK, "注册 AI 助手页")
     patch(MAIN_WINDOW, "pages:AiSettingsPage", NAV_ANCHOR,
           NAV_BLOCK, "侧边栏 AI 助手入口")
+    patch(APP_HOST, "AgentPanelWindow.EnsureGlobalHotkey", APP_HOST_ANCHOR,
+          APP_HOST_ANCHOR + APP_HOST_BLOCK, "助手小面板快捷键")
 
     # AllConfig / App / VM 需要额外的 using
     for rel, anchor, line in (

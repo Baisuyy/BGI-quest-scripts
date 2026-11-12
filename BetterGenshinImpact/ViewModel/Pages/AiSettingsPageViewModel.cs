@@ -38,7 +38,8 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
         _runtimes = runtimes;
         _agent = new LocalAgent(kernel, config);
         _progress = new Progress<string>(AppendOutput);
-        AgentConsent.Handler = RequestConsentAsync;
+        // 授权闸门由界面层补默认实现；常驻小面板可能先注册，这里不覆盖它
+        AgentConsent.EnsureDefaultHandler();
         _config.AiConfig.PropertyChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(SandboxRoot));
@@ -167,6 +168,12 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
     private void Clear() => Output = "";
 
     /// <summary>
+    /// 打开游戏内的常驻小面板。与热键 <c>Ctrl+Alt+A</c> 是同一个窗口。
+    /// </summary>
+    [RelayCommand]
+    private void OpenPanel() => AgentPanelWindow.ShowPanel();
+
+    /// <summary>
     /// 开始/停止路径录制。录制依赖截图器，没启动时直接提示，不静默失败。
     /// </summary>
     [RelayCommand]
@@ -178,7 +185,8 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
             Recording = false;
             RecordStatus = result == null
                 ? "没有采到有效点，未保存（确认地图匹配正常、人确实走动过）"
-                : $"已保存 {result.Kept} 点（采样 {result.Sampled}）· {result.TotalMeters:F0}m · 状态 {result.MotionSummary}\n{result.FilePath}";
+                : $"已保存 {result.Kept} 点（采样 {result.Sampled}，去折返 {result.Trimmed}）· "
+                  + $"{result.TotalMeters:F0}m · 状态 {result.MotionSummary}\n{result.FilePath}";
             return;
         }
 
@@ -239,32 +247,5 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
         }
 
         Output = string.IsNullOrEmpty(Output) ? line : Output + Environment.NewLine + line;
-    }
-
-    /// <summary>
-    /// 授权回调。必须回到 UI 线程弹窗；用户点「否」或窗口不存在时一律按拒绝处理。
-    /// </summary>
-    private static Task<bool> RequestConsentAsync(AgentRequest request)
-    {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher == null)
-        {
-            return Task.FromResult(false);
-        }
-
-        return dispatcher.InvokeAsync(() =>
-        {
-            var body = $"""
-                        操作：{request.Action}
-                        目标：{request.Target}
-                        详情：{request.Detail}
-
-                        该操作不在软件目录（沙箱）内，或当前配置要求逐次确认。
-                        允许本次执行吗？拒绝不会中断任务，模型会换一种做法。
-                        """;
-            var result = ThemedMessageBox.Show(body, "本地助手请求授权",
-                MessageBoxButton.YesNo, ThemedMessageBox.MessageBoxIcon.Warning, MessageBoxResult.No);
-            return result == MessageBoxResult.Yes;
-        }).Task;
     }
 }

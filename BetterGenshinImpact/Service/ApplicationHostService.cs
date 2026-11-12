@@ -37,6 +37,10 @@ public class ApplicationHostService(
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await HandleActivationAsync();
+
+        // 特别版：注册助手小面板的全局快捷键。失败只记日志，不阻断启动
+        BetterGenshinImpact.View.Windows.AgentPanelWindow.EnsureGlobalHotkey();
+
         instanceService.MarkApplicationReady();
     }
 

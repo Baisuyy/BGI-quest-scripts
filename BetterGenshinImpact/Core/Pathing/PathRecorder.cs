@@ -19,8 +19,9 @@ namespace BetterGenshinImpact.Core.Pathing;
 /// <summary>录制时采样到的一个点。<see cref="Motion"/> 来自画面上的按键图标，不是模型猜的。</summary>
 public sealed record RecordedPoint(double X, double Y, string Motion, int ElapsedMs);
 
-/// <summary>录制结果。</summary>
-public sealed record PathRecordResult(string FilePath, int Sampled, int Kept, double TotalMeters, string MotionSummary);
+/// <summary>录制结果。<see cref="Trimmed"/> 是被当作折返圈裁掉的采样点数。</summary>
+public sealed record PathRecordResult(string FilePath, int Sampled, int Kept, double TotalMeters,
+    string MotionSummary, int Trimmed = 0);
 
 /// <summary>
 /// 路径录制：按固定间隔读小地图坐标，停下来后简化成 BetterGI 能直接跑的路径文件。
@@ -114,13 +115,14 @@ public sealed class PathRecorder
             return null;
         }
 
-        var kept = Simplify(raw, 1.2);
+        var trimmed = TrimLoops(raw);
+        var kept = Simplify(trimmed, 1.2);
         var total = TotalMeters(kept);
-        var path = Save(kept, raw.Count, total, name);
+        var path = Save(kept, raw.Count, total, name, raw.Count - trimmed.Count);
         var motions = SummarizeMotions(kept);
-        Logger.LogInformation("[录制] 停止 · 采样 {Sampled} → 保留 {Kept} 点 · {Total:F0}m · {File}",
-            raw.Count, kept.Count, total, path);
-        return new PathRecordResult(path, raw.Count, kept.Count, total, motions);
+        Logger.LogInformation("[录制] 停止 · 采样 {Sampled} → 去折返 {Trimmed} 点 → 保留 {Kept} 点 · {Total:F0}m · {File}",
+            raw.Count, raw.Count - trimmed.Count, kept.Count, total, path);
+        return new PathRecordResult(path, raw.Count, kept.Count, total, motions, raw.Count - trimmed.Count);
     }
 
     private async Task SampleLoopAsync(GameRuntime runtime, int intervalMs, CancellationToken ct)
@@ -186,6 +188,74 @@ public sealed class PathRecorder
             return "walk";
         }
     }
+
+    /// <summary>
+    /// 回环裁剪：走错路又走回原地，轨迹里会留下一个「A→…→A」的圈。
+    /// <para>
+    /// 判据是「同一位置在走出一段距离后又经过」：半径 3 米内重现、且中间绕行超过 15 米，就把中间那段整段丢掉。
+    /// 只丢中间、保留回到原位的那一点，避免把两段路接出硬折角。
+    /// </para>
+    /// </summary>
+    private static List<RecordedPoint> TrimLoops(List<RecordedPoint> points, double radius = 3.0, double minDetour = 15.0)
+    {
+        if (points.Count < 8)
+        {
+            return points;
+        }
+
+        var keep = Enumerable.Repeat(true, points.Count).ToArray();
+        var i = 0;
+        while (i < points.Count)
+        {
+            if (!keep[i])
+            {
+                i++;
+                continue;
+            }
+
+            var walked = 0d;
+            var closed = -1;
+            for (var j = i + 4; j < points.Count; j++)
+            {
+                if (!keep[j])
+                {
+                    continue;
+                }
+
+                walked += Distance(points[j], points[j - 1]);
+                if (Distance(points[i], points[j]) <= radius && walked >= minDetour)
+                {
+                    closed = j;
+                    break;
+                }
+
+                // 绕出去太远还没回到原位，就不是「原地打转」，别把整条路当成环
+                if (walked > minDetour * 6)
+                {
+                    break;
+                }
+            }
+
+            if (closed > 0)
+            {
+                for (var k = i + 1; k < closed; k++)
+                {
+                    keep[k] = false;
+                }
+
+                i = closed;
+                continue;
+            }
+
+            i++;
+        }
+
+        var result = points.Where((_, index) => keep[index]).ToList();
+        return result.Count >= 2 ? result : points;
+    }
+
+    private static double Distance(RecordedPoint a, RecordedPoint b)
+        => Math.Sqrt(Math.Pow(b.X - a.X, 2) + Math.Pow(b.Y - a.Y, 2));
 
     /// <summary>Douglas-Peucker：把近似直线的采样点压掉，阈值按米算。</summary>
     private static List<RecordedPoint> Simplify(List<RecordedPoint> points, double tolerance)
@@ -269,7 +339,7 @@ public sealed class PathRecorder
         return string.Join(" / ", groups.Select(g => $"{g.Key} {g.Count()}"));
     }
 
-    private string Save(List<RecordedPoint> points, int sampled, double total, string? name)
+    private string Save(List<RecordedPoint> points, int sampled, double total, string? name, int trimmed = 0)
     {
         var dir = Global.Absolute(Path.Combine("User", "PathRecord"));
         Directory.CreateDirectory(dir);
@@ -319,6 +389,7 @@ public sealed class PathRecorder
                 ["recorded_at"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 ["sampled_points"] = sampled,
                 ["kept_points"] = points.Count,
+                ["trimmed_loop_points"] = trimmed,
                 ["total_meters"] = Math.Round(total, 1),
                 ["motion_counts"] = motionCounts,
                 ["height"] = "unavailable",

@@ -33,7 +33,10 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
     /// <summary>回给模型的工具结果上限。</summary>
     private const int MaxResultChars = 8_000;
 
-    private static readonly LlmTool[] Tools =
+    /// <summary>
+    /// 文件类工具。任务下发工具在 <see cref="AgentTasks"/> 里，运行时合并成一个工具集。
+    /// </summary>
+    private static readonly LlmTool[] FileTools =
     [
         new("list_dir", "列出目录内容。路径相对沙箱根目录；不填表示根目录。",
             new JsonObject
@@ -106,6 +109,22 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
     private AgentSandbox Sandbox => new(config.AiConfig.AgentSandboxRoot);
 
     /// <summary>
+    /// 任务下发桥。软件还没初始化完（或作为纯库调用）时为 null，此时只剩文件能力。
+    /// </summary>
+    private AgentTasks? _tasks;
+
+    /// <summary>首次使用时解析一次；失败后下次调用再试，避免一次时序问题永久降级。</summary>
+    private AgentTasks? Tasks => _tasks ??= AgentTasks.TryCreate();
+
+    /// <summary>路径工具无状态，直接复用。</summary>
+    private static readonly AgentPathing Pathing = new();
+
+    /// <summary>本次可用的工具集：文件类 + 任务下发类 + 路径比对类。</summary>
+    private IReadOnlyList<LlmTool> BuildTools()
+        => [.. FileTools, .. AgentTasks.Tools, .. AgentPathing.Tools];
+
+
+    /// <summary>
     /// 执行一个自然语言任务。<paramref name="progress"/> 每步回调一次，供界面实时显示。
     /// </summary>
     public async Task<AgentRunResult> RunAsync(string task, IProgress<string>? progress = null,
@@ -147,7 +166,7 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
                     return Finish(false, "任务超时", step, callsAtStart, stopwatch, blockId);
                 }
 
-                var reply = await kernel.SendAsync("本地助手", conversation, Tools,
+                var reply = await kernel.SendAsync("本地助手", conversation, BuildTools(),
                     BuildSystemPrompt(sandbox, settings), ct).ConfigureAwait(false);
 
                 if (!reply.WantsTool)
@@ -210,19 +229,26 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
     {
         var rootEntries = SafeEntries(sandbox.Root);
         var prompt = $"""
-                       你是运行在 BetterGI 客户端里的本地助手。你能读写文件和运行程序，但只能在下面这个沙箱里自由行动。
+                       你是运行在 BetterGI 客户端里的本地助手。你有两类能力：
+                       ① 在沙箱里读写文件、运行程序；② 把游戏内的活儿交给 BGI 自己去做（下发内置任务、跑用户脚本）。
 
                        沙箱根目录：{sandbox.Root}
                        根目录内容：{rootEntries}
 
                        规则：
                        1. 相对路径一律相对沙箱根目录解析，不要拼盘符。
-                       2. 沙箱内的读取可以直接做；写入与运行是否需要确认由配置决定，配置拒绝了就等弹窗之外的路径，不要重复尝试同一操作。
+                       2. 沙箱内的读取可以直接做；写入与运行是否需要确认由配置决定，配置拒绝了就换路径，不要重复尝试同一操作。
                        3. 沙箱外的任何路径都会弹窗向用户申请，被拒绝时换方案或直接 done(success=false)，不要反复申请。
                        4. 删除文件没有专用工具，确需删除时用 run 调用系统命令，并在参数里写清楚要删什么。
                        5. 不要修改 BetterGI.exe、Assets、dicts 之外你不了解的东西；改动配置前先读一遍原文件。
-                       6. 完成任务或确认做不到时调用 done。
-                       7. 全程用中文，说明简短。
+                       6. 用户要求「刷本、清体力、领日常、讨伐、钓鱼、伐木、跑脚本」这类游戏内操作时，用 list_tasks / run_task / run_script 下发，
+                          不要用键鼠模拟或自己写程序去替代——那些能力 BGI 本身就有，而且带任务锁与停止入口。
+                       7. 下任务前先 list_tasks 确认标识；参数不确定时先 describe_task，params 只填要改的字段（snake_case），其余保持默认。
+                       8. 长任务（刷本、讨伐、脚本）不要 wait，让它在后台跑，再用 task_status 回报；短任务才值得等。
+                       9. 同一时刻只能跑一个任务，被拒绝时先 task_status，必要时 stop_task。
+                       10. 用户问「刚录的路线怎么样、和成品比一下」时，用 list_paths 找到文件再 compare_path 比对，不要自己算。
+                       11. 完成任务或确认做不到时调用 done。
+                       12. 全程用中文，说明简短；不要编造任务标识或脚本名。
                        """;
 
         if (settings.AgentAllowWrite)
@@ -268,6 +294,25 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
         var args = ParseArguments(call.ArgumentsJson);
         try
         {
+            // 路径比对只读 User 目录，不碰游戏，因此不需要授权弹窗
+            if (AgentPathing.Handles(call.Name))
+            {
+                var report = await Pathing.ExecuteAsync(call.Name, args, ct).ConfigureAwait(false);
+                return new ToolOutcome(call.Name, report);
+            }
+
+            // 游戏内任务与脚本走任务桥：它复用 BGI 的任务锁、截图器与停止按钮，不另起一套执行
+            if (AgentTasks.Handles(call.Name))
+            {
+                if (Tasks is not { } tasks)
+                {
+                    return new ToolOutcome(call.Name, "任务下发不可用：软件尚未初始化完成，请改用文件类操作或稍后再试。");
+                }
+
+                var text = await tasks.ExecuteAsync(call.Name, args, ct).ConfigureAwait(false);
+                return new ToolOutcome(DescribeTaskCall(call.Name, args), text);
+            }
+
             switch (call.Name)
             {
                 case "list_dir":
@@ -295,6 +340,24 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
             Logger.LogDebug(e, "本地助手工具 {Name} 执行失败", call.Name);
             return new ToolOutcome(call.Name, "执行失败：" + e.Message);
         }
+    }
+
+    /// <summary>任务类调用的一行描述，用于日志与界面进度。</summary>
+    private static string DescribeTaskCall(string name, JsonObject args)
+    {
+        var taskId = GetString(args, "task_id");
+        var script = GetString(args, "name");
+        return name switch
+        {
+            "list_tasks" => "list_tasks" + (GetString(args, "group") is { } group ? " " + group : ""),
+            "describe_task" => "describe_task " + (taskId ?? ""),
+            "run_task" => "run_task " + (taskId ?? ""),
+            "task_status" => "task_status",
+            "stop_task" => "stop_task",
+            "list_scripts" => "list_scripts" + (GetString(args, "keyword") is { } keyword ? " " + keyword : ""),
+            "run_script" => "run_script " + (script ?? ""),
+            _ => name,
+        };
     }
 
     private async Task<ToolOutcome> ListDirAsync(JsonObject args, AgentSandbox sandbox, CancellationToken ct)

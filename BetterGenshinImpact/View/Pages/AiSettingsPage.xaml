@@ -75,6 +75,32 @@
                 </ui:CardExpander.Header>
 
                 <StackPanel>
+                    <!-- 游戏内小面板：不切出游戏就能下任务，热键随时唤起 -->
+                    <Grid Margin="16,16,16,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="游戏内小面板" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Grid.Column="0"
+                                      Margin="0,0,12,0"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      TextWrapping="Wrap"
+                                      Text="常驻悬浮窗，游戏运行时按 Ctrl+Alt+A 唤起，一句话下发任务或脚本；也可以从这里直接打开" />
+                        <ui:Button Grid.Row="0"
+                                   Grid.RowSpan="2"
+                                   Grid.Column="1"
+                                   Margin="0,0,36,0"
+                                   VerticalAlignment="Center"
+                                   Command="{Binding OpenPanelCommand}"
+                                   Content="打开面板" />
+                    </Grid>
+
                     <Grid Margin="16,16,16,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />

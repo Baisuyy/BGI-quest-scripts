@@ -46,6 +46,9 @@ KEEP = (
     "BetterGenshinImpact/View/Pages/AiSettingsPage.xaml",
     "BetterGenshinImpact/View/Pages/AiSettingsPage.xaml.cs",
     "BetterGenshinImpact/ViewModel/Pages/AiSettingsPageViewModel.cs",
+    # 游戏内助手小面板（热键唤起，下发任务/脚本）
+    "BetterGenshinImpact/View/Windows/AgentPanelWindow.xaml",
+    "BetterGenshinImpact/View/Windows/AgentPanelWindow.xaml.cs",
     "tools/bgi-special/",
 )
 
