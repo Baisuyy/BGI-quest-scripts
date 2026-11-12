@@ -83,9 +83,13 @@ def patch_auto_boss() -> None:
     if not block:
         warn("AutoBossData 里找不到 NoPathingSupportBosses")
     elif '"蕴光月幻蝶"' in block.group(1):
-        inner = block.group(1)
-        inner = re.sub(r'\s*"蕴光月幻蝶"\s*,?', "", inner)
-        text = text[: block.start(1)] + inner + text[block.end(1):]
+        # 按行删，保留缩进与括号位置；顺手去掉最后一项的尾逗号
+        lines = [line for line in block.group(1).splitlines() if '"蕴光月幻蝶"' not in line]
+        for i in range(len(lines) - 1, -1, -1):
+            if lines[i].strip():
+                lines[i] = lines[i].rstrip().rstrip(",")
+                break
+        text = text[: block.start(1)] + "\n".join(lines) + text[block.end(1):]
         note("蕴光月幻蝶 移出无路线名单")
 
     if text != original:

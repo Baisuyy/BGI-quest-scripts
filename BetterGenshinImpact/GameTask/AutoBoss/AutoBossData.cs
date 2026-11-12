@@ -50,7 +50,8 @@ public static class AutoBossData
     public static readonly HashSet<string> NoPathingSupportBosses =
     [
         "蕴光月守宫",
-        "超重型陆巡舰·机动战垒",];
+        "超重型陆巡舰·机动战垒"
+    ];
 
     /// <summary>
     /// 战斗后需要重新执行完整前往路线的 Boss。
