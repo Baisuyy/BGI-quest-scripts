@@ -12,7 +12,8 @@
 
 const CONFIG = {
     startSeg: 0,             // 从第几段开始（0 = 从头），断点续跑改这里
-    skipSegs: [],            // 要跳过的段号；2/3 段已放开（段间有 1.6-1.8km 跳跃，靠段前传送衔接）
+    skipSegs: [2, 3],        // 段 2、3 默认跳过：雪桦车站/贝洛沃迪一带在 tp.json 里没有传送点
+                             // （最近神像 963m、最近锚点 2920m），传送后要走几公里直线，必然卡死
     teleportBeforeSeg: true,   // 每段开始前先传送到首点附近
     autoSkip: true,            // 自动跳对话 + 自动选项
     chooseOption: '优先选择第一个选项',
