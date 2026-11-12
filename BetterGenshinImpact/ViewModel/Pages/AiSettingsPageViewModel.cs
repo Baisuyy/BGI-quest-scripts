@@ -82,6 +82,36 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
     /// <summary>本次运行已用请求数 / 上限。</summary>
     public string BudgetText => $"{_kernel.Calls} / {_kernel.MaxCalls}";
 
+    /// <summary>连通性测试的结果文本（内嵌的 AiSettingsCard 直接绑定这个）。</summary>
+    [ObservableProperty]
+    private string _aiTestResult = "";
+
+    /// <summary>
+    /// 发一条最小请求验证地址、密钥、模型名。不占运行额度、不参与熔断。
+    /// <para>
+    /// 卡片在「任务设置」和「AI 助手」两处复用，两个页面各有自己的 ViewModel，
+    /// 所以命令名与结果属性必须在两边都存在，否则按钮点了没有任何反馈。
+    /// </para>
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = false)]
+    private async Task TestAiConnection()
+    {
+        AiTestResult = "正在测试…";
+        try
+        {
+            var reply = await _kernel.TestConnectionAsync(CancellationToken.None);
+            AiTestResult = "连接正常：" + reply;
+        }
+        catch (OperationCanceledException)
+        {
+            AiTestResult = "测试超时：模型没有在设定时间内返回，检查地址与网络";
+        }
+        catch (Exception e)
+        {
+            AiTestResult = "测试失败：" + e.Message;
+        }
+    }
+
     [ObservableProperty]
     private string _taskInput = "";
 
