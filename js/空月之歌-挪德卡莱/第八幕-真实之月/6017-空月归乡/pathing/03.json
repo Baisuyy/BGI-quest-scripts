@@ -11,8 +11,8 @@
   },
   "positions": [
     {
-      "x": 9453.8,
-      "y": 1599.2,
+      "x": 1599.2,
+      "y": 9453.8,
       "type": "target",
       "move_mode": "run"
     }
