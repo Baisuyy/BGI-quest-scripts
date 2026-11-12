@@ -12,6 +12,23 @@ BetterGI 特别版，基于上游 **{{BASE}}** 构建，源码 {{REF}} @ {{SHA}}
 - 默认 6 步、45 秒、每小时 60 次；连续失败 3 次冷却 2 分钟
 - 配置入口：**任务设置 → AI 智能决策（内置）**，支持 OpenAI 兼容（DeepSeek / 通义 / 智谱 / Kimi / Ollama / LM Studio）与 Anthropic
 
+### 游戏内助手面板
+
+游戏运行时按 <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd> 唤起常驻小窗，一句话说「把今天体力清掉」「领一下每日和邮件」，由模型自己选任务下发，不必切出游戏。
+
+- 下发走 BGI 自己的任务通道（`SoloTaskExecutionService` + `TaskRunner`），与界面点「开始」同一条路：同样加任务锁、同样起截图器、同样能被停止按钮打断
+- 可用工具：`list_tasks` / `describe_task` / `run_task` / `task_status` / `stop_task` / `list_scripts` / `run_script`
+- 参数深合并：模型只填要改的字段，漏填的保持任务默认值，不会被清零
+- 长任务默认只下发不等（刷本、跑脚本），之后用 `task_status` 回报进度
+- 热键被占用时，从 **AI 助手** 页的「打开面板」进入
+
+### 路径录制与比对（实验）
+
+- 走一遍即录制：200ms 采样小地图坐标，静止点丢弃、近似直线压缩、折返裁剪（同一位置走出 15 米后又经过，中间绕行段整段丢弃）
+- 产物存 `User/PathRecord/*.json`，格式与 BGI 路径文件一致，可直接跑
+- `list_paths` / `compare_path` 可回答「刚录的这条和成品差多少」：双向最近点最大/平均偏差 + 长度比
+- 只记平面坐标：小地图与大地图配准是二维的，**没有高度**；滑翔 / 攀爬按键图标能识别，按段统计在 `special_meta.motion_counts`
+
 ### 脚本宿主接口
 
 | 接口 | 用途 |
