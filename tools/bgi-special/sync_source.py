@@ -33,6 +33,8 @@ KEEP = (
     "BetterGenshinImpact/Core/Script/Dependence/AiAgentHost.cs",
     # 内置大模型内核
     "BetterGenshinImpact/Core/Ai/",
+    # 路径录制（特别版新增）
+    "BetterGenshinImpact/Core/Pathing/",
     # 特别版更新检查（改走自己的 Release）
     "BetterGenshinImpact/Core/Special/",
     "BetterGenshinImpact/Core/Config/AiConfig.cs",

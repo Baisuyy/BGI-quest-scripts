@@ -131,8 +131,8 @@ STUCK_ANCHOR = """                            _inTrap++;
 
 STUCK_BLOCK = """                            _inTrap++;
 
-                            // 第三次卡死本来要放弃整段路线：先给内置 AI 一次接管机会
-                            if (_inTrap == 3 && await TryAiRescueAsync(screen, waypoint, position))
+                            // 到第 N 次卡死（默认 3，可配 1 便于验证）时，先给内置 AI 一次接管机会
+                            if (_inTrap == AiStuckThreshold && await TryAiRescueAsync(screen, waypoint, position))
                             {
                                 _inTrap = 0;
                                 prevPositions.Clear();
@@ -141,7 +141,7 @@ STUCK_BLOCK = """                            _inTrap++;
                                 continue;
                             }
 
-                            if (_inTrap > 2)"""
+                            if (_inTrap >= AiStuckThreshold && _inTrap > 2)"""
 
 # ---------------------------------------------------------------- 5. 设置卡片
 

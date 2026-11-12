@@ -23,6 +23,11 @@ public partial class PathExecutor
     private const double AiRescueMinProgress = 5d;
 
     /// <summary>
+    /// 第几次卡死交给内置 AI。默认 3；设成 1 时第一次卡死就接管，用来验证链路是否通。
+    /// </summary>
+    private int AiStuckThreshold => Math.Clamp(_config.AiConfig.RescueTriggerAfterStuck, 1, 5);
+
+    /// <summary>
     /// 尝试让内置 AI 接管脱困。返回 true 表示已经脱离，可以继续走原路线。
     /// </summary>
     private async Task<bool> TryAiRescueAsync(ImageRegion screen, WaypointForTrack waypoint, Point2f position)

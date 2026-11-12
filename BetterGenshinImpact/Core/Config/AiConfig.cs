@@ -87,6 +87,13 @@ public partial class AiConfig : ObservableObject
     private int _rescueTimeoutSeconds = 45;
 
     /// <summary>
+    /// 第几次卡死交给内置 AI。默认 3（前两次仍走规则脱困）。
+    /// 设成 1 可以在测试时让第一次卡死就接管，用来确认链路是否通。
+    /// </summary>
+    [ObservableProperty]
+    private int _rescueTriggerAfterStuck = 3;
+
+    /// <summary>
     /// 允许模型在距离过远时直接传送到目标点位。关闭后模型只能用走位脱困。
     /// </summary>
     [ObservableProperty]

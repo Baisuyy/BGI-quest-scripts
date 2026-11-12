@@ -9,6 +9,52 @@
             <!-- 模型连接：与「任务设置」里那张卡是同一份配置 -->
             <controls:AiSettingsCard />
 
+            <!-- 状态自检：一行说清现在能不能用，避免「开了却没反应」 -->
+            <ui:Card Margin="0,0,0,12" Padding="16,12">
+                <StackPanel>
+                    <ui:TextBlock FontTypography="Body" Text="AI 状态" />
+                    <ui:TextBlock Margin="0,4,0,0"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  TextWrapping="Wrap"
+                                  Text="{Binding AiStatusText, Mode=OneWay}" />
+                </StackPanel>
+            </ui:Card>
+
+            <!-- 路径录制（实验） -->
+            <ui:CardExpander Margin="0,0,0,12" ContentPadding="0">
+                <ui:CardExpander.Icon>
+                    <ui:FontIcon Glyph="&#xe7c8;" Style="{StaticResource FaFontIconStyle}" />
+                </ui:CardExpander.Icon>
+                <ui:CardExpander.Header>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <ui:TextBlock FontTypography="Body" Text="路径录制（实验）" TextWrapping="Wrap" />
+                        <ui:TextBlock Grid.Row="1"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="走一遍就生成路径文件：200ms 采样小地图坐标，静止点丢弃、直线段压缩，存到 User/PathRecord"
+                                      TextWrapping="Wrap" />
+                    </Grid>
+                </ui:CardExpander.Header>
+
+                <StackPanel>
+                    <StackPanel Margin="16,16,16,0" Orientation="Horizontal">
+                        <ui:Button Appearance="Primary"
+                                   Command="{Binding ToggleRecordCommand}"
+                                   Content="{Binding RecordButtonText}" />
+                        <ui:Button Margin="8,0,0,0"
+                                   Command="{Binding OpenRecordFolderCommand}"
+                                   Content="打开录制目录" />
+                    </StackPanel>
+                    <ui:TextBlock Margin="16,12,36,16"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  TextWrapping="Wrap"
+                                  Text="{Binding RecordStatus, Mode=OneWay}" />
+                </StackPanel>
+            </ui:CardExpander>
+
             <!-- 本地助手 -->
             <ui:CardExpander Margin="0,0,0,12" ContentPadding="0">
                 <ui:CardExpander.Icon>

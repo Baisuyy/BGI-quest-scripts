@@ -197,6 +197,32 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="第几次卡死接管" />
+                <ui:TextBlock Grid.Row="1"
+                              Grid.Column="0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              TextWrapping="Wrap"
+                              Text="默认 3：前两次仍走规则脱困。设成 1 让第一次卡死就交给模型，用于验证整条链路是否通" />
+                <ui:NumberBox Grid.Row="0"
+                              Grid.RowSpan="2"
+                              Grid.Column="1"
+                              Width="300"
+                              VerticalAlignment="Top"
+                              Margin="0,0,36,0"
+                              Minimum="1"
+                              Maximum="5"
+                              SmallChange="1"
+                              Value="{Binding Config.AiConfig.RescueTriggerAfterStuck, Mode=TwoWay}" />
+            </Grid>
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="单次接管步数" />
                 <ui:TextBlock Grid.Row="1"
                               Grid.Column="0"

@@ -4,8 +4,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using BetterGenshinImpact.Core.Pathing;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
+using BetterGenshinImpact.GameTask.Runtime;
 using BetterGenshinImpact.View.Windows;
 using BetterGenshinImpact.ViewModel;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,18 +26,52 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
     private readonly AllConfig _config;
     private readonly AiKernel _kernel;
     private readonly LocalAgent _agent;
+    private readonly GameRuntimeService _runtimes;
+    private readonly PathRecorder _recorder = new();
     private readonly IProgress<string> _progress;
     private CancellationTokenSource? _cts;
 
-    public AiSettingsPageViewModel(AllConfig config, AiKernel kernel)
+    public AiSettingsPageViewModel(AllConfig config, AiKernel kernel, GameRuntimeService runtimes)
     {
         _config = config;
         _kernel = kernel;
+        _runtimes = runtimes;
         _agent = new LocalAgent(kernel, config);
         _progress = new Progress<string>(AppendOutput);
         AgentConsent.Handler = RequestConsentAsync;
-        _config.AiConfig.PropertyChanged += (_, _) => OnPropertyChanged(nameof(SandboxRoot));
+        _config.AiConfig.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(SandboxRoot));
+            OnPropertyChanged(nameof(AiStatusText));
+        };
     }
+
+    /// <summary>
+    /// 一行说清「现在能不能用」：开关、协议、模型、密钥、不可用原因。
+    /// 用户测「AI 没生效」时先看这行，不用翻日志。
+    /// </summary>
+    public string AiStatusText
+    {
+        get
+        {
+            var settings = _config.AiConfig;
+            var reason = _kernel.UnavailableReason;
+            var key = string.IsNullOrWhiteSpace(settings.ApiKey) ? "密钥 空" : "密钥 已填";
+            var endpoint = string.IsNullOrWhiteSpace(settings.Endpoint) ? "地址 空" : settings.Endpoint;
+            return $"{(_kernel.Enabled ? "已启用" : "未启用")} · {settings.Provider} · "
+                   + $"{(string.IsNullOrWhiteSpace(settings.ModelName) ? "模型 空" : settings.ModelName)} · {key} · "
+                   + $"{endpoint} · {(reason ?? "可发请求")} · 本次已用 {_kernel.Calls}/{_kernel.MaxCalls}";
+        }
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RecordButtonText))]
+    private bool _recording;
+
+    [ObservableProperty]
+    private string _recordStatus = "未开始。开始后正常走动即可，站着不动不记点。";
+
+    public string RecordButtonText => Recording ? "停止并保存" : "开始录制";
 
     /// <summary>配置根，供内嵌的 <c>AiSettingsCard</c> 绑定 <c>Config.AiConfig.*</c>。</summary>
     public AllConfig Config => _config;
@@ -99,6 +135,55 @@ public partial class AiSettingsPageViewModel : ObservableObject, IViewModel
 
     [RelayCommand]
     private void Clear() => Output = "";
+
+    /// <summary>
+    /// 开始/停止路径录制。录制依赖截图器，没启动时直接提示，不静默失败。
+    /// </summary>
+    [RelayCommand]
+    private async Task ToggleRecordAsync()
+    {
+        if (Recording)
+        {
+            var result = await _recorder.StopAsync();
+            Recording = false;
+            RecordStatus = result == null
+                ? "没有采到有效点，未保存（确认地图匹配正常、人确实走动过）"
+                : $"已保存 {result.Kept} 点（采样 {result.Sampled}）· {result.TotalMeters:F0}m · 状态 {result.MotionSummary}\n{result.FilePath}";
+            return;
+        }
+
+        var runtime = _runtimes.Current;
+        if (runtime == null || !_runtimes.IsRunning)
+        {
+            RecordStatus = "截图器没启动：先启动 BGI（让左上角出现遮罩窗口），再开始录制";
+            return;
+        }
+
+        if (!_recorder.Start(runtime))
+        {
+            RecordStatus = "录制启动失败：运行环境不可用";
+            return;
+        }
+
+        Recording = true;
+        RecordStatus = "录制中…（每 200ms 采样一次，静止与非地图区域自动跳过）";
+    }
+
+    [RelayCommand]
+    private void OpenRecordFolder()
+    {
+        try
+        {
+            var dir = Path.Combine(Global.Absolute("User"), "PathRecord");
+            Directory.CreateDirectory(dir);
+            Process.Start(new ProcessStartInfo { FileName = dir, UseShellExecute = true });
+        }
+        catch (Exception e)
+        {
+            RecordStatus = "打不开目录：" + e.Message;
+        }
+    }
+
     [RelayCommand]
     private void OpenSandbox()
     {

@@ -78,6 +78,7 @@ jobs:
           set -euo pipefail
           python3 tools/bgi-special/sync_source.py /tmp/upstream
           python3 tools/bgi-special/patch_special.py
+          python3 tools/bgi-special/apply_upstream_extra.py
           echo "${{ steps.up.outputs.sha }}" > .bgi-upstream
 
       - name: 提交并推送
@@ -118,7 +119,7 @@ jobs:
             "或 \`VisionHost.cs\` 依赖的接口（\`ImageRegion\` / \`OcrFactory\` / \`IOcrService\`）签名变化。" \
             "" \
             "处理方式：本地按 SPECIAL-API.md 的说明调整" \
-            "\`tools/bgi-special/patch_special.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
+            "\`tools/bgi-special/patch_special.py\`、\`tools/bgi-special/apply_upstream_extra.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
             "" \
             "构建日志：${RUN_URL}")
           EXIST=$(gh issue list --state open --search "上游同步失败 in:title" \
