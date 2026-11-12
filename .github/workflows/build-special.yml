@@ -179,17 +179,38 @@ jobs:
           $notes = $notes.Replace('{{SHA}}', $env:SHA)
           $notes | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
 
+          # 先建空壳再逐个上传：一次带上 1.3GB 资产容易在中途断流，
+          # 断在这里只能得到半成品 Release，且重跑会重复占用 tag。
           gh release delete $tag -y --cleanup-tag 2>$null
           gh release create $tag `
-            $env:ARCHIVE `
-            $env:SETUP `
-            (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe') `
             --target $env:FULL_SHA `
             --title "BetterGI 特别版 $env:VERSION" `
             --notes-file 'RELEASE_NOTES.md' `
             --prerelease
           if ($LASTEXITCODE -ne 0) { throw "Release 创建失败，退出码 $LASTEXITCODE" }
-          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB）"
+
+          $assets = @(
+            $env:ARCHIVE,
+            $env:SETUP,
+            (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe')
+          )
+          foreach ($asset in $assets) {
+              if (-not (Test-Path $asset)) { throw "资产缺失：$asset" }
+              $ok = $false
+              for ($i = 1; $i -le 3; $i++) {
+                  gh release upload $tag $asset --clobber
+                  if ($LASTEXITCODE -eq 0) { $ok = $true; break }
+                  Write-Host "上传 $asset 第 $i 次失败，退避 $($i * 15) 秒后重试"
+                  Start-Sleep -Seconds ($i * 15)
+              }
+              if (-not $ok) { throw "资产上传失败：$asset" }
+              $mb = [math]::Round((Get-Item $asset).Length / 1MB, 1)
+              Write-Host "已上传 $(Split-Path $asset -Leaf)（$mb MB）"
+          }
+
+          $listed = gh release view $tag --json assets --jq '.assets | length'
+          if ($lastExitCode -ne 0 -or [int]$listed -ne 3) { throw "资产数量异常：$listed（期望 3）" }
+          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 资产 $listed 个）"
 
       - name: 写入运行摘要
         if: always()
