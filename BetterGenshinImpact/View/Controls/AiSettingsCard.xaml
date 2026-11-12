@@ -249,6 +249,27 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="识别任务进度" />
+                <ui:TextBlock Grid.Row="1"
+                              Grid.Column="0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              TextWrapping="Wrap"
+                              Text="读左上角任务面板，把任务名、当前步骤、目标动作与 0/3 这类计数并进决策；交互后与每 3 步刷新一次" />
+                <ui:ToggleSwitch Grid.Row="0"
+                                 Grid.RowSpan="2"
+                                 Grid.Column="1"
+                                 Margin="0,0,36,0"
+                                 IsChecked="{Binding Config.AiConfig.ReadQuestProgress, Mode=TwoWay}" />
+            </Grid>
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="附带截图（多模态）" />
                 <ui:TextBlock Grid.Row="1"
                               Grid.Column="0"

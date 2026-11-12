@@ -105,26 +105,25 @@ public sealed class GameStateProbe(GameRuntime runtime)
     }
 
     /// <summary>
-    /// 读左上角任务面板的标题与当前步骤。OCR 较慢，一次救援读一次即可。
+    /// 读左上角任务面板：标题、当前步骤、目标动作、计数与距离。
+    /// <para>一次 OCR 约 100–300ms，只在接管开始、交互之后和每隔几步刷新，不放进每步循环。</para>
     /// </summary>
-    public string ReadQuestText()
+    public QuestProgress ReadQuest()
     {
         try
         {
             var tracker = new QuestHost(new OcrHost(runtime)).Tracker();
-            if (string.IsNullOrWhiteSpace(tracker.Title) && string.IsNullOrWhiteSpace(tracker.Step))
-            {
-                return "";
-            }
-
-            return $"{tracker.Title}｜{tracker.Step}".Trim('｜');
+            return QuestParser.Parse(tracker.Title, tracker.Step, tracker.RawText);
         }
         catch (Exception e)
         {
             Logger.LogDebug(e, "读取任务面板失败");
-            return "";
+            return QuestProgress.Empty;
         }
     }
+
+    /// <summary>只需要一行文字时的便捷入口。</summary>
+    public string ReadQuestText() => ReadQuest().ToPromptText();
 
     /// <summary>
     /// 把当前画面压成 base64 JPEG。宽度限制在 768，避免把额度花在像素上。

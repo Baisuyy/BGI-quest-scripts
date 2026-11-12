@@ -91,6 +91,7 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
         new("jump", "跳跃。用于跨越矮障碍或脱离卡住的地形。", EmptySchema()),
         new("attack", "普通攻击。可打碎挡路的物件或触发交互。", EmptySchema()),
         new("interact", "交互/拾取（F 键）。靠近机关、宝箱、NPC 时使用。", EmptySchema()),
+        new("quest", "重新读左上角任务面板，返回任务标题、当前步骤、目标动作与计数进度。对话/交付/开启之后可以调用，确认任务是否已推进。", EmptySchema()),
         new("tp", "传送到接管目标点。只在距离超过 80 米且允许传送时使用。", EmptySchema()),
         new("toggle_feature", "开关 BGI 自带功能（自动剧情/自动拾取/自动吃药），只在明确需要时使用。",
             new JsonObject
@@ -135,14 +136,19 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
         using var screen = runtime.CaptureToRectArea();
         var start = _probe.Read(screen, goal.MapName, goal.MatchMethod, goal.TargetX, goal.TargetY);
         var startDistance = start.Distance ?? double.NaN;
-        var questText = _probe.ReadQuestText();
+        // 任务面板只在开始时读一次；接管是短平快的脱困动作，不必每步都付 OCR 的 100–300ms
+        var quest = settings.ReadQuestProgress ? _probe.ReadQuest() : QuestProgress.Empty;
         var image = settings.VisionMode ? _probe.EncodeScreenshot(screen) : null;
 
         _startedAt = DateTime.UtcNow;
         _blockId = AiLog.Begin(trigger ?? "跑图卡死接管", goal, start, settings, kernel.Calls);
-        if (!string.IsNullOrWhiteSpace(questText))
+        if (!quest.IsEmpty)
         {
-            AiLog.Note(_blockId, "任务面板：" + questText);
+            AiLog.Note(_blockId, "任务 " + quest.ToPromptText());
+        }
+        else if (settings.ReadQuestProgress)
+        {
+            AiLog.Note(_blockId, "任务面板为空（未追踪任务，或面板被遮挡）");
         }
 
         if (settings.VisionMode)
@@ -151,7 +157,7 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
         }
 
         var conversation = new LlmConversation();
-        conversation.AddUser(BuildFirstUserMessage(goal, start, questText), image);
+        conversation.AddUser(BuildFirstUserMessage(goal, start, quest), image);
 
         // 接管期间所有按键先释放，避免上一段逻辑残留的 W 键干扰
         InputHub.Foreground.ReleaseAll();
@@ -205,6 +211,28 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 if (execution.Finished)
                 {
                     return Result(execution.Success, execution.Content, steps, startDistance, lastState, kernel.Calls - callsAtStart);
+                }
+
+                // 任务节点（交互）之后、以及每 3 步刷新一次任务面板：
+                // 步骤文字或计数变了，说明这条路真的在推进，比坐标变化更能说明「走对了」。
+                // quest 工具本身刚读过，不再重复 OCR。
+                if (settings.ReadQuestProgress && call.Name != "quest"
+                    && (call.Name == "interact" || steps % 3 == 0))
+                {
+                    var refreshed = _probe.ReadQuest();
+                    if (refreshed.AdvancedOver(quest))
+                    {
+                        AiLog.Quest(_blockId, quest, refreshed);
+                        quest = refreshed;
+                        execution = execution with
+                        {
+                            Content = execution.Content + "\n任务进度：" + quest.ToPromptText(),
+                        };
+                    }
+                    else if (!refreshed.IsEmpty)
+                    {
+                        quest = refreshed;
+                    }
                 }
 
                 // 连续两次一模一样的动作视为无效，提醒模型换策略
@@ -265,6 +293,7 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
         {
             "move" => $"move {GetString(args, "direction", "forward")} {Math.Clamp(GetInt(args, "ms", 600), 100, 2000)}ms",
             "turn" => $"turn {GetInt(args, "dx", 0):+#;-#;0}",
+            "quest" => "quest（读任务面板）",
             "toggle_feature" => $"toggle {GetString(args, "feature", "?")}={(GetBool(args, "enabled", true) ? "on" : "off")}",
             "finish" => $"finish({(GetBool(args, "success", false) ? "success" : "fail")})",
             _ => call.Name,
@@ -283,20 +312,26 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 3. 不要连续两次用完全相同的动作；同一方向超过两次没进展就立刻换方向。
                 4. 距离小于 {goal.ReachDistance:F0} 米即视为到达，调用 finish(success=true)。
                 5. 最多 {maxSteps} 步，超时会强制交还；步数紧张时优先做最有把握的动作。
-                6. 禁止调用未提供的工具，禁止输出代码或解释长段落。
+                6. 任务面板给了当前任务与步骤：如果目标点就在任务目标附近，任务进度变化（步骤文字或计数）说明走对了；连续几步任务进度不动，说明这条路只是绕过路障、与任务无关，按距离继续走即可。
+                7. 拿不准任务是否推进时调用 quest 重新读面板，不要连续两次以上调用。
+                8. 禁止调用未提供的工具，禁止输出代码或解释长段落。
                 """;
     }
 
-    private string BuildFirstUserMessage(AiGoal goal, GameState state, string questText)
+    private string BuildFirstUserMessage(AiGoal goal, GameState state, QuestProgress quest)
     {
         var lines = new List<string>
         {
             "当前状态：" + state.ToPromptText(),
             "目标点：" + $"({goal.TargetX:F1}, {goal.TargetY:F1})，地图 {goal.MapName}",
         };
-        if (!string.IsNullOrWhiteSpace(questText))
+        if (!quest.IsEmpty)
         {
-            lines.Add("任务面板：" + questText);
+            lines.Add("任务面板：" + quest.ToPromptText());
+            if (quest.Distance.HasValue && quest.Distance.Value > 0)
+            {
+                lines.Add("任务面板显示目标距离 " + $"{quest.Distance.Value:F0} 米；如果与上面的目标点距离差得远，说明当前目标是任务里的另一段，先按目标点走。");
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(goal.ExtraContext))
@@ -363,6 +398,11 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 var next = await ObserveAsync(goal, "交互");
                 return new ExecutionResult(false, false, next.ToJson() + budget, next);
             }
+            case "quest":
+            {
+                var progress = _probe.ReadQuest();
+                return new ExecutionResult(false, false, progress.ToJson() + budget, state);
+            }
             case "tp":
             {
                 if (!goal.AllowTeleport)
@@ -404,7 +444,7 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 return new ExecutionResult(true, success, reason, state);
             }
             default:
-                return new ExecutionResult(false, false, $"未知工具 {call.Name}，可用：move/turn/jump/attack/interact/tp/toggle_feature/finish", state);
+                return new ExecutionResult(false, false, $"未知工具 {call.Name}，可用：move/turn/jump/attack/interact/quest/tp/toggle_feature/finish", state);
         }
     }
 

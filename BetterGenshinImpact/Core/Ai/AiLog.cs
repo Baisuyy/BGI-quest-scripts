@@ -68,6 +68,29 @@ internal sealed class AiLog
     /// <summary>块内一行说明模型的原话，模型不调工具时用得到。</summary>
     public static void Say(int id, string text) => Info("│ 模型：{0}", Truncate(text, 160));
 
+    /// <summary>任务面板推进：步骤文字变了，或计数变大。</summary>
+    public static void Quest(int id, QuestProgress from, QuestProgress to)
+    {
+        string line;
+        if (!string.Equals(from.Step, to.Step, StringComparison.Ordinal))
+        {
+            line = $"{Short(from.Step)} → {Short(to.Step)}";
+        }
+        else if (from.Current.HasValue && to.Current.HasValue)
+        {
+            line = $"计数 {from.Current}/{from.Total} → {to.Current}/{to.Total}";
+        }
+        else
+        {
+            line = Short(to.Step);
+        }
+
+        Info("│ 任务推进 · {0}", Truncate(line, 160));
+    }
+
+    private static string Short(string text)
+        => string.IsNullOrWhiteSpace(text) ? "（空）" : text;
+
     /// <summary>收块。</summary>
     public static void End(int id, bool success, string reason, int steps, int calls,
         TimeSpan elapsed, double startDistance, double? endDistance)

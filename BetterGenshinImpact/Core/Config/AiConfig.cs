@@ -93,6 +93,15 @@ public partial class AiConfig : ObservableObject
     private bool _allowTeleport = true;
 
     /// <summary>
+    /// 读取左上角任务面板：把任务标题、当前步骤、目标动作与计数（0/3）并入决策上下文。
+    /// <para>
+    /// 每步不 OCR，只在接管开始时读一次，交互之后与每 3 步刷新；模型也可以主动调 quest 工具重读。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    private bool _readQuestProgress = true;
+
+    /// <summary>
     /// 视觉模式：<c>false</c> 只发结构化状态（坐标、距离、运动状态、任务面板文字），
     /// <c>true</c> 额外附带一张压缩截图，供多模态模型判断地形。
     /// </summary>
