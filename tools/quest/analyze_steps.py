@@ -116,6 +116,74 @@ def classify(has_coord: bool, local: bool, conds) -> str:
     return kinds[0] if kinds else "event"
 
 
+def scene_stats(quests: dict) -> dict:
+    """场景 → 这个场景的点位是大世界还是局部。
+
+    客户端拿这张表就能判断：路线首点落在哪个场景，能不能交给大地图寻路。
+    """
+    stats = collections.defaultdict(lambda: {"steps": 0, "local": 0, "overworld": 0})
+    for q in quests.values():
+        for s in q["steps"]:
+            if s["xyz"] is None:
+                continue
+            key = str(s["scene"])
+            stats[key]["steps"] += 1
+            stats[key]["local" if "local_coords" in s["flags"] else "overworld"] += 1
+    out = {}
+    for k, v in stats.items():
+        # scene=3 是提瓦特大地图；其余场景即使坐标量级像世界坐标，
+        # 也要先进入该场景才有意义（例：20276 试验设计局、20372 曙光车站）。
+        if k == str(OVERWORLD_SCENE):
+            kind = "teyvat"
+        elif v["overworld"] > v["local"]:
+            kind = "world_coords"
+        else:
+            kind = "local"
+        out[k] = {
+            "steps": v["steps"],
+            "local": v["local"],
+            "overworld": v["overworld"],
+            "kind": kind,
+        }
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]["steps"]))
+
+
+def unlock_gated(quests: dict) -> list:
+    """列出了「必须先解锁传送点」的步骤，这些点位在未开图时会把小地图遮成黑雾。"""
+    out = []
+    for qid, q in quests.items():
+        for s in q["steps"]:
+            if "requires_unlock" in s["flags"]:
+                out.append({
+                    "quest": qid, "title": q["title"], "order": s["order"],
+                    "name": s["name"], "scene": s["scene"], "xyz": s["xyz"],
+                })
+    return out
+
+
+def scene_maps(quests: dict, overrides: dict) -> dict:
+    """场景 → 客户端地图名。只认人工核对过的映射。
+
+    试过用「点位是否落在各独立地图包围盒内」自动推断，不可靠：
+    19 个场景会同时命中多张地图的盒子（室内局部坐标都挤在原点附近），
+    20378 会被推成 TheChasm，而它的剧情是「前往空之神殿」，实际是 TempleOfSpace。
+    错的地图名比没有地图名更糟——传送会把角色丢到几百公里外。
+    所以这里只输出 overrides 里人工确认过的条目，其余留空，交给实机验证补。
+    """
+    by_scene = collections.Counter()
+    for q in quests.values():
+        for s in q["steps"]:
+            if s["xyz"]:
+                by_scene[str(s["scene"])] += 1
+
+    out = {str(OVERWORLD_SCENE): {"map": "Teyvat", "confidence": "confirmed",
+                                  "points": by_scene[str(OVERWORLD_SCENE)]}}
+    for sid, item in overrides.items():
+        out[sid] = {"map": item["map"], "confidence": item.get("confidence", "candidate"),
+                    "points": by_scene.get(sid, 0), "evidence": item.get("evidence", "")}
+    return dict(sorted(out.items(), key=lambda kv: -kv[1]["points"]))
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--data", default="/workspace/AnimeGameData")
@@ -203,11 +271,18 @@ def main() -> None:
     except Exception:
         pass
 
+    ov_path = Path("data/scene_overrides.json")
+    overrides = json.load(ov_path.open(encoding="utf-8")) if ov_path.exists() else {}
+
     payload = {
         "source": src,
         "generated_at": datetime.date.today().isoformat(),
         "overworld_scene": OVERWORLD_SCENE,
+        "local_coord_limit": LOCAL_COORD_LIMIT,
         "kind_label": KIND_LABEL,
+        "scenes": scene_stats(quests),
+        "scene_maps": scene_maps(quests, overrides),
+        "unlock_gated": unlock_gated(quests),
         "quests": quests,
     }
     out = Path(args.out_json)
@@ -224,7 +299,9 @@ def main() -> None:
     runnable = kind_all["path"]
     by_chapter = collections.defaultdict(lambda: collections.Counter())
     for q in quests.values():
-        key = f"{q['chapter_no']} {q['chapter_title']}".strip() or "未归类"
+        # 世界任务与传说任务没有 chapterId，单独归一类，不混进章节统计里
+        key = (f"{q['chapter_no']} {q['chapter_title']}".strip() or f"章节 {q['chapter']}") \
+            if q["chapter"] else "世界任务 / 传说任务"
         for s in q["steps"]:
             by_chapter[key][s["kind"]] += 1
             by_chapter[key]["_n"] += 1
@@ -279,8 +356,10 @@ def main() -> None:
     for q in ranked[:40]:
         st = quests[q]["steps"]
         c = collections.Counter(s["kind"] for s in st)
+        ch = quests[q]
+        chname = (f"{ch['chapter_no']} {ch['chapter_title']}"[:20].strip() or "世界任务") if ch["chapter"] else "世界任务"
         lines.append(
-            f"| {q} {quests[q]['title'][:16]} | {quests[q]['chapter_no']} {quests[q]['chapter_title'][:12]} "
+            f"| {q} {ch['title'][:16]} | {chname} "
             f"| {c['path']} | {c['talk']} | {len(st) - c['path'] - c['talk']} | {len(st)} |"
         )
 
@@ -293,9 +372,45 @@ def main() -> None:
             f"| {c['scripted'] + c['plot']} | {other} |"
         )
 
+    lines += ["", "## 四、场景与坐标空间", "",
+              "坐标是不是「能直接交给大地图寻路」，由**量级**决定，`guideScene` 只作参考：",
+              "",
+              "| kind | 含义 | 怎么用 |",
+              "| --- | --- | --- |",
+              "| `teyvat` | scene=3，提瓦特大地图 | 可直接寻路 |",
+              "| `world_coords` | 独立场景但坐标是世界坐标（如 20372 曙光车站 8478,224,7792） | 先确认已进入该场景，再用同一套坐标寻路 |",
+              "| `local` | 场景内局部坐标（如 1162 至冬宫 0,0,66） | **不能**交给大地图，只能场景内小移动或跳过 |",
+              "",
+              "| 场景 | 点位数 | 大世界坐标 | 局部坐标 | kind |", "| ---: | ---: | ---: | ---: | --- |"]
+    for sid, v in list(payload["scenes"].items())[:20]:
+        lines.append(f"| {sid} | {v['steps']} | {v['overworld']} | {v['local']} | `{v['kind']}` |")
+
+    cand = {k: v for k, v in payload["scene_maps"].items() if v["confidence"] != "confirmed"}
+    lines += ["", "## 五、场景 → 客户端地图名", "",
+              "客户端 `genshin.tp(x, y, mapName)` 需要地图名，解包里只有 scene id。"
+              "自动推断做过，不可靠——室内局部坐标都挤在原点附近，会同时命中好几张独立地图的包围盒，"
+              "`20378` 就被推成 `TheChasm`，而它的剧情是「前往空之神殿」，实际是 `TempleOfSpace`。"
+              "错的地图名比没有更糟，所以只保留人工核对过的条目（`data/scene_overrides.json`）。", ""]
+    if cand:
+        lines += ["| scene | 地图 | 置信度 | 依据 | 点位数 |", "| ---: | --- | --- | --- | ---: |"]
+        for sid, v in cand.items():
+            lines.append(f"| {sid} | `{v['map']}` | {v['confidence']} | {v.get('evidence', '')} | {v['points']} |")
+    else:
+        lines.append("（暂无人工确认的映射）")
+
+    gated = payload["unlock_gated"]
+    lines += ["", "## 六、解锁门槛步骤", "",
+              f"共 **{len(gated)}** 步的完成条件里带 `UNLOCK_ANY_TRANS_POINT`，也就是必须先开图。"
+              "这类点位在未解锁区域会遮出黑雾、地图匹配失败，脚本应当直接跳过而不是硬跑。", ""]
+    if gated:
+        lines += ["| 任务 | 步骤 | 场景 | 坐标 |", "| --- | --- | ---: | --- |"]
+        for g in gated[:30]:
+            xyz = ",".join(f"{v:.0f}" for v in g["xyz"]) if g["xyz"] else "—"
+            lines.append(f"| {g['quest']} {g['title'][:12]} | {g['name'][:16]} | {g['scene']} | {xyz} |")
+
     lines += [
         "",
-        "## 四、用这份数据能做的事",
+        "## 七、用这份数据能做的事",
         "",
         "| 用法 | 字段 |",
         "| --- | --- |",

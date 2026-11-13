@@ -1,0 +1,51 @@
+{
+ "Teyvat": {
+  "points": 797,
+  "min_x": -6693,
+  "max_x": 10497,
+  "min_z": -4584,
+  "max_z": 15204
+ },
+ "Enkanomiya": {
+  "points": 24,
+  "min_x": -788,
+  "max_x": 1511,
+  "min_z": -700,
+  "max_z": 1579
+ },
+ "TheChasm": {
+  "points": 15,
+  "min_x": 179,
+  "max_x": 1056,
+  "min_z": 278,
+  "max_z": 1321
+ },
+ "SeaOfBygoneEras": {
+  "points": 17,
+  "min_x": 1335,
+  "max_x": 1768,
+  "min_z": 3506,
+  "max_z": 4849
+ },
+ "AncientSacredMountain": {
+  "points": 19,
+  "min_x": -292,
+  "max_x": 747,
+  "min_z": -545,
+  "max_z": 383
+ },
+ "MoonCanon": {
+  "points": 44,
+  "min_x": -2736,
+  "max_x": 2284,
+  "min_z": -4261,
+  "max_z": 6828
+ },
+ "TempleOfSpace": {
+  "points": 20,
+  "min_x": -321,
+  "max_x": 821,
+  "min_z": -557,
+  "max_z": 1308
+ }
+}
