@@ -24,6 +24,8 @@ HERE = Path(__file__).resolve().parent
 GRAPH = HERE / "graph.json"
 
 SNAP_LIMIT = 300.0
+# origin=0 的边只有脚本生成的直线做背书，加价让 A* 优先走官方录制的真实路径
+GENERATED_PENALTY = 1.35
 
 
 def load_graph() -> tuple[dict[tuple[int, int], tuple[float, float]], dict[tuple[int, int], list[tuple[tuple[int, int], float]]]]:
@@ -38,9 +40,10 @@ def load_graph() -> tuple[dict[tuple[int, int], tuple[float, float]], dict[tuple
         gx, gy = key.split(",")
         node = (int(gx), int(gy))
         adjacency[node] = []
-        for nkey, distance in neighbours:
-            nx, ny = nkey.split(",")
-            adjacency[node].append(((int(nx), int(ny)), distance))
+        for item in neighbours:
+            nx, ny = item[0].split(",")
+            origin = item[2] if len(item) > 2 else 0
+            adjacency[node].append(((int(nx), int(ny)), item[1], origin))
     return coords, adjacency
 
 
@@ -70,8 +73,8 @@ def astar(coords, adjacency, start, goal):
         if cost > cost_so_far.get(current, float("inf")):
             continue
 
-        for neighbour, weight in adjacency.get(current, []):
-            new_cost = cost + weight
+        for neighbour, weight, origin in adjacency.get(current, []):
+            new_cost = cost + weight * (1.0 if origin == 1 else GENERATED_PENALTY)
             if new_cost < cost_so_far.get(neighbour, float("inf")):
                 cost_so_far[neighbour] = new_cost
                 came_from[neighbour] = current
@@ -125,7 +128,19 @@ def main() -> int:
     parser.add_argument("--to", dest="goal", required=True, help="终点 x,y")
     parser.add_argument("--out", help="导出 pathing json 的路径")
     parser.add_argument("--name", default="路网生成路线", help="导出路线的名字")
-    args = parser.parse_args()
+    # 坐标可能是负数（蒙德、须弥一片都在原点西南），argparse 会把 "-1393,7249"
+    # 当成选项，必须掰成 --from=-1393,7249 才能用
+    argv = []
+    raw = sys.argv[1:]
+    i = 0
+    while i < len(raw):
+        if raw[i] in ("--from", "--to", "--out", "--name") and i + 1 < len(raw):
+            argv.append(f"{raw[i]}={raw[i + 1]}")
+            i += 2
+        else:
+            argv.append(raw[i])
+            i += 1
+    args = parser.parse_args(argv)
 
     if not GRAPH.exists():
         print("先跑 build_graph.py 生成 graph.json", file=sys.stderr)

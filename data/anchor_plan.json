@@ -1,0 +1,4168 @@
+{
+ "segments": [
+  {
+   "file": "js/空月之歌-挪德卡莱/序奏-归途/6004-墟火/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1240.7,
+    9560.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 55,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/序奏-归途/6004-墟火/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1377.8,
+    7694.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 54,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/序奏-归途/6005-阴燃/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1243.4,
+    9560.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 52,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/序奏-归途/6005-阴燃/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1206.7,
+    9309.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 132,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/序奏-归途/6006-逆焰/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1160.5,
+    9158.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 244,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6000-月亮升起的地方/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1403.7,
+    9390.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 34,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6000-月亮升起的地方/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1677.9,
+    9965.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "「聚所·叮铃哐啷蛋卷工坊」",
+   "nearest_gap": 37,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6001-于月光下重逢/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1866.2,
+    10907.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "失落的月庭",
+   "nearest_gap": 113,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6001-于月光下重逢/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1634.1,
+    9524.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 7,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6001-于月光下重逢/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    2049.2,
+    10623.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 133,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6001-于月光下重逢/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    2018.0,
+    11095.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 68,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3094.5,
+    9513.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 39,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3269.7,
+    9579.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 129,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    3261.0,
+    9806.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 65,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    1930.6,
+    10527.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 11,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    3263.4,
+    9872.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 64,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    2281.4,
+    9566.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 148,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第一幕-雪浪与苍林之舞/6002-在夜的阴影中/pathing/07.json",
+   "map": "Teyvat",
+   "first": [
+    1826.6,
+    10381.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "「聚所·霜月之坊」",
+   "nearest_gap": 19,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6003-无月之夜/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    6394.1,
+    9531.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "赝月的研究所",
+   "nearest_gap": 0,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1603.8,
+    9447.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 58,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2516.6,
+    10127.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 386,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    1649.5,
+    9445.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 14,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    2513.7,
+    10051.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 349,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    1649.4,
+    9433.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 22,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    4484.6,
+    9747.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 460,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/07.json",
+   "map": "Teyvat",
+   "first": [
+    3629.4,
+    9861.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 36,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/08.json",
+   "map": "Teyvat",
+   "first": [
+    2091.3,
+    9922.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 251,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/09.json",
+   "map": "Teyvat",
+   "first": [
+    1650.3,
+    9378.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 74,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6022-你我交错的时空/pathing/10.json",
+   "map": "Teyvat",
+   "first": [
+    2572.0,
+    10065.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 305,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2091.3,
+    9922.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 251,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2133.1,
+    10068.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "无光的深都",
+   "nearest_gap": 319,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    5395.1,
+    9380.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 53,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    2385.5,
+    9320.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 78,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    2382.4,
+    9301.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 60,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    3478.9,
+    9674.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 113,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/07.json",
+   "map": "Teyvat",
+   "first": [
+    2589.5,
+    10128.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 330,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/08.json",
+   "map": "Teyvat",
+   "first": [
+    3756.8,
+    9208.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "「聚所·终夜长茔」",
+   "nearest_gap": 49,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第七幕-如果在冬夜，一个旅人/6023-循着过往的足迹/pathing/09.json",
+   "map": "Teyvat",
+   "first": [
+    1843.7,
+    9552.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "新月神像",
+   "nearest_gap": 126,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6012-匿于阴影/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1658.5,
+    9492.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 40,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6012-匿于阴影/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1578.0,
+    11022.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 42,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6013-特别行动/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2911.4,
+    9900.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 83,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6013-特别行动/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1560.8,
+    11114.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 59,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6014-如月长存/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1560.8,
+    11114.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 59,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6014-如月长存/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3230.3,
+    9917.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 14,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第三幕-不存在的国土/6014-如月长存/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    1913.7,
+    11081.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 132,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3034-花于何处醒来/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -516.1,
+    2695.5
+   ],
+   "record_target_gap": 224,
+   "record_name": "蒙德3-奔狼领-4",
+   "record_anchor": [
+    -440.1,
+    2580.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 64,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3034-花于何处醒来/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1670.3,
+    9405.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 47,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3034-花于何处醒来/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -310.3,
+    2795.1
+   ],
+   "record_target_gap": 234,
+   "record_name": "蒙德3-奔狼领-4",
+   "record_anchor": [
+    -440.1,
+    2580.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 81,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3034-花于何处醒来/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -1561.0,
+    3818.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 106,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3035-通向自我的歧途/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1573.1,
+    3868.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 85,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3035-通向自我的歧途/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -538.3,
+    5350.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 137,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3035-通向自我的歧途/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -2436.7,
+    4275.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 177,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3035-通向自我的歧途/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -1550.7,
+    5633.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 206,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3035-通向自我的歧途/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    -1992.5,
+    3999.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-草",
+   "nearest_gap": 14,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3035-通向自我的歧途/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    -1779.0,
+    5695.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 45,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3036-旧影重现/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2393.2,
+    4187.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 167,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第九幕-身土坏空，五蕴识转/3036-旧影重现/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -2374.1,
+    5568.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 107,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6007-轰鸣与暗涌/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1639.5,
+    9472.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 30,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6009-曾有人追猎月亮/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1664.8,
+    9370.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 82,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6009-曾有人追猎月亮/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2137.1,
+    9033.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 21,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6010-灰白的秩序熊熊燃烧/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3758.8,
+    9208.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "「聚所·终夜长茔」",
+   "nearest_gap": 51,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6010-灰白的秩序熊熊燃烧/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2242.5,
+    9518.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 116,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6010-灰白的秩序熊熊燃烧/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    1653.3,
+    9495.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 41,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6010-灰白的秩序熊熊燃烧/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    2136.2,
+    11208.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 128,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第二幕-尘与灯的挽歌/6011-遥不可及的安息/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1665.2,
+    9500.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 47,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6025-月影轮番登台/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2146.8,
+    11212.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 139,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6025-月影轮番登台/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1759.8,
+    10450.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "「聚所·霜月之坊」",
+   "nearest_gap": 104,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6025-月影轮番登台/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    2127.7,
+    9459.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 100,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2124.7,
+    11205.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 116,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1801.2,
+    9615.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 83,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    2117.0,
+    11199.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 107,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    1651.0,
+    9464.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 16,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    1791.4,
+    10548.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 9,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    3236.9,
+    9950.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 20,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/07.json",
+   "map": "Teyvat",
+   "first": [
+    1895.4,
+    9220.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 8,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第五幕-终北的夜行诗/6026-无法传达的涟漪/pathing/08.json",
+   "map": "Teyvat",
+   "first": [
+    1973.3,
+    9356.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 117,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6015-最初的那抹月光/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1631.1,
+    9527.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 3,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6015-最初的那抹月光/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2506.1,
+    10121.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 391,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6015-最初的那抹月光/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    1649.3,
+    9477.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 28,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6016-月之将坠/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1631.1,
+    9527.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 3,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6016-月之将坠/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1638.4,
+    9538.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 14,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6017-空月归乡/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1594.7,
+    9465.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 68,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6017-空月归乡/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1940.1,
+    10535.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 23,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第八幕-真实之月/6017-空月归乡/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    1599.2,
+    9453.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 62,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第六幕-散于晨雾的月芒/6024-名于何处？/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2105.1,
+    10781.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 56,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第六幕-散于晨雾的月芒/6027-月亮回家的夜晚/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1664.6,
+    9456.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 5,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第六幕-散于晨雾的月芒/6028-回到月亮上去/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2105.1,
+    10781.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 56,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第六幕-散于晨雾的月芒/6028-回到月亮上去/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1679.0,
+    9395.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 59,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6034-幽暗时分/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2345.2,
+    5581.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 122,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6034-幽暗时分/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -2349.3,
+    5493.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 104,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6034-幽暗时分/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1670.3,
+    3870.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 15,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6034-幽暗时分/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -2340.7,
+    5486.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 96,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6034-幽暗时分/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    91.5,
+    2969.6
+   ],
+   "record_target_gap": 62,
+   "record_name": "蒙德4-风龙废墟-3",
+   "record_anchor": [
+    265.6,
+    2915.0
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 45,
+   "verdict": "nearby",
+   "source": "recorded"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6034-幽暗时分/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    -2345.0,
+    5495.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 105,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6035-妄念与真知的通天塔/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2605.9,
+    5568.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 22,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6035-妄念与真知的通天塔/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -2340.0,
+    5547.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 147,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6035-妄念与真知的通天塔/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1175.1,
+    6371.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 491,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6035-妄念与真知的通天塔/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -2349.4,
+    5530.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 140,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6036-虚空劫灰往世书/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2350.2,
+    5339.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 52,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6036-虚空劫灰往世书/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -578.4,
+    2685.9
+   ],
+   "record_target_gap": 272,
+   "record_name": "蒙德3-奔狼领-4",
+   "record_anchor": [
+    -440.1,
+    2580.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 45,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6036-虚空劫灰往世书/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -377.8,
+    2933.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 57,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6036-虚空劫灰往世书/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    178.5,
+    3642.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-草",
+   "nearest_gap": 356,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6036-虚空劫灰往世书/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    -1651.3,
+    3868.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 10,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6038-你的往事如一座花园/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1651.3,
+    3868.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 10,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6038-你的往事如一座花园/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -433.0,
+    2760.0
+   ],
+   "record_target_gap": 220,
+   "record_name": "蒙德3-奔狼领-4",
+   "record_anchor": [
+    -440.1,
+    2580.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 56,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6038-你的往事如一座花园/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1873.2,
+    8995.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 22,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第十幕-道成千壑，因果异灭/6038-你的往事如一座花园/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    2181.4,
+    -1033.4
+   ],
+   "record_target_gap": 164,
+   "record_name": "未命名路径",
+   "record_anchor": [
+    2289.0,
+    -1197.3
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 90,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第四幕-回望湮灭的月光/6018-皆为预言/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1765.4,
+    10081.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "无光的深都",
+   "nearest_gap": 127,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第四幕-回望湮灭的月光/6019-蛇与蝎的亡命舞/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2012.0,
+    4106.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 17,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第四幕-回望湮灭的月光/6020-命运的回声/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1905.5,
+    10898.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "失落的月庭",
+   "nearest_gap": 83,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/空月之歌-挪德卡莱/第四幕-回望湮灭的月光/6020-命运的回声/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3226.8,
+    9944.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 14,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7011-逆风向苦寒之北/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    7031.0,
+    8677.7
+   ],
+   "record_target_gap": 152,
+   "record_name": "至冬3-彩冰镇-2",
+   "record_anchor": [
+    6940.2,
+    8730.3
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 10,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7011-逆风向苦寒之北/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1650.1,
+    9470.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 22,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7011-逆风向苦寒之北/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    7032.3,
+    8675.9
+   ],
+   "record_target_gap": 153,
+   "record_name": "至冬3-彩冰镇-2",
+   "record_anchor": [
+    6940.2,
+    8730.3
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 12,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7011-逆风向苦寒之北/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    7367.7,
+    8427.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 430,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7011-逆风向苦寒之北/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    7584.1,
+    8315.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 344,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7011-逆风向苦寒之北/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    7634.1,
+    7879.8
+   ],
+   "record_target_gap": 217,
+   "record_name": "至冬2-凝露镇-1",
+   "record_anchor": [
+    7677.6,
+    7726.8
+   ],
+   "nearest_anchor": "七天神像-冰",
+   "nearest_gap": 46,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7012-沉寂之地的枪声/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    7724.8,
+    7712.8
+   ],
+   "record_target_gap": 187,
+   "record_name": "至冬2-凝露镇-1",
+   "record_anchor": [
+    7677.6,
+    7726.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 45,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7012-沉寂之地的枪声/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    7667.2,
+    7746.1
+   ],
+   "record_target_gap": 142,
+   "record_name": "至冬2-凝露镇-1",
+   "record_anchor": [
+    7677.6,
+    7726.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 95,
+   "verdict": "nearby",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7012-沉寂之地的枪声/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    8544.2,
+    7809.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 20,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7013-冰原上的伟业/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    8545.3,
+    7803.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 24,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7013-冰原上的伟业/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    9297.9,
+    6899.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 17,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7013-冰原上的伟业/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    8658.2,
+    6526.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 26,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7013-冰原上的伟业/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    9648.0,
+    6684.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 26,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第一幕-无神怜爱的雪国/7014-唯沉默不受眷顾/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9352.0,
+    6508.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 11,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第三幕-白夜似梦初醒/7015-溯见光影交织/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9896.8,
+    6689.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 19,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第三幕-白夜似梦初醒/7016-星火交汇于冻原/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9562.1,
+    6631.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 42,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第三幕-白夜似梦初醒/7016-星火交汇于冻原/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    8732.0,
+    6501.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 70,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第三幕-白夜似梦初醒/7016-星火交汇于冻原/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    9596.5,
+    6563.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 27,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第三幕-白夜似梦初醒/7017-仅此一着/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9304.4,
+    6904.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 17,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第二幕-死魂灵的夜曲/7005-白幕降下/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9446.9,
+    6606.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 125,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第二幕-死魂灵的夜曲/7009-槲寄生/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9350.2,
+    6504.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 16,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第二幕-死魂灵的夜曲/7009-槲寄生/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    10103.3,
+    6355.6
+   ],
+   "record_target_gap": 262,
+   "record_name": "深黯魇语之主前往",
+   "record_anchor": [
+    10285.1,
+    6355.2
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 155,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7030-如同消融的积雪/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9654.5,
+    6606.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 90,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7030-如同消融的积雪/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    9329.3,
+    4821.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-冰",
+   "nearest_gap": 963,
+   "verdict": "far",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7030-如同消融的积雪/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    8789.2,
+    2918.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 2920,
+   "verdict": "none",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7031-迈向未来的一步/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9661.0,
+    6579.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 90,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7031-迈向未来的一步/pathing/02.json",
+   "map": "TempleOfSpace",
+   "first": [
+    261.6,
+    332.3
+   ],
+   "record_target_gap": 26,
+   "record_name": "璃月4-璃月港-5",
+   "record_anchor": [
+    173.9,
+    389.5
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 39,
+   "verdict": "nearby",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7031-迈向未来的一步/pathing/03.json",
+   "map": "TempleOfSpace",
+   "first": [
+    307.4,
+    550.2
+   ],
+   "record_target_gap": 32,
+   "record_name": "璃月4-璃月港-6",
+   "record_anchor": [
+    341.2,
+    548.1
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 45,
+   "verdict": "nearby",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第五幕-坏灭肇始之时/7031-迈向未来的一步/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    9644.9,
+    6615.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 81,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7023-僭越者的试炼/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9654.2,
+    6607.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 90,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7025-雷和永恒/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -3063.0,
+    -4409.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 16,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7025-雷和永恒/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -4241.9,
+    -4087.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 102,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7025-雷和永恒/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -3422.5,
+    -4614.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "鸣神岛·天守",
+   "nearest_gap": 87,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7026-草和智慧/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -454.5,
+    2765.0
+   ],
+   "record_target_gap": 234,
+   "record_name": "蒙德3-奔狼领-4",
+   "record_anchor": [
+    -440.1,
+    2580.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 36,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7026-草和智慧/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1160.3,
+    5444.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 91,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7026-草和智慧/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -380.2,
+    2934.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 58,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7026-草和智慧/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -2345.5,
+    5560.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 134,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1872.5,
+    8994.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 21,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1342.2,
+    7652.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「回声之子」",
+   "nearest_gap": 1,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -2107.9,
+    8430.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「悬木人」",
+   "nearest_gap": 1,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -2918.9,
+    9033.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「流泉之众」",
+   "nearest_gap": 1,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    -1205.5,
+    9485.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「花羽会」",
+   "nearest_gap": 1,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    -2718.5,
+    10264.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「沃陆之邦」",
+   "nearest_gap": 1,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/07.json",
+   "map": "Teyvat",
+   "first": [
+    -1657.4,
+    10015.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 69,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7027-火和战争/pathing/08.json",
+   "map": "Teyvat",
+   "first": [
+    -1906.2,
+    9066.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "神庙·煅石之轮",
+   "nearest_gap": 43,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7028-叩响终幕之门/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1602.4,
+    2876.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 105,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7029-风和自由/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2250.6,
+    -894.0
+   ],
+   "record_target_gap": 280,
+   "record_name": "未命名路径",
+   "record_anchor": [
+    2289.0,
+    -1197.3
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 32,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7029-风和自由/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1597.6,
+    -1082.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 50,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7029-风和自由/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    2243.4,
+    -778.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 36,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第六幕-寄自彼岸的昨日/7029-风和自由/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    1534.2,
+    -1086.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 78,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第四幕-往冥府的安魂歌/7018-邪眼/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9901.4,
+    6690.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 16,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第四幕-往冥府的安魂歌/7020-于饯别之时散落的黑羽/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    9521.1,
+    6666.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 49,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第四幕-往冥府的安魂歌/7020-于饯别之时散落的黑羽/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    8540.1,
+    7829.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 19,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第七章-至冬/第四幕-往冥府的安魂歌/7020-于饯别之时散落的黑羽/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    9760.8,
+    6516.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 198,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8016-命运始动的钥匙/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2691.7,
+    9931.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 125,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8016-命运始动的钥匙/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1767.4,
+    9851.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 69,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8017-「救世主」/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2696.5,
+    9927.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 122,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8017-「救世主」/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1705.9,
+    9589.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 99,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8017-「救世主」/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -2696.5,
+    9927.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 122,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8018-你所不在的时空/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1705.9,
+    9589.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 99,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8018-你所不在的时空/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -599.4,
+    9769.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 22,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8018-你所不在的时空/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1705.9,
+    9589.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 99,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-旅人章/第六幕-你存在的时空/8018-你所不在的时空/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -2695.6,
+    9928.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 123,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/幕间-万火归一/5026-为同一片土地/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1211.1,
+    9488.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「花羽会」",
+   "nearest_gap": 7,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/幕间-万火归一/5026-为同一片土地/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1128.9,
+    9538.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 16,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5000-纳塔！新的旅程/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    1629.0,
+    5035.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-水",
+   "nearest_gap": 48,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5000-纳塔！新的旅程/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1437.0,
+    7265.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 37,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5000-纳塔！新的旅程/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1792.8,
+    8294.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 77,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5001-归火圣夜巡礼/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1889.9,
+    9111.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 74,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5001-归火圣夜巡礼/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1568.4,
+    8040.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 58,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5001-归火圣夜巡礼/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1877.3,
+    8998.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 25,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5002-温泉之乡/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2678.7,
+    8938.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 25,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第一幕-荣花与炎日之途/5002-温泉之乡/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -2656.1,
+    9007.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 97,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5015-皆为崇高之名/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1849.6,
+    9081.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 31,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5015-皆为崇高之名/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1378.9,
+    7677.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「回声之子」",
+   "nearest_gap": 46,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5015-皆为崇高之名/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1918.7,
+    8999.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "神庙·煅石之轮",
+   "nearest_gap": 25,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5016-向着迷烟飘往之处/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1806.7,
+    7980.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 132,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5016-向着迷烟飘往之处/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1958.1,
+    9084.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 13,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5017-摇曳灯火一分为二/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1894.5,
+    9113.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 78,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5017-摇曳灯火一分为二/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1409.5,
+    7388.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 149,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第三幕-镜与谜烟的彼方/5017-摇曳灯火一分为二/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1590.5,
+    8697.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 15,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第二幕-黑石湮落白石下/5003-抉择/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2779.6,
+    9157.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「流泉之众」",
+   "nearest_gap": 188,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第二幕-黑石湮落白石下/5003-抉择/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1875.6,
+    9001.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 27,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第二幕-黑石湮落白石下/5004-古名寻回之旅/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2134.6,
+    8425.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「悬木人」",
+   "nearest_gap": 27,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第二幕-黑石湮落白石下/5005-生命的回响/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1938.9,
+    8790.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 100,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第二幕-黑石湮落白石下/5006-坠入永夜/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1938.9,
+    8790.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 100,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第二幕-黑石湮落白石下/5007-过去与未来/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1897.8,
+    9115.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 76,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5023-正如日出日落/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2819.6,
+    9043.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「流泉之众」",
+   "nearest_gap": 101,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5023-正如日出日落/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1859.7,
+    8783.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 50,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5023-正如日出日落/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1503.0,
+    8453.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 19,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5024-星与火的征途/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1870.5,
+    8989.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 18,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5028-众望所归/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1906.6,
+    9066.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "神庙·煅石之轮",
+   "nearest_gap": 43,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5029-当一切镌刻成碑/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1872.1,
+    9071.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 32,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5029-当一切镌刻成碑/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -193.5,
+    10025.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 32,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第五幕-炽烈的还魂诗/5029-当一切镌刻成碑/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1925.7,
+    9484.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "碑碣的记录",
+   "nearest_gap": 16,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5009-秘源之下/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -2518.9,
+    8293.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 2,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5011-席卷而来的暗潮/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1877.3,
+    8988.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 15,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5011-席卷而来的暗潮/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1699.9,
+    8674.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 124,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5011-席卷而来的暗潮/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1964.3,
+    7785.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "蕴火的幽墟",
+   "nearest_gap": 99,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5011-席卷而来的暗潮/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -1699.9,
+    8674.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 124,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1863.5,
+    8715.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 20,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -2192.6,
+    8783.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 119,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -2194.9,
+    8783.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-火",
+   "nearest_gap": 119,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    -1398.3,
+    8904.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 149,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/05.json",
+   "map": "Teyvat",
+   "first": [
+    -1476.4,
+    8117.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 99,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/06.json",
+   "map": "Teyvat",
+   "first": [
+    -2376.8,
+    8988.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "虹灵的净土",
+   "nearest_gap": 69,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/07.json",
+   "map": "Teyvat",
+   "first": [
+    -1374.3,
+    7676.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "曜石图腾柱·「回声之子」",
+   "nearest_gap": 41,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5012-绝望高悬天之上/pathing/08.json",
+   "map": "Teyvat",
+   "first": [
+    -1743.5,
+    9166.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 65,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5013-我们不会孤军奋战/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1831.8,
+    8941.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 58,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5013-我们不会孤军奋战/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -1665.8,
+    8161.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 107,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5013-我们不会孤军奋战/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    -1865.2,
+    8978.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 14,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第五章-纳塔/第四幕-命定将焚的虹光/5014-名为「命运」的燃料/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1957.2,
+    9092.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 13,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-旅人章/第六幕-睡前故事/8019-积存已久的委托/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1107.6,
+    2682.1
+   ],
+   "record_target_gap": 215,
+   "record_name": "蒙德5-千风神殿-5",
+   "record_anchor": [
+    -1273.8,
+    2721.7
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 105,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-旅人章/第六幕-睡前故事/8020-不应存在的记忆/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1137.0,
+    2684.4
+   ],
+   "record_target_gap": 186,
+   "record_name": "蒙德5-千风神殿-5",
+   "record_anchor": [
+    -1273.8,
+    2721.7
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 132,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-旅人章/第六幕-睡前故事/8020-不应存在的记忆/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    -509.7,
+    2135.0
+   ],
+   "record_target_gap": 191,
+   "record_name": "蒙德2-清泉镇-5-1",
+   "record_anchor": [
+    -251.7,
+    2256.6
+   ],
+   "nearest_anchor": "缘觉塔",
+   "nearest_gap": 93,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-旅人章/第六幕-睡前故事/8021-以世界之格的诉说/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -875.5,
+    2644.1
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 123,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第一幕-白露与黑潮的序诗/4004-独舞者的序幕/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    -1637.2,
+    3867.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 21,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第一幕-白露与黑潮的序诗/4004-独舞者的序幕/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    1630.0,
+    5035.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-水",
+   "nearest_gap": 47,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第一幕-白露与黑潮的序诗/4004-独舞者的序幕/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    3231.2,
+    4262.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "水仙十字结社",
+   "nearest_gap": 91,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第一幕-白露与黑潮的序诗/4005-细雨眷恋之城/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3489.5,
+    4609.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 46,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第一幕-白露与黑潮的序诗/4005-细雨眷恋之城/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3793.5,
+    3800.1
+   ],
+   "record_target_gap": 228,
+   "record_name": "歌裴莉娅的葬送前往",
+   "record_anchor": [
+    3602.2,
+    3529.4
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 14,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4011-锋芒难掩的茶会/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3474.1,
+    4554.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 42,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4011-锋芒难掩的茶会/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3317.7,
+    3823.0
+   ],
+   "record_target_gap": 282,
+   "record_name": "枫丹4-柔灯港-4-rerun",
+   "record_anchor": [
+    3032.7,
+    3732.4
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 165,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4011-锋芒难掩的茶会/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    4340.9,
+    4526.4
+   ],
+   "record_target_gap": 278,
+   "record_name": "实验性场力发生装置前往",
+   "record_anchor": [
+    4144.2,
+    4423.9
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 24,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4012-梅洛彼得堡/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4427.1,
+    4484.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 76,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4012-梅洛彼得堡/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    4389.0,
+    4618.2
+   ],
+   "record_target_gap": 221,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 8,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4015-匿于日常之禁忌/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4517.6,
+    4564.0
+   ],
+   "record_target_gap": 202,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 61,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4015-匿于日常之禁忌/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    4485.8,
+    4598.0
+   ],
+   "record_target_gap": 179,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 39,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4015-匿于日常之禁忌/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    4519.4,
+    4615.5
+   ],
+   "record_target_gap": 151,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 20,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第三幕-向深水中的晨星/4018-深海的迷路者/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4516.9,
+    4565.0
+   ],
+   "record_target_gap": 201,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 60,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4000-如同昔日的微茫月明/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3454.5,
+    4631.7
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 22,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4000-如同昔日的微茫月明/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3457.4,
+    3666.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 98,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4000-如同昔日的微茫月明/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    3566.0,
+    4490.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 69,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4001-真相流逝于雨后/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3548.9,
+    4560.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-水",
+   "nearest_gap": 88,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4001-真相流逝于雨后/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2711.4,
+    4229.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 31,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4001-真相流逝于雨后/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    3518.7,
+    4455.5
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 77,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4002-当一切回归于水/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3598.5,
+    4633.0
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-水",
+   "nearest_gap": 0,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4002-当一切回归于水/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3567.1,
+    4445.9
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 94,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第二幕-仿若无因飘落的轻雨/4002-当一切回归于水/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    2640.4,
+    4273.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 65,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4020-相见亦是离别/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2273.6,
+    4131.2
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 262,
+   "verdict": "walk",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4021-狩猎者，预见者/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3472.6,
+    4551.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 38,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4021-狩猎者，预见者/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2844.6,
+    4167.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "苍白的遗荣",
+   "nearest_gap": 142,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4021-狩猎者，预见者/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    3477.9,
+    4550.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 40,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4022-审判日/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    2764.8,
+    4191.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 91,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4023-怒涛之灾/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4520.1,
+    4561.2
+   ],
+   "record_target_gap": 204,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 64,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4023-怒涛之灾/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    2708.4,
+    4255.3
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 6,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4025-终幕礼/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    3454.9,
+    4479.4
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 26,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4025-终幕礼/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    4457.6,
+    4576.0
+   ],
+   "record_target_gap": 211,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 5,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4025-终幕礼/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    1625.6,
+    4999.8
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "七天神像-水",
+   "nearest_gap": 38,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第五幕-罪人舞步旋/4025-终幕礼/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    3329.2,
+    3811.1
+   ],
+   "record_target_gap": 284,
+   "record_name": "枫丹4-柔灯港-4-rerun",
+   "record_anchor": [
+    3032.7,
+    3732.4
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 181,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4007-探入水底迷雾/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4519.6,
+    4558.5
+   ],
+   "record_target_gap": 207,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 64,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4008-真相隐于影中/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4489.7,
+    4608.0
+   ],
+   "record_target_gap": 168,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 42,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4008-真相隐于影中/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    4580.8,
+    4630.3
+   ],
+   "record_target_gap": 134,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 60,
+   "verdict": "nearby",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4009-守秘者与禁区/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4491.6,
+    4597.6
+   ],
+   "record_target_gap": 177,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 43,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4010-灾厄的脚步/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4490.6,
+    4617.1
+   ],
+   "record_target_gap": 159,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 36,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4010-灾厄的脚步/pathing/02.json",
+   "map": "Teyvat",
+   "first": [
+    3329.4,
+    3809.8
+   ],
+   "record_target_gap": 284,
+   "record_name": "枫丹4-柔灯港-4-rerun",
+   "record_anchor": [
+    3032.7,
+    3732.4
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 183,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4010-灾厄的脚步/pathing/03.json",
+   "map": "Teyvat",
+   "first": [
+    4449.9,
+    4608.5
+   ],
+   "record_target_gap": 187,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "梅洛彼得堡",
+   "nearest_gap": 38,
+   "verdict": "walk",
+   "source": "recorded"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4010-灾厄的脚步/pathing/04.json",
+   "map": "Teyvat",
+   "first": [
+    3441.2,
+    3694.6
+   ],
+   "record_target_gap": null,
+   "record_name": null,
+   "record_anchor": null,
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 130,
+   "verdict": "nearby",
+   "source": "tp"
+  },
+  {
+   "file": "js/第四章-枫丹/第四幕-谕示胎动的终焉之刻/4019-片刻安宁/pathing/01.json",
+   "map": "Teyvat",
+   "first": [
+    4581.1,
+    4629.4
+   ],
+   "record_target_gap": 135,
+   "record_name": "枫丹3-新枫丹科学院-1-rerun",
+   "record_anchor": [
+    4498.2,
+    4710.8
+   ],
+   "nearest_anchor": "传送锚点",
+   "nearest_gap": 61,
+   "verdict": "nearby",
+   "source": "recorded"
+  }
+ ]
+}
