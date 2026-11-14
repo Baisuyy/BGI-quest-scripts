@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
+        xmlns:microsoft="clr-namespace:BetterGenshinImpact.View.Windows"
         Title="BetterGI 助手"
-        Width="430"
-        Height="330"
+        Width="460"
+        Height="460"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
@@ -58,6 +59,59 @@
             <Setter Property="Padding" Value="8,2" />
             <Setter Property="FontSize" Value="14" />
         </Style>
+
+        <!-- 一条消息的气泡：用户靠右、AI 靠左、工具步骤压成小字。
+             以前整块是一个 TextBlock，模型说的话和 [3/16] 步骤混在同一行，分不清谁在说。 -->
+        <DataTemplate x:Key="MessageTemplate">
+            <Border x:Name="Bubble"
+                    MaxWidth="386"
+                    Margin="0,2"
+                    Padding="9,6"
+                    CornerRadius="9"
+                    HorizontalAlignment="Left"
+                    Background="#1FFFFFFF">
+                <TextBlock x:Name="BubbleText"
+                           Text="{Binding Text}"
+                           TextWrapping="Wrap"
+                           Foreground="#E9FFFFFF"
+                           FontSize="12.5"
+                           LineHeight="19" />
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static microsoft:PanelMessageKind.User}">
+                    <Setter TargetName="Bubble" Property="HorizontalAlignment" Value="Right" />
+                    <Setter TargetName="Bubble" Property="Background" Value="#5A4CC2FF" />
+                    <Setter TargetName="BubbleText" Property="Foreground" Value="#08121A" />
+                    <Setter TargetName="BubbleText" Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static microsoft:PanelMessageKind.Ai}">
+                    <Setter TargetName="Bubble" Property="Background" Value="#2BFFFFFF" />
+                    <Setter TargetName="Bubble" Property="CornerRadius" Value="9,9,9,3" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static microsoft:PanelMessageKind.Step}">
+                    <Setter TargetName="Bubble" Property="Background" Value="Transparent" />
+                    <Setter TargetName="Bubble" Property="Padding" Value="3,0" />
+                    <Setter TargetName="Bubble" Property="MaxWidth" Value="396" />
+                    <Setter TargetName="BubbleText" Property="Foreground" Value="#8CFFFFFF" />
+                    <Setter TargetName="BubbleText" Property="FontSize" Value="11.5" />
+                    <Setter TargetName="BubbleText" Property="FontFamily" Value="Consolas, Microsoft YaHei UI" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static microsoft:PanelMessageKind.Ok}">
+                    <Setter TargetName="Bubble" Property="Background" Value="#266DDC8F" />
+                    <Setter TargetName="BubbleText" Property="Foreground" Value="#C2F3D2" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static microsoft:PanelMessageKind.Fail}">
+                    <Setter TargetName="Bubble" Property="Background" Value="#26FF8A8A" />
+                    <Setter TargetName="BubbleText" Property="Foreground" Value="#FFCCCC" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Kind}" Value="{x:Static microsoft:PanelMessageKind.Hint}">
+                    <Setter TargetName="Bubble" Property="Background" Value="Transparent" />
+                    <Setter TargetName="Bubble" Property="Padding" Value="3,0" />
+                    <Setter TargetName="BubbleText" Property="Foreground" Value="#85FFFFFF" />
+                    <Setter TargetName="BubbleText" Property="FontSize" Value="11.5" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
     </Window.Resources>
 
     <Border Background="{StaticResource PanelBackground}"
@@ -90,16 +144,16 @@
                 </StackPanel>
             </Grid>
 
-            <!-- 中部：步骤流 -->
-            <Border Grid.Row="1" Background="#14FFFFFF" CornerRadius="8" Padding="10,8">
+            <!-- 中部：对话流（用户 / AI / 工具步骤分色） -->
+            <Border Grid.Row="1" Background="#14FFFFFF" CornerRadius="8" Padding="8,6">
                 <ScrollViewer x:Name="OutputScroll" VerticalScrollBarVisibility="Auto">
-                    <TextBlock x:Name="OutputText"
-                               Foreground="#E6FFFFFF"
-                               FontFamily="Consolas, Microsoft YaHei UI"
-                               FontSize="12"
-                               TextWrapping="Wrap"
-                               LineHeight="18"
-                               Text="说一句要做什么，例如：&#x0a;· 把今天的体力清掉&#x0a;· 领一下每日和邮件&#x0a;· 跑「第七章第五幕」脚本" />
+                    <ItemsControl x:Name="OutputList" ItemTemplate="{StaticResource MessageTemplate}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
                 </ScrollViewer>
             </Border>
 

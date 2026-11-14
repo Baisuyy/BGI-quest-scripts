@@ -35,7 +35,68 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  # 官方发布流水线会把两个前端产物塞进 Assets：脚本仓库页与地图编辑器页。
+  # 特别版漏了这一步，客户端打开「脚本仓库」时 WebView2 找不到目录，
+  # SetVirtualHostNameToFolderMapping 抛 0x80070003，窗口直接空白。
+  # 前端构建失败不阻断客户端出包，代码侧有缺目录兜底。
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - name: 构建脚本仓库页
+        id: scripts
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: zaodonganqi/bettergi-script-web
+
+      - name: 安装 Node
+        if: ${{ steps.scripts.outcome == 'success' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 打包脚本仓库页
+        if: ${{ steps.scripts.outcome == 'success' }}
+        continue-on-error: true
+        run: npm install && npm run build:single
+
+      - name: 上传脚本仓库页
+        if: ${{ steps.scripts.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: web_scripts_list
+          path: dist/
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: 检出地图编辑器
+        id: map
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: huiyadanli/bettergi-map
+          path: map
+
+      - name: 打包地图编辑器
+        if: ${{ steps.map.outcome == 'success' }}
+        continue-on-error: true
+        run: cd map && npm install && npm run build:single
+
+      - name: 上传地图编辑器
+        if: ${{ steps.map.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: web_map_editor
+          path: map/dist/
+          if-no-files-found: warn
+          retention-days: 3
+
   build:
+    needs: [web]
     runs-on: windows-latest
     timeout-minutes: 60
     steps:
@@ -80,6 +141,22 @@ jobs:
             -p:Version=${{ steps.ver.outputs.version }} `
             --nologo
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish 失败，退出码 $LASTEXITCODE" }
+
+      # 前端产物先落到 dist，随下面的 Copy-Item 一起进包。取不到就跳过，
+      # 客户端会退化成可读提示而不是白屏。
+      - name: 取脚本仓库页
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: web_scripts_list
+          path: dist/BetterGI/Assets/Web/ScriptRepo
+
+      - name: 取地图编辑器页
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: web_map_editor
+          path: dist/BetterGI/Assets/Map/Editor
 
       - name: 整理并打包
         id: pack

@@ -1,9 +1,11 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.View.Pages;
@@ -12,6 +14,27 @@ using Microsoft.Extensions.Logging;
 using Wpf.Ui;
 
 namespace BetterGenshinImpact.View.Windows;
+
+/// <summary>面板里的一条消息，决定气泡的颜色与对齐。</summary>
+public enum PanelMessageKind
+{
+    /// <summary>灰色小字提示，不是模型说的话。</summary>
+    Hint,
+    User,
+    Ai,
+    /// <summary>工具调用步骤，压成等宽小字。</summary>
+    Step,
+    Ok,
+    Fail
+}
+
+/// <summary>面板消息。只读，产生后不再变化。</summary>
+public sealed class PanelMessage
+{
+    public string Text { get; init; } = "";
+
+    public PanelMessageKind Kind { get; init; }
+}
 
 /// <summary>
 /// 常驻小面板：游戏运行时按 <c>Ctrl+Alt+A</c> 唤起，用一句话让内置模型去下任务。
@@ -39,6 +62,13 @@ public partial class AgentPanelWindow : Window
     private readonly AiKernel? _kernel;
     private readonly AllConfig? _config;
     private readonly IProgress<string> _progress;
+
+    /// <summary>对话内容。面板只保留本次会话，换任务就清空，免得看起来像有多轮上下文。</summary>
+    private readonly ObservableCollection<PanelMessage> _messages = [];
+
+    /// <summary>面板最多留多少条消息，超出丢最早的。</summary>
+    private const int MaxMessages = 200;
+
     private CancellationTokenSource? _cts;
     private bool _running;
 
@@ -46,6 +76,9 @@ public partial class AgentPanelWindow : Window
     {
         InitializeComponent();
         _progress = new Progress<string>(Append);
+
+        OutputList.ItemsSource = _messages;
+        ShowWelcome();
 
         _kernel = TryGet<AiKernel>();
         _config = TryGet<AllConfig>();
@@ -201,18 +234,21 @@ public partial class AgentPanelWindow : Window
         var text = InputBox.Text?.Trim();
         if (string.IsNullOrEmpty(text))
         {
-            Append("先写一句要做什么，例如：把今天的体力清掉。");
+            Append("先写一句要做什么，例如：把今天的体力清掉。", PanelMessageKind.Hint);
             return;
         }
 
         if (_agent == null)
         {
-            Append("内置模型未初始化，无法执行。");
+            Append("内置模型未初始化，无法执行。", PanelMessageKind.Fail);
             return;
         }
 
         InputBox.Clear();
-        Append("> " + text);
+
+        // 每次都是独立会话，旧气泡留着会让人以为模型记得上一轮
+        _messages.Clear();
+        Append(text, PanelMessageKind.User);
 
         // 面板是 Topmost，输入结束后焦点还在输入框上。任务一开始就会因为「前台不是原神」被暂停，
         // 传送这类需要连续点击的操作尤其明显。这里在交给模型之前先把焦点还给游戏窗口，
@@ -227,17 +263,26 @@ public partial class AgentPanelWindow : Window
         try
         {
             var result = await _agent.RunAsync(text, _progress, _cts.Token);
-            Append((result.Success ? "✔ " : "✖ ") + result.Summary
-                   + $"（{result.Steps} 步 / {result.Calls} 请求）");
+
+            // 模型最后那句话通常已经作为气泡显示过了，重复贴一遍只是噪音
+            var last = _messages.Count > 0 ? _messages[^1] : null;
+            var alreadyShown = last is { Kind: PanelMessageKind.Ai } && last.Text == result.Summary;
+            if (!alreadyShown && !string.IsNullOrWhiteSpace(result.Summary))
+            {
+                Append(result.Summary, result.Success ? PanelMessageKind.Ai : PanelMessageKind.Fail);
+            }
+
+            Append($"{(result.Success ? "完成" : "中止")} · {result.Steps} 步 · {result.Calls} 次模型请求",
+                result.Success ? PanelMessageKind.Hint : PanelMessageKind.Fail);
         }
         catch (OperationCanceledException)
         {
-            Append("✖ 已取消");
+            Append("已取消", PanelMessageKind.Fail);
         }
         catch (Exception e)
         {
             Logger.LogWarning(e, "助手面板执行失败");
-            Append("✖ " + e.Message);
+            Append(e.Message, PanelMessageKind.Fail);
         }
         finally
         {
@@ -351,32 +396,72 @@ public partial class AgentPanelWindow : Window
         Opacity = 1;
     }
 
-    /// <summary>追加一行并滚到底；超过 200 行时丢掉前半，防止长时间运行把内存撑大。</summary>
-    private void Append(string line)
+    /// <summary>追加一条消息并滚到底；超过 <see cref="MaxMessages"/> 条时丢掉最早的。</summary>
+    private void Append(string line, PanelMessageKind kind)
     {
-        if (string.IsNullOrEmpty(line))
+        if (string.IsNullOrWhiteSpace(line))
         {
             return;
         }
 
-        var text = OutputText.Text;
-        if (string.IsNullOrEmpty(text) || text.StartsWith("说一句要做什么", StringComparison.Ordinal))
+        _messages.Add(new PanelMessage { Text = line.Trim(), Kind = kind });
+        while (_messages.Count > MaxMessages)
         {
-            text = line;
-        }
-        else
-        {
-            text += Environment.NewLine + line;
+            _messages.RemoveAt(0);
         }
 
-        var lines = text.Split('\n');
-        if (lines.Length > 200)
+        ScrollToEnd();
+    }
+
+    /// <summary>未标注类型的消息按内容猜：勾叉是结果，[n/m] 是工具步骤，其余当作模型说的话。</summary>
+    private void Append(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line))
         {
-            text = string.Join('\n', lines[(lines.Length - 200)..]);
+            return;
         }
 
-        OutputText.Text = text;
-        OutputScroll.ScrollToEnd();
+        Append(line, GuessKind(line));
+    }
+
+    private static PanelMessageKind GuessKind(string line)
+    {
+        if (line.StartsWith('✔'))
+        {
+            return PanelMessageKind.Ok;
+        }
+
+        if (line.StartsWith('✖'))
+        {
+            return PanelMessageKind.Fail;
+        }
+
+        // 步骤行形如「[3/16] 调用 run_task」，斜杠必须出现在方括号内
+        if (line[0] == '[')
+        {
+            var close = line.IndexOf(']');
+            var slash = line.IndexOf('/');
+            if (close > 2 && slash > 0 && slash < close)
+            {
+                return PanelMessageKind.Step;
+            }
+        }
+
+        return PanelMessageKind.Ai;
+    }
+
+    /// <summary>新气泡还没参与布局，立刻滚动常停在上一条，等一轮再滚。</summary>
+    private void ScrollToEnd()
+    {
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => OutputScroll.ScrollToEnd()));
+    }
+
+    private void ShowWelcome()
+    {
+        Append("说一句要做什么，例如：", PanelMessageKind.Hint);
+        Append("· 把今天的体力清掉", PanelMessageKind.Hint);
+        Append("· 领一下每日和邮件", PanelMessageKind.Hint);
+        Append("· 跑「第七章第五幕」脚本", PanelMessageKind.Hint);
     }
 
     private static T? TryGet<T>() where T : class

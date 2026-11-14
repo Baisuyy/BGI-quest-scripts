@@ -169,12 +169,25 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
                 var reply = await kernel.SendAsync("本地助手", conversation, BuildTools(),
                     BuildSystemPrompt(sandbox, settings), ct).ConfigureAwait(false);
 
+                // 模型一边调工具一边说的话也要显示。只在「不再调工具」时才说正文，
+                // 面板里就只剩一串 [n/m] 步骤，看着像没有 AI 在回答。
+                var speech = reply.Text?.Trim();
+                if (!string.IsNullOrEmpty(speech))
+                {
+                    AiLog.Say(blockId, speech);
+                    progress?.Report(speech);
+                }
+
                 if (!reply.WantsTool)
                 {
-                    var text = string.IsNullOrWhiteSpace(reply.Text) ? "（模型没有给出内容）" : reply.Text.Trim();
-                    AiLog.Say(blockId, text);
-                    progress?.Report("模型：" + text);
-                    return Finish(true, text, step, callsAtStart, stopwatch, blockId);
+                    if (string.IsNullOrEmpty(speech))
+                    {
+                        speech = "（模型没有给出内容）";
+                        AiLog.Say(blockId, speech);
+                        progress?.Report(speech);
+                    }
+
+                    return Finish(true, speech, step, callsAtStart, stopwatch, blockId);
                 }
 
                 conversation.AddAssistant(reply);
