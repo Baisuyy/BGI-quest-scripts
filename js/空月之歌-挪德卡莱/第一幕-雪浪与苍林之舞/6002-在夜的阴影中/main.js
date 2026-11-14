@@ -145,6 +145,13 @@ async function main() {
             continue;
         }
 
+        if (!data.positions || data.positions.length < 2) {
+            // 只有 1 个点的是任务提示坐标，不是能走的路线：硬跑会直冲目标，常停在副本门口或墙边
+            bad++;
+            log.warn('  段 ' + seg.seq + ' 只有 ' + ((data.positions || []).length) + ' 个点，是任务提示点而非路线，已跳过');
+            continue;
+        }
+
         if (CONFIG.teleportBeforeSeg) {
             await teleportTo(seg, data);
             await sleep(CONFIG.delayAfterTeleport);
