@@ -1,4 +1,4 @@
-# 安装 BetterGI 脚本与路线
+﻿# 安装 BetterGI 脚本与路线
 #
 # 用法（在仓库根目录打开 PowerShell）：
 #   .\install.ps1 -BgiRoot "D:\BetterGI"
@@ -46,12 +46,16 @@ if ($projects.Count -eq 0) {
 $installed = 0
 $copiedRoutes = 0
 foreach ($proj in $projects) {
-    $dest = Join-Path $jsTarget $proj.Name
+    # 同名任务可能有两份（原始 / 路径优化），装到同一个目录会互相覆盖，加后缀区分
+    $variant = ''
+    if ($proj.FullName -match '[\\/](原始|路径优化)-') { $variant = '（' + $Matches[1] + '）' }
+    $destName = $proj.Name + $variant
+    $dest = Join-Path $jsTarget $destName
     if (Test-Path $dest) {
         Remove-Item $dest -Recurse -Force
     }
     Copy-Item $proj.FullName $dest -Recurse -Force
-    Write-Host "  ✔ 脚本 $($proj.Name)"
+    Write-Host "  ✔ 脚本 $destName"
     $installed++
 
     # 全流程项目里的 pathing 是其它任务的聚合副本，不重复安装

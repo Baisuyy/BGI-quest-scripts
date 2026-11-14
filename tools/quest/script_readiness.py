@@ -76,6 +76,9 @@ def main() -> None:
     for main_js in sorted(JS.rglob("main.js")):
         if "_tools" in main_js.parts:
             continue
+        # 「路径优化-」是派生副本，统计时只算原始脚本，免得同一任务被数两遍
+        if any(p.startswith("路径优化-") for p in main_js.parts):
+            continue
         rows = parse_script(main_js)
         rel = main_js.relative_to(JS)
         tasks.append({
@@ -93,6 +96,8 @@ def main() -> None:
         "# 任务脚本可跑性报告",
         "",
         "由 `tools/quest/script_readiness.py` 生成。判据：一段路线里有几个点。",
+        "",
+        "> 统计范围是原始脚本，`js/路径优化-*` 是派生副本，不计入，免得同一任务被数两遍。",
         "",
         "- **0/1 个点** = 任务提示坐标，不是能走的路线。脚本运行时会跳过并打警告，"
         "不会再把角色直冲过去（旧版会跑到副本门口这类地方，看起来像「脚本错位」）。",
