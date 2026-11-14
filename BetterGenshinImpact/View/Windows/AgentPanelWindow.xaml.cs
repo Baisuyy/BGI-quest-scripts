@@ -214,6 +214,11 @@ public partial class AgentPanelWindow : Window
         InputBox.Clear();
         Append("> " + text);
 
+        // 面板是 Topmost，输入结束后焦点还在输入框上。任务一开始就会因为「前台不是原神」被暂停，
+        // 传送这类需要连续点击的操作尤其明显。这里在交给模型之前先把焦点还给游戏窗口，
+        // 面板本身留在原地显示进度——不隐藏，用户还要看。
+        ReturnFocusToGame();
+
         _running = true;
         _cts = new CancellationTokenSource();
         SendButton.Content = "停止";
@@ -258,6 +263,25 @@ public partial class AgentPanelWindow : Window
         {
             e.Handled = true;
             Hide();
+        }
+    }
+
+    /// <summary>
+    /// 把前台让给游戏窗口。找不到游戏时静默返回——焦点由任务侧的检查兜底。
+    /// </summary>
+    private static void ReturnFocusToGame()
+    {
+        try
+        {
+            var handle = BetterGenshinImpact.GameTask.SystemControl.FindGenshinImpactHandle();
+            if (handle != 0)
+            {
+                BetterGenshinImpact.GameTask.SystemControl.FocusWindow(handle);
+            }
+        }
+        catch (Exception e)
+        {
+            Logger.LogDebug(e, "归还焦点给游戏窗口失败");
         }
     }
 

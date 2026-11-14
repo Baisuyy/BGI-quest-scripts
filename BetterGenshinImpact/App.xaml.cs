@@ -140,13 +140,18 @@ public partial class App : Application
                         // 原始诊断独立留档；不再在文件额外复制仅供悬浮显示的OCR摘要。
                         .Filter.ByExcluding(QuestVoiceLog.IsSummary)
                         .Enrich.WithProperty("BgiInstance", instanceIdentity)
-                        .WriteTo.File(logFile,
-                            outputTemplate:
-                            "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}",
-                            rollingInterval: RollingInterval.Day,
-                            shared: true,
-                            retainedFileCountLimit: 31,
-                            retainedFileTimeLimit: TimeSpan.FromDays(21)))
+                        .WriteTo.Sink(new RepeatSuppressorSink(
+                            new LoggerConfiguration()
+                                .WriteTo.File(logFile,
+                                    // 一行一条：时间 / 级别 / 实例 / 来源 → 消息；异常另起，方便按行 grep
+                                    outputTemplate:
+                                    "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext} | {Message:lj}{NewLine}{Exception}",
+                                    rollingInterval: RollingInterval.Day,
+                                    shared: true,
+                                    retainedFileCountLimit: 31,
+                                    retainedFileTimeLimit: TimeSpan.FromDays(21))
+                                .CreateLogger()),
+                            LogEventLevel.Debug))
                     .WriteTo.Console(outputTemplate:
                         "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .MinimumLevel.Debug()

@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using BetterGenshinImpact.Core.Config;
@@ -124,11 +125,14 @@ internal sealed class AiLog
         return id;
     }
 
-    /// <summary>本地助手一步：动作与结果首行。</summary>
+    /// <summary>本地助手一步：动作与结果首行，结果多行时标出行数，避免「只看到一句话」。</summary>
     public static void AgentStep(int id, int step, int max, string action, string result)
     {
-        var firstLine = (result ?? "").Split('\n').FirstOrDefault(l => !string.IsNullOrWhiteSpace(l)) ?? "";
-        Info("│ [{0}/{1}] {2} → {3}", step, max, Truncate(action, 110), Truncate(firstLine, 90));
+        var text = result ?? "";
+        var lines = text.Split('\n').Count(l => !string.IsNullOrWhiteSpace(l));
+        var firstLine = text.Split('\n').FirstOrDefault(l => !string.IsNullOrWhiteSpace(l)) ?? "";
+        var more = lines > 1 ? $"（共 {lines} 行）" : "";
+        Info("│ [{0}/{1}] {2} → {3}{4}", step, max, Truncate(action, 110), Truncate(firstLine, 120), more);
     }
 
     /// <summary>收本地助手块。</summary>
@@ -141,11 +145,13 @@ internal sealed class AiLog
         => Info("│ 授权 {0} · {1} {2} · {3}", action, inside ? "沙箱内" : "沙箱外",
             allowed ? "允许" : "拒绝", Truncate(target, 120));
 
+    // 整行先拼成普通字符串再交给 logger：Serilog 会把 {0} 当作名为 "0" 的字符串属性，
+    // 落盘时给每个值加引号，读起来像一串被引号包住的碎片。合并成单参数就干净了。
     private static void Info(string format, params object?[] args)
-        => Logger.LogInformation(Tag + " " + format, args);
+        => Logger.LogInformation("{AiLine}", Tag + " " + string.Format(CultureInfo.InvariantCulture, format, args));
 
     private static void Warn(string format, params object?[] args)
-        => Logger.LogWarning(Tag + " " + format, args);
+        => Logger.LogWarning("{AiLine}", Tag + " " + string.Format(CultureInfo.InvariantCulture, format, args));
 
     private static string Truncate(string? text, int max = MaxLine)
     {

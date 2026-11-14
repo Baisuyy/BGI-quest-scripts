@@ -154,9 +154,11 @@ public partial class AiConfig : ObservableObject
 
     /// <summary>
     /// 单次任务最多几步（一步一次工具调用）。
+    /// 实测一次「看清有哪些任务 → 查参数 → 确认状态 → 下发 → 核实」要 5~8 步，
+    /// 遇到配置缺失再补一次就要 10 步以上，默认 16 才不会中途截断。
     /// </summary>
     [ObservableProperty]
-    private int _agentMaxSteps = 10;
+    private int _agentMaxSteps = 16;
 
     /// <summary>
     /// 单次任务总超时（秒）。

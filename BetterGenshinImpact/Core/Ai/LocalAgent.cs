@@ -244,6 +244,9 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
                        6. 用户要求「刷本、清体力、领日常、讨伐、钓鱼、伐木、跑脚本」这类游戏内操作时，用 list_tasks / run_task / run_script 下发，
                           不要用键鼠模拟或自己写程序去替代——那些能力 BGI 本身就有，而且带任务锁与停止入口。
                        7. 下任务前先 list_tasks 确认标识；参数不确定时先 describe_task，params 只填要改的字段（snake_case），其余保持默认。
+                           有些任务依赖用户在界面里建好的配置（如「一条龙」需要 OneDragon 配置）。返回「找不到配置」时不要原样重试，
+                           先说明缺什么、让用户去对应页面建一份，或改下不需要配置的任务。
+                       7.1 run_task 返回「启动后立即失败」时，按给出的原因改参数或换任务，最多再试一次；连续失败就直接 done 并说明缺什么。
                        8. 长任务（刷本、讨伐、脚本）不要 wait，让它在后台跑，再用 task_status 回报；短任务才值得等。
                        9. 同一时刻只能跑一个任务，被拒绝时先 task_status，必要时 stop_task。
                        10. 用户问「刚录的路线怎么样、和成品比一下」时，用 list_paths 找到文件再 compare_path 比对，不要自己算。

@@ -300,6 +300,16 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
         var head = $"已下发 {descriptor.TaskId}（{descriptor.DisplayName}）" + (note.Length > 0 ? "，" + note : "");
         if (!wait)
         {
+            // 配置缺失、路径不可达这类错误在启动后一两秒内就会抛。
+            // 如果直接回「已下发」，模型会以为成功，下一轮再查状态才发现失败，白花一步。
+            // 这里短暂观察一下，把失败原因当场带回去，让它能立刻改参数或换任务。
+            var immediate = await ProbeImmediateFailureAsync(ct).ConfigureAwait(false);
+            if (immediate is { Length: > 0 })
+            {
+                return $"{head}，但启动后立即失败：{immediate}。"
+                       + "先看 describe_task 的参数与依赖（例如某类任务要先在界面里建好配置），不要原样重试。";
+            }
+
             return head + "，任务在后台运行。用 task_status 查进度，stop_task 停止。";
         }
 
@@ -308,6 +318,24 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
         return result is null
             ? head + $"，已等 {seconds} 秒仍在运行。用 task_status 继续观察。"
             : head + "，已结束：" + DescribeResult(result);
+    }
+
+    /// <summary>
+    /// 下发后观察一小段时间，返回「已停止且带错误」的原因；仍在跑或正常结束都返回空。
+    /// </summary>
+    private async Task<string?> ProbeImmediateFailureAsync(CancellationToken ct)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(1200), ct).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
+
+        var status = execution.GetStatus();
+        return !status.IsActive && status.ErrorMessage is { Length: > 0 } error ? error : null;
     }
 
     /// <summary>把模型给的部分参数与任务默认参数深合并，避免它漏字段导致数值被清零。</summary>
