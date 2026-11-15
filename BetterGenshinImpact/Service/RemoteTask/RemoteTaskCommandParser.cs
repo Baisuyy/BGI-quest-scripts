@@ -264,8 +264,69 @@ public static class RemoteTaskCommandParser
             return new RemoteTaskCommand(loose);
         }
 
+        // 6.5 只报了一个素材名（「析晶褶伞」「清心」）：盘上有这条路线就当成采集。
+        // 这一步不能省——交给模型解析时，模型看不到本地文件，只会回「没有这种任务」。
+        if (TryMatchMaterialRoute(normalized, out var material))
+        {
+            return new RemoteTaskCommand(RemoteTaskCommandKind.Path, Args: material);
+        }
+
         // 7. 都不认识：交给上层判断要不要让模型自己上手。
         return new RemoteTaskCommand(RemoteTaskCommandKind.Unknown, Say: text?.Trim());
+    }
+
+    /// <summary>
+    /// 判断整句是不是一个「只有素材名」的采集请求。
+    /// <para>
+    /// 判据是本地路线索引里真的有这个东西，而不是猜词性：短句、且能对上素材名/路线名才算。
+    /// 长度上限用来挡住「今天有什么好看的」这类长句被误判成采集。
+    /// </para>
+    /// </summary>
+    /// <param name="text">已去掉空格的正文。</param>
+    /// <param name="material">归一后的素材名，用作后续查路线的关键词。</param>
+    private static bool TryMatchMaterialRoute(string text, out string material)
+    {
+        material = string.Empty;
+        foreach (var clause in SplitClauses(text))
+        {
+            var candidate = StripMaterialNoise(clause);
+            if (candidate.Length is 0 or > 12)
+            {
+                continue;
+            }
+
+            try
+            {
+                if (PathingRouteLibrary.Find(candidate).Count > 0)
+                {
+                    material = candidate;
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                // 路线目录不可读时按普通句子处理，不让扫描异常冒到聊天里
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 剥掉「材料」「素材」这类修饰词，只留可能对得上路线目录的部分。
+    /// <para>
+    /// 「捡材料析晶褶伞」的动作词在指令表里已经吃掉，但「材料」两个字还挂在参数上，
+    /// 直接拿去查路线会一条都匹配不到。
+    /// </para>
+    /// </summary>
+    /// <param name="text">原始片段。</param>
+    internal static string StripMaterialNoise(string text)
+    {
+        var cleaned = (text ?? string.Empty).Trim().Trim('「', '」', '"', '“', '”', ' ', '。', '，');
+        cleaned = Regex.Replace(cleaned, "^(采集|采一下|采点|采|挖|收集|捡|拾取|找|刷|跑图采)", "");
+        cleaned = Regex.Replace(cleaned, "(材料|素材|特产|东西|路线|脚本|拾取|采集)$", "");
+        return cleaned.Trim();
     }
 
     /// <summary>
@@ -470,9 +531,12 @@ public static class RemoteTaskCommandParser
         (RemoteTaskCommandKind.SwitchCharacter, ["切换角色", "切角色", "换角色", "切换人物", "切人", "换人", "切到", "换到"]),
         (RemoteTaskCommandKind.Script, ["运行脚本", "执行脚本", "跑脚本", "运行配置组"]),
         (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时"]),
-        (RemoteTaskCommandKind.Path, ["采集", "采一下", "采点", "挖", "收集", "采"]),
-        (RemoteTaskCommandKind.Pilot, ["自由操作", "你自己操作", "你自己点", "看着点",
-            "捡材料", "捡东西", "捡一下", "拾取材料"])
+        // 采集类是「跑盘上的路线」，不是「让模型在画面上点」：一条路线动辄几十个点，
+        // 靠 look/click 一步点点不出来，而且模型根本不知道本地有哪些路线。
+        (RemoteTaskCommandKind.Path, ["采集", "采一下", "采点", "采", "挖", "收集", "捡", "拾取",
+            "找素材", "刷素材", "跑图采"]),
+        // 自由操作只剩「明确要模型自己上手」的说法，避免把采集请求抢走
+        (RemoteTaskCommandKind.Pilot, ["自由操作", "你自己操作", "你自己点", "看着点", "随便点", "你自己看着办"])
     ];
 
     /// <summary>

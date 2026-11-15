@@ -242,6 +242,13 @@ public sealed class GuiPilot(
                 }
 
                 conversation.AddToolResult(call.Id, content);
+
+                // 模型偶尔一次返回多个工具调用，这里只跑第一个。其余的必须各回一条 tool 消息，
+                // 否则下一轮请求会因为「tool_calls 后面缺 tool 响应」被服务端直接 400 打断。
+                for (var i = 1; i < reply.Calls.Count; i++)
+                {
+                    conversation.AddToolResult(reply.Calls[i].Id, "同一步只执行一个动作，这个已跳过。");
+                }
             }
         }
         finally

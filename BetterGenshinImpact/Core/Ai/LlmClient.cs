@@ -132,6 +132,17 @@ public sealed class LlmClient
             messages.Add(new JsonObject { ["role"] = "system", ["content"] = systemPrompt });
         }
 
+        // 先记下已经有结果的调用：下面遇到 assistant 时据此判断要不要补占位，
+        // 否则流程中断（超时、取消、异常）留下的孤立 tool_calls 会让整个请求被拒。
+        var answered = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var turn in conversation.Turns)
+        {
+            if (turn is LlmToolResultTurn answeredTurn)
+            {
+                answered.Add(answeredTurn.CallId);
+            }
+        }
+
         foreach (var turn in conversation.Turns)
         {
             switch (turn)
@@ -163,6 +174,21 @@ public sealed class LlmClient
                     }
 
                     messages.Add(message);
+
+                    // 缺结果的调用就地补一条，保证「每个 tool_call_id 都有对应 tool 消息」
+                    foreach (var call in assistant.Calls)
+                    {
+                        if (!answered.Contains(call.Id))
+                        {
+                            messages.Add(new JsonObject
+                            {
+                                ["role"] = "tool",
+                                ["tool_call_id"] = call.Id,
+                                ["content"] = "（未执行：流程中断或超时）",
+                            });
+                        }
+                    }
+
                     break;
                 }
                 case LlmToolResultTurn result:

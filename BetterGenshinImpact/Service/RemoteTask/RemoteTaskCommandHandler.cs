@@ -129,7 +129,8 @@ public sealed class RemoteTaskCommandHandler(
             RemoteTaskCommandKind.Login => await LoginAsync(command, cancellationToken).ConfigureAwait(false),
             RemoteTaskCommandKind.Path => await PathingAsync(command, onRunStarted, cancellationToken)
                 .ConfigureAwait(false),
-            RemoteTaskCommandKind.Pilot => await PilotAsync(command.Args ?? message.Content, cancellationToken)
+            RemoteTaskCommandKind.Pilot => await PilotAsync(
+                    command.Args ?? message.Content, onRunStarted, cancellationToken)
                 .ConfigureAwait(false),
             RemoteTaskCommandKind.Plan => StartPlan(command),
             RemoteTaskCommandKind.Chat => new RemoteTaskReply(command.Say ?? BuildHelp()),
@@ -590,24 +591,58 @@ public sealed class RemoteTaskCommandHandler(
             return new RemoteTaskReply(BuildPathingHelp());
         }
 
+        return await TryStartPathingAsync(goal, command.Say, onRunStarted, cancellationToken).ConfigureAwait(false)
+               ?? new RemoteTaskReply(BuildPathingHelp(goal));
+    }
+
+    /// <summary>
+    /// 盘上真有这条路线就把它跑起来；没有则返回 null，由调用方决定怎么兜底。
+    /// <para>
+    /// 抽出来是因为「自由操作」也需要先过一遍：采集请求经常被说成「你自己去捡一下」，
+    /// 而模型看不到本地文件，让它临场找路只会把步数烧在乱点上。
+    /// </para>
+    /// </summary>
+    /// <param name="goal">素材名、角色名或路线名。</param>
+    /// <param name="say">要放在回复开头的话术，可为空。</param>
+    /// <param name="onRunStarted">任务被受理后回调，用于登记待回传，避免秒失败的任务漏回。</param>
+    /// <returns>已启动的回复；没找到路线时返回 null。</returns>
+    private async Task<RemoteTaskReply?> TryStartPathingAsync(
+        string goal,
+        string? say,
+        Action<Guid>? onRunStarted,
+        CancellationToken cancellationToken)
+    {
+        var raw = (goal ?? string.Empty).Trim();
+        if (raw.Length == 0)
+        {
+            return null;
+        }
+
+        // 「捡材料析晶褶伞」这类句子，动作词已被指令表吃掉，剩下的「材料」会挡住目录匹配
+        var text = RemoteTaskCommandParser.StripMaterialNoise(raw);
+        if (text.Length == 0)
+        {
+            text = raw;
+        }
+
         var note = string.Empty;
-        var routes = PathingRouteLibrary.Find(goal);
+        var routes = PathingRouteLibrary.Find(text);
         if (routes.Count == 0 && kernel.Available)
         {
             // 角色名到素材名的映射不在客户端里，交给模型做这一步翻译最省事
-            if (await TranslateMaterialAsync(goal, cancellationToken).ConfigureAwait(false) is { Length: > 0 } material)
+            if (await TranslateMaterialAsync(raw, cancellationToken).ConfigureAwait(false) is { Length: > 0 } material)
             {
                 routes = PathingRouteLibrary.Find(material);
                 if (routes.Count > 0)
                 {
-                    note = $"「{goal}」按「{material}」找路线。";
+                    note = $"「{text}」按「{material}」找路线。";
                 }
             }
         }
 
         if (routes.Count == 0)
         {
-            return new RemoteTaskReply(BuildPathingHelp(goal));
+            return null;
         }
 
         var route = routes[0];
@@ -627,7 +662,7 @@ public sealed class RemoteTaskCommandHandler(
 
         logger.LogInformation("远程采集：{Material} → {Route}（{RunId}）", route.Material, route.Relative, request.RunId);
 
-        var head = string.IsNullOrWhiteSpace(command.Say) ? $"开始采「{route.Material}」。" : command.Say.Trim();
+        var head = string.IsNullOrWhiteSpace(say) ? $"开始采「{route.Material}」。" : say.Trim();
         if (note.Length > 0)
         {
             head = $"{head}\n{note}";
@@ -717,8 +752,20 @@ public sealed class RemoteTaskCommandHandler(
     /// <summary>
     /// 交给模型自由操作：看画面、点按钮，直到做完或放弃。
     /// </summary>
-    private async Task<RemoteTaskReply> PilotAsync(string goal, CancellationToken cancellationToken)
+    private async Task<RemoteTaskReply> PilotAsync(
+        string goal,
+        Action<Guid>? onRunStarted,
+        CancellationToken cancellationToken)
     {
+        // 采集请求经常被说成「你自己去捡一下」：先看盘上有没有路线，有就直接按路线跑。
+        // 这条分支不花模型调用，也不要求开自由操作——采集本来就是跑图，不是临场点。
+        if (await TryStartPathingAsync(goal, null, onRunStarted, cancellationToken).ConfigureAwait(false)
+            is { } started)
+        {
+            logger.LogInformation("自由操作改走地图追踪：{Goal}", goal);
+            return started;
+        }
+
         var config = configService.Get();
         if (!config.RemoteTaskConfig.SelfLearningEnabled)
         {
