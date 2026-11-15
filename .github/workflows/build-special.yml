@@ -241,19 +241,30 @@ jobs:
 
           # 本轮 Release 还没创建，列表里第一条 special 就是上一个版本
           # 排除本次自己的 tag：重跑失败任务时上一次可能已经建过同名 Release
-          $prevTag = (gh release list --repo $repo --limit 20 --json tagName |
-              ConvertFrom-Json |
+          $listRaw = gh release list --repo $repo --limit 30 --json tagName,createdAt
+          if ($LASTEXITCODE -ne 0) { throw "gh release list 失败，退出码 $LASTEXITCODE" }
+          Write-Host "release 列表：$listRaw"
+
+          $prevTag = ($listRaw | ConvertFrom-Json |
               Where-Object { $_.tagName -like 'special-v*' -and $_.tagName -ne "special-v$cur" } |
+              Sort-Object createdAt -Descending |
               Select-Object -First 1).tagName
           if (-not $prevTag) { Write-Host '没有可对比的历史版本，跳过增量包'; exit 0 }
           $prevVer = $prevTag.Substring('special-v'.Length)
           Write-Host "对比基准：$prevTag"
 
           gh release download $prevTag --repo $repo --pattern '*special-win-x64.7z' --dir dist/prev --clobber
-          if ($LASTEXITCODE -ne 0) { throw '下载上一个版本失败' }
+          if ($LASTEXITCODE -ne 0) { throw "下载 $prevTag 失败，退出码 $LASTEXITCODE" }
+          Write-Host "已下载：$((Get-ChildItem 'dist/prev').Name -join ', ')"
           $prevArchive = Get-ChildItem 'dist/prev' -Filter '*.7z' | Select-Object -First 1
           7z x $prevArchive.FullName "-odist/prev/extract" -y | Out-Null
-          if ($LASTEXITCODE -ne 0) { throw '解压上一个版本失败' }
+          if ($LASTEXITCODE -ne 0) { throw "解压上一个版本失败，退出码 $LASTEXITCODE" }
+          if (-not (Test-Path 'dist/prev/extract/BetterGI')) {
+              # 压缩包里可能没有 BetterGI 顶层目录，找一层下钻
+              $found = Get-ChildItem 'dist/prev/extract' -Directory | Select-Object -First 1
+              if ($found) { Move-Item $found.FullName 'dist/prev/extract/BetterGI' }
+          }
+          if (-not (Test-Path 'dist/prev/extract/BetterGI')) { throw '解压后找不到 BetterGI 目录' }
 
           $newRoot = (Resolve-Path 'dist/BetterGI').Path
           $oldRoot = (Resolve-Path 'dist/prev/extract/BetterGI').Path
@@ -307,6 +318,7 @@ jobs:
           "patch=dist/$patchName" >> $env:GITHUB_OUTPUT
           "patchMB=$patchMB"      >> $env:GITHUB_OUTPUT
           Write-Host "增量包：$patchName（$patchMB MB，变更 $($files.Count) 个、删除 $($removed.Count) 个）"
+          Write-Host "资产文件名：$patchName"
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
