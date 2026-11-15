@@ -67,7 +67,8 @@ Release 建好后额外镜像一份到 123 云盘，走 WebDAV（`MKCOL` 建目�
 
 - 仓库里配 `PAN123_WEBDAV_USER` / `PAN123_WEBDAV_PASS` 后自动生效；`PAN123_WEBDAV_URL` 默认 `https://webdav.123pan.cn/webdav`，`PAN123_WEBDAV_ROOT` 默认 `/BetterGI`，每个版本一个子目录（`/BetterGI/<版本号>`）
 - 没配就 `::notice::` 跳过，不会让构建失败
-- 密码是「应用密码」而非登录密码。123 云盘网页端已经去掉 WebDAV 入口，只能在 **App → 我的 → 第三方挂载 → 添加应用**（授权目录 + 读写权限）里生成；网页登录拿到的 token 不认
+- 密码是「应用密码」，不是登录密码
+- **前提**：123 云盘已把 WebDAV 与「第三方挂载」一起划为历史会员专属权益，新开通的会员不再包含，网页端建号接口直接返回 `5807`「该功能为历史会员专属权益」，因此「工具中心 → 第三方挂载」是个空页，App 里点添加也是同一句提示。没有这个权益时改用开放平台，配 `PAN123_CLIENT_ID` / `PAN123_CLIENT_SECRET` 走 `tools/bgi-special/upload_123pan.py`（分片上传）
 
 ### 版本号对齐
 
