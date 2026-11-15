@@ -1,10 +1,14 @@
 name: Build BGI Special
 
-# 特别版客户端构建：只手动触发（workflow_dispatch），可选分支/版本/是否发 Release。
-# 推代码不再自动构建；每日上游同步成功后由 sync-upstream.yml 显式派发一次。
-run-name: "BGI Special ${{ inputs.version || format('build-{0}', github.run_number) }}"
+# 特别版客户端构建：手动触发（workflow_dispatch），可选分支/版本/是否发 Release。
+# 推代码不构建；但推 special-v* 标签会直接走同一套流程，版本号取自标签名。
+# 每日上游同步成功后由 sync-upstream.yml 显式派发一次。
+run-name: "BGI Special ${{ inputs.version || github.ref_name }}"
 
 on:
+  push:
+    tags:
+      - "special-v*"
   workflow_dispatch:
     inputs:
       ref:
@@ -117,12 +121,22 @@ jobs:
         shell: pwsh
         env:
           INPUT_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
           $csproj = 'BetterGenshinImpact/BetterGenshinImpact.csproj'
           $m = Select-String -Path $csproj -Pattern '<Version>([^<]+)</Version>'
           if (-not $m) { throw '未能从 csproj 读取 <Version>' }
           $base = $m.Matches[0].Groups[1].Value
+
           $override = $env:INPUT_VERSION
+          # 推标签触发时没有 inputs，版本号直接取标签名：special-v0.67.0-special.7 → 0.67.0-special.7
+          if ([string]::IsNullOrWhiteSpace($override) -and
+              $env:REF_TYPE -eq 'tag' -and $env:REF_NAME -like 'special-v*') {
+              $override = $env:REF_NAME.Substring('special-v'.Length)
+              Write-Host "版本号取自标签：$env:REF_NAME"
+          }
+
           if ([string]::IsNullOrWhiteSpace($override)) {
               $version = "$base-special.$env:GITHUB_RUN_NUMBER"
           } else {
@@ -329,7 +343,8 @@ jobs:
           compression-level: 0
 
       - name: 创建 Release
-        if: ${{ inputs.make_release }}
+        # 手动触发看勾选；推标签触发时没有 inputs，按标签语义一律发布
+        if: ${{ inputs.make_release || startsWith(github.ref, 'refs/tags/special-v') }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -342,7 +357,7 @@ jobs:
           SETUP_MB: ${{ steps.sfx.outputs.setupMB }}
           PATCH: ${{ steps.patch.outputs.patch }}
           PATCH_MB: ${{ steps.patch.outputs.patchMB }}
-          REF: ${{ inputs.ref || 'bgi-special' }}
+          REF: ${{ inputs.ref || github.ref_name }}
           # 构建的源码在 inputs.ref，未必是触发分支：用 --ref main 触发时 github.sha 是 main 的提交，
           # 直接拿它当 target 会把 tag 打到 main 上（脚本仓库内容），而不是这次构建的客户端源码
           FULL_SHA: ${{ steps.src.outputs.commit }}
