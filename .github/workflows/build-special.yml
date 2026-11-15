@@ -2,9 +2,14 @@ name: Build BGI Special
 
 # 特别版客户端构建：只手动触发（workflow_dispatch），可选分支/版本/是否发 Release。
 # 推代码不再自动构建；每日上游同步成功后由 sync-upstream.yml 显式派发一次。
-run-name: "BGI Special ${{ inputs.version || format('build-{0}', github.run_number) }}"
+run-name: "BGI Special ${{ inputs.version || '0.67.0-special.5' }}"
 
 on:
+  # 一次性发版分支：没有 token、点不了 Run workflow 时，推到这条分支即开始构建。
+  # 用完删分支，别让后续误推触发大构建。
+  push:
+    branches:
+      - ci/special-5
   workflow_dispatch:
     inputs:
       ref:
@@ -116,7 +121,7 @@ jobs:
         id: ver
         shell: pwsh
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_VERSION: ${{ inputs.version || '0.67.0-special.5' }}
         run: |
           $csproj = 'BetterGenshinImpact/BetterGenshinImpact.csproj'
           $m = Select-String -Path $csproj -Pattern '<Version>([^<]+)</Version>'
@@ -234,7 +239,7 @@ jobs:
           compression-level: 0
 
       - name: 创建 Release
-        if: ${{ inputs.make_release }}
+        if: ${{ inputs.make_release || github.event_name == 'push' }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
