@@ -306,18 +306,25 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
             var immediate = await ProbeImmediateFailureAsync(ct).ConfigureAwait(false);
             if (immediate is { Length: > 0 })
             {
+                AgentRunMemory.RecordTask(descriptor.DisplayName, false, immediate, 0);
                 return $"{head}，但启动后立即失败：{immediate}。"
                        + "先看 describe_task 的参数与依赖（例如某类任务要先在界面里建好配置），不要原样重试。";
             }
 
+            AgentRunMemory.RecordTask(descriptor.DisplayName, true, "已下发，后台运行", 0);
             return head + "，任务在后台运行。用 task_status 查进度，stop_task 停止。";
         }
 
         var seconds = Math.Clamp(GetInt(args, "wait_seconds") ?? 120, 5, MaxWaitSeconds);
         var result = await WaitForAsync(runId, TimeSpan.FromSeconds(seconds), ct).ConfigureAwait(false);
-        return result is null
-            ? head + $"，已等 {seconds} 秒仍在运行。用 task_status 继续观察。"
-            : head + "，已结束：" + DescribeResult(result);
+        if (result is null)
+        {
+            return head + $"，已等 {seconds} 秒仍在运行。用 task_status 继续观察。";
+        }
+
+        AgentRunMemory.RecordTask(descriptor.DisplayName, result.Outcome == SoloTaskRunOutcome.Completed,
+            DescribeResult(result), seconds);
+        return head + "，已结束：" + DescribeResult(result);
     }
 
     /// <summary>
@@ -409,6 +416,13 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
     /// <summary>当前状态：空闲、启动中、运行中、正在停止，附已运行时长与上次错误。</summary>
     private string Status()
     {
+        // 脚本走 TaskRunner 而不是独立任务状态机，只查状态机会误报「空闲」，
+        // 模型据此以为没启动成功、反复重新下发，一次任务能白烧三四步。
+        if (AgentRunMemory.DescribeActive() is { } scriptRunning)
+        {
+            return scriptRunning;
+        }
+
         var status = execution.GetStatus();
         if (!status.IsActive)
         {
@@ -534,6 +548,11 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
             return $"找不到脚本「{name}」。先 list_scripts 看可用名称。";
         }
 
+        if (AgentRunMemory.DescribeActive() is { } scriptRunning)
+        {
+            return scriptRunning;
+        }
+
         var status = execution.GetStatus();
         if (status.IsActive)
         {
@@ -541,20 +560,40 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
         }
 
         var seconds = Math.Clamp(GetInt(args, "wait_seconds") ?? 5, 2, 120);
-        var head = $"已启动脚本 {project.Manifest.Name}";
+        var scriptName = project.Manifest.Name;
+        var head = $"已启动脚本 {scriptName}";
+        AgentRunMemory.BeginScript(scriptName);
         var run = new TaskRunner().RunCurrentWithResultAsync(
             (runtime, token) => scripts.RunMulti(runtime, [new ScriptGroupProject(project)], null, token),
             waitForMainUi: true,
             requestToken: CancellationToken.None,
-            taskName: project.Manifest.Name);
+            taskName: scriptName);
 
         var finished = await Task.WhenAny(run, Task.Delay(TimeSpan.FromSeconds(seconds), ct)).ConfigureAwait(false);
         if (finished != run)
         {
+            // 脚本在后台继续跑，结束时要落一条历史，下一个会话的「刚才那个」才对得上。
+            _ = run.ContinueWith(task =>
+            {
+                if (task.IsFaulted)
+                {
+                    AgentRunMemory.EndScript(scriptName, false, task.Exception?.GetBaseException().Message ?? "异常");
+                }
+                else if (task.IsCanceled)
+                {
+                    AgentRunMemory.EndScript(scriptName, false, "已取消");
+                }
+                else
+                {
+                    AgentRunMemory.EndScript(scriptName, task.Result.Outcome == SoloTaskRunOutcome.Completed,
+                        DescribeResult(task.Result));
+                }
+            }, TaskScheduler.Default);
             return head + $"，仍在运行（已确认启动 {seconds} 秒）。task_status 可查，stop_task 可停。";
         }
 
         var result = await run.ConfigureAwait(false);
+        AgentRunMemory.EndScript(scriptName, result.Outcome == SoloTaskRunOutcome.Completed, DescribeResult(result));
         return head + "，" + DescribeResult(result);
     }
 

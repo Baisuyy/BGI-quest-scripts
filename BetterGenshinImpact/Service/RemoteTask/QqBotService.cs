@@ -34,6 +34,11 @@ public sealed class QqBotService : IHostedService
     private readonly RemoteTaskCommandHandler _handler;
 
     /// <summary>
+    /// 指令解析器：规则优先，不认识的交给大模型。
+    /// </summary>
+    private readonly RemoteTaskIntentResolver _resolver;
+
+    /// <summary>
     /// 独立任务状态机，用于订阅任务结束事件。
     /// </summary>
     private readonly SoloTaskExecutionService _executionService;
@@ -74,6 +79,7 @@ public sealed class QqBotService : IHostedService
     public QqBotService(
         IConfigService configService,
         RemoteTaskCommandHandler handler,
+        RemoteTaskIntentResolver resolver,
         SoloTaskExecutionService executionService,
         IHttpClientFactory httpClientFactory,
         InstanceService instanceService,
@@ -81,6 +87,7 @@ public sealed class QqBotService : IHostedService
     {
         _configService = configService;
         _handler = handler;
+        _resolver = resolver;
         _executionService = executionService;
         _httpClientFactory = httpClientFactory;
         _instanceService = instanceService;
@@ -171,7 +178,8 @@ public sealed class QqBotService : IHostedService
         await _commandGate.WaitAsync().ConfigureAwait(false);
         try
         {
-            reply = await _handler.HandleAsync(message, CancellationToken.None).ConfigureAwait(false);
+            var command = await _resolver.ResolveAsync(message.Content, CancellationToken.None).ConfigureAwait(false);
+            reply = await _handler.ExecuteAsync(command, message, CancellationToken.None).ConfigureAwait(false);
         }
         catch (Exception exception)
         {

@@ -738,9 +738,12 @@
             </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
-        <tray:NotifyIcon Grid.Row="0" Grid.Column="0"
+        <tray:NotifyIcon x:Name="TrayIcon"
+                         Grid.Row="0"
+                         Grid.Column="0"
                          FocusOnLeftClick="False"
                          Icon="{Binding InstanceIconSource, Mode=OneWay}"
+                         Visibility="{Binding Config.RemoteTaskConfig.EffectiveShowTrayIcon, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
                          LeftDoubleClick="OnNotifyIconLeftDoubleClick"
                          MenuOnRightClick="True"
                          TooltipText="{Binding TrayTooltipText, Mode=OneWay}">

@@ -71,6 +71,29 @@ public partial class RemoteTaskConfig : ObservableValidator
     private int _screenshotQuality = 80;
 
     /// <summary>
+    /// 关闭主窗口时留在托盘后台运行，保持 QQ 机器人在线，随时可以被下发任务。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveShowTrayIcon))]
+    private bool _keepAliveInTray;
+
+    /// <summary>
+    /// 是否在任务栏通知区域显示 BetterGI 小图标。
+    /// <para>
+    /// 关掉之后只能靠重新启动 BetterGI 唤回主界面，因此与「后台保活」互斥：
+    /// 保活开启时托盘图标强制显示，避免程序在后台跑却没有任何入口。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveShowTrayIcon))]
+    private bool _showTrayIcon = true;
+
+    /// <summary>
+    /// 实际是否显示托盘图标：后台保活时必须有入口，所以强制显示。
+    /// </summary>
+    public bool EffectiveShowTrayIcon => ShowTrayIcon || KeepAliveInTray;
+
+    /// <summary>
     /// 单条回复的最大字符数，超出时截断并在末尾提示。
     /// </summary>
     [ObservableProperty]

@@ -276,6 +276,13 @@ public partial class NotifyIconViewModel : ObservableObject, IDisposable
         }
 
         App.GetService<IConfigService>()?.Save();
+        // 先声明这是退出，否则「关闭到托盘保活」会把 Shutdown 也拦下来。
+        if (Application.Current.MainWindow is BetterGenshinImpact.View.MainWindow mainWindow)
+        {
+            BetterGenshinImpact.View.MainWindow.RequestExit();
+            mainWindow.Close();
+        }
+
         Application.Current.Shutdown();
     }
 

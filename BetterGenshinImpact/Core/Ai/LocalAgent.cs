@@ -261,6 +261,7 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
                            先说明缺什么、让用户去对应页面建一份，或改下不需要配置的任务。
                        7.1 run_task 返回「启动后立即失败」时，按给出的原因改参数或换任务，最多再试一次；连续失败就直接 done 并说明缺什么。
                        8. 长任务（刷本、讨伐、脚本）不要 wait，让它在后台跑，再用 task_status 回报；短任务才值得等。
+                           8.1 run_script 返回「仍在运行」就是已经跑起来了，task_status 也会显示这个脚本；不要为了确认再调一次 run_script。
                        9. 同一时刻只能跑一个任务，被拒绝时先 task_status，必要时 stop_task。
                        10. 用户问「刚录的路线怎么样、和成品比一下」时，用 list_paths 找到文件再 compare_path 比对，不要自己算。
                        11. 完成任务或确认做不到时调用 done。
@@ -275,6 +276,13 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
         if (settings.AgentAllowRun)
         {
             prompt += "\n当前配置：沙箱内运行程序已放行，无需逐次确认。";
+        }
+
+        // 每次对话都是新会话，用户说「重新执行」「刚才那个」时需要上一轮的落点。
+        var recent = AgentRunMemory.DescribeRecent();
+        if (recent.Length > 0)
+        {
+            prompt += "\n\n最近几次执行（新的在前，用户说「重新执行」「刚才那个」时对照这里）：\n" + recent;
         }
 
         if (!string.IsNullOrWhiteSpace(settings.SystemPromptExtra))
@@ -429,7 +437,10 @@ public sealed class LocalAgent(AiKernel kernel, AllConfig config)
         }
 
         var max = Math.Clamp(GetInt(args, "max_chars") ?? 20_000, 200, MaxTextChars);
-        await using var stream = File.OpenRead(target.FullPath);
+        // 日志文件被 Serilog 以「允许他人读写」的方式打开，File.OpenRead 的共享模式与之冲突，
+        // 会直接抛「文件被另一进程占用」。这里按同样的共享模式打开。
+        await using var stream = new FileStream(target.FullPath, FileMode.Open, FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete, 4096, useAsync: true);
         using var reader = new StreamReader(stream, detectEncodingFromByteOrderMarks: true);
         var buffer = new char[max];
         var read = await reader.ReadBlockAsync(buffer, ct).ConfigureAwait(false);

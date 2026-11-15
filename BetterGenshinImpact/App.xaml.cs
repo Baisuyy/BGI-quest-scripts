@@ -411,6 +411,7 @@ public partial class App : Application
                 services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
                 // 远程任务：QQ 机器人把聊天指令转成独立任务并回传截图，只在主实例启动
                 services.AddSingleton<RemoteTaskCommandHandler>();
+                services.AddSingleton<RemoteTaskIntentResolver>();
                 services.AddSingleton<QqBotService>();
                 services.AddHostedService(sp => sp.GetRequiredService<QqBotService>());
                 services.AddSingleton<NotifierManager>();

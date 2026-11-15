@@ -42,7 +42,12 @@ public enum RemoteTaskCommandKind
     /// <summary>
     /// 运行指定任务。
     /// </summary>
-    RunTask
+    RunTask,
+
+    /// <summary>
+    /// 与下发任务无关的话，由大模型直接回答。
+    /// </summary>
+    Chat
 }
 
 /// <summary>
@@ -51,7 +56,12 @@ public enum RemoteTaskCommandKind
 /// <param name="Kind">意图。</param>
 /// <param name="TaskId">要运行的独立任务标识，仅 <see cref="RemoteTaskCommandKind.RunTask"/> 有值。</param>
 /// <param name="TaskName">任务显示名，用于回复文案。</param>
-public sealed record RemoteTaskCommand(RemoteTaskCommandKind Kind, string? TaskId = null, string? TaskName = null);
+/// <param name="Say">大模型给出的确认语或回答，规则解析时为 null。</param>
+public sealed record RemoteTaskCommand(
+    RemoteTaskCommandKind Kind,
+    string? TaskId = null,
+    string? TaskName = null,
+    string? Say = null);
 
 /// <summary>
 /// 把聊天文本解析成远程指令。

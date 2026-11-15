@@ -63,17 +63,23 @@ public sealed class RemoteTaskCommandHandler(
     /// <param name="message">已去除 @ 的入站消息。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>回复内容。</returns>
-    public async Task<RemoteTaskReply> HandleAsync(QqBotIncomingMessage message, CancellationToken cancellationToken)
+    public async Task<RemoteTaskReply> ExecuteAsync(
+        RemoteTaskCommand command,
+        QqBotIncomingMessage message,
+        CancellationToken cancellationToken)
     {
-        var command = RemoteTaskCommandParser.Parse(message.Content, Tasks);
         return command.Kind switch
         {
-            RemoteTaskCommandKind.Help => new RemoteTaskReply(BuildHelp()),
-            RemoteTaskCommandKind.TaskList => new RemoteTaskReply(BuildTaskList()),
-            RemoteTaskCommandKind.Status => new RemoteTaskReply(BuildStatus()),
-            RemoteTaskCommandKind.Screenshot => new RemoteTaskReply("当前画面如下。", await CaptureAsync(cancellationToken).ConfigureAwait(false)),
+            RemoteTaskCommandKind.Help => new RemoteTaskReply(command.Say ?? BuildHelp()),
+            RemoteTaskCommandKind.TaskList => new RemoteTaskReply(command.Say is { Length: > 0 } say ? say + "\n\n" + BuildTaskList() : BuildTaskList()),
+            RemoteTaskCommandKind.Status => new RemoteTaskReply(command.Say ?? BuildStatus()),
+            RemoteTaskCommandKind.Screenshot => new RemoteTaskReply(
+                command.Say ?? "当前画面如下。",
+                await CaptureAsync(cancellationToken).ConfigureAwait(false)),
             RemoteTaskCommandKind.Stop => new RemoteTaskReply(await StopAsync().ConfigureAwait(false)),
-            RemoteTaskCommandKind.RunTask => await StartAsync(command.TaskId!, command.TaskName ?? command.TaskId!, cancellationToken).ConfigureAwait(false),
+            RemoteTaskCommandKind.RunTask => await StartAsync(
+                command.TaskId!, command.TaskName ?? command.TaskId!, command.Say, cancellationToken).ConfigureAwait(false),
+            RemoteTaskCommandKind.Chat => new RemoteTaskReply(command.Say ?? BuildHelp()),
             _ => new RemoteTaskReply($"没看懂「{message.Content}」。\n\n{BuildHelp()}")
         };
     }
@@ -119,7 +125,11 @@ public sealed class RemoteTaskCommandHandler(
     /// <summary>
     /// 启动一个独立任务。
     /// </summary>
-    private async Task<RemoteTaskReply> StartAsync(string taskId, string taskName, CancellationToken cancellationToken)
+    private async Task<RemoteTaskReply> StartAsync(
+        string taskId,
+        string taskName,
+        string? say,
+        CancellationToken cancellationToken)
     {
         var request = new SoloTaskStartRequest
         {
@@ -133,8 +143,9 @@ public sealed class RemoteTaskCommandHandler(
         }
 
         logger.LogInformation("远程下发任务：{TaskId}（{RunId}）", taskId, request.RunId);
+        var head = string.IsNullOrWhiteSpace(say) ? $"已开始「{taskName}」。" : say.Trim();
         return new RemoteTaskReply(
-            $"已开始「{taskName}」。\n发送「状态」查看进度，发送「停止」可中断，跑完会自动回传截图。",
+            $"{head}\n发送「状态」查看进度，发送「停止」可中断，跑完会自动回传截图。",
             RunId: request.RunId);
     }
 

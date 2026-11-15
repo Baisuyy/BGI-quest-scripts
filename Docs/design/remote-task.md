@@ -56,6 +56,29 @@ QQ 客户端 → QQ 开放平台 → wss 网关（BetterGI 主动连出去）
 
 首次使用建议：先在私聊里发一句「帮助」，让机器人把你的 OpenID 自动写进白名单，再到设置页确认那一串数字已经填上。群聊里同一个人的 `member_openid` 与私聊的 `openid` 不同，两边都发一次即可各自绑定。
 
+## 指令解析：规则优先，大模型兜底
+
+先跑 `RemoteTaskCommandParser`（纯函数，无网络）：任务标识、显示名、中文别名、内置指令，四种说法都能命中。命中就立刻执行，一次往返都不花。
+
+没命中时把整句交给「设置 → AI」里配置好的模型，要求它只输出一个 JSON：
+
+```json
+{"intent":"run","task_id":"auto_domain","say":"想刷秘境，这就开"}
+```
+
+模型返回的任务标识必须出现在注册表里，否则整条结果作废、退回规则结论——不给模型编造标识的机会。模型不可用、超时（20 秒）或输出不合规时同样退回规则，聊天链路不依赖大模型可用性。
+
+`intent: chat` 用于与下发无关的话或信息不足的情况（例如只说「重新执行」但说不清是哪个任务），由模型直接回答。
+
+## 后台保活
+
+「设置 → 通用 → 远程任务」里的**关闭窗口后继续在后台运行**打开后，点关闭只做 `Hide()`，进程、QQ 长连接、任务调度全部保留；真正退出走托盘菜单的「退出」（`MainWindow.RequestExit()` 置位后放行 `Closing`）。
+
+两个约束：
+
+- 只在主实例生效。分身进程不常驻，否则关掉主程序后托盘会残留多个进程，还各自抢着连同一个 AppID。
+- 托盘图标与保活联动：`EffectiveShowTrayIcon = ShowTrayIcon || KeepAliveInTray`。保活开着却把图标藏了，就会出现「程序在后台跑但没有入口」。
+
 ## 指令
 
 | 指令 | 作用 |
@@ -100,4 +123,5 @@ QQ 客户端 → QQ 开放平台 → wss 网关（BetterGI 主动连出去）
 | `Service/RemoteTask/QqBotGatewayClient.cs` | 常驻 WebSocket、心跳、重连 |
 | `Service/RemoteTask/RemoteTaskCommandParser.cs` | 文本 → 指令（纯函数，可单测） |
 | `Service/RemoteTask/RemoteTaskCommandHandler.cs` | 指令 → 任务/截图/状态 |
+| `Service/RemoteTask/RemoteTaskIntentResolver.cs` | 规则不命中时用大模型解析 |
 | `Service/RemoteTask/QqBotService.cs` | 宿主编排与回复 |
