@@ -5,6 +5,10 @@ name: Build BGI Special
 run-name: "BGI Special ${{ inputs.version || format('build-{0}', github.run_number) }}"
 
 on:
+  # 临时：用一次性分支触发本次构建，构建完成后删除该分支与这段触发器。
+  push:
+    branches:
+      - 'ci/special-6'
   workflow_dispatch:
     inputs:
       ref:
@@ -116,7 +120,7 @@ jobs:
         id: ver
         shell: pwsh
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_VERSION: ${{ inputs.version || '0.67.0-special.6' }}
         run: |
           $csproj = 'BetterGenshinImpact/BetterGenshinImpact.csproj'
           $m = Select-String -Path $csproj -Pattern '<Version>([^<]+)</Version>'
@@ -234,7 +238,7 @@ jobs:
           compression-level: 0
 
       - name: 创建 Release
-        if: ${{ inputs.make_release }}
+        if: ${{ github.event_name == 'push' || inputs.make_release }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
