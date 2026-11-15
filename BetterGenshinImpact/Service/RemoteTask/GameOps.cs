@@ -113,12 +113,21 @@ public sealed class GameOps(
     public static IReadOnlyCollection<string> PanelNames { get; } = Panels.Keys.ToArray();
 
     /// <summary>
+    /// 上一次读树脂失败的原因；成功时为 null。
+    /// <para>
+    /// 米游社与画面两条路都可能失败，各自的原因拼在一起，用户才能判断该改哪里。
+    /// </para>
+    /// </summary>
+    public string? LastResinError { get; private set; }
+
+    /// <summary>
     /// 读取树脂：配了米游社 Cookie 就直连官方接口，否则退回截屏 OCR。
     /// </summary>
     /// <param name="ct">取消令牌。</param>
     /// <returns>读数；两条路都不通时返回 null。</returns>
     public async Task<ResinSnapshot?> ReadResinAsync(CancellationToken ct = default)
     {
+        LastResinError = null;
         var config = configService.Get().RemoteTaskConfig;
         if (!string.IsNullOrWhiteSpace(config.MysCookie))
         {
@@ -129,6 +138,8 @@ public sealed class GameOps(
                 {
                     return new ResinSnapshot(note.CurrentResin, note.CondensedResin, note.MaxResin, "米游社");
                 }
+
+                LastResinError = mysClient.LastError;
             }
             catch (OperationCanceledException)
             {
@@ -140,7 +151,16 @@ public sealed class GameOps(
             }
         }
 
-        return ReadResinFromScreen(ct);
+        var fromScreen = ReadResinFromScreen(ct);
+        if (fromScreen == null)
+        {
+            var screenReason = "画面顶栏不可见（游戏没开，或者不在主界面/战斗界面）";
+            LastResinError = LastResinError is { Length: > 0 } reason
+                ? $"{reason}；{screenReason}"
+                : screenReason;
+        }
+
+        return fromScreen;
     }
 
     /// <summary>

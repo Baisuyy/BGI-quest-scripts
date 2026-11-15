@@ -431,8 +431,9 @@ public sealed class RemoteTaskCommandHandler(
         var snapshot = await ops.ReadResinAsync(cancellationToken).ConfigureAwait(false);
         if (snapshot == null)
         {
+            var reason = ops.LastResinError is { Length: > 0 } detail ? $"\n原因：{detail}" : string.Empty;
             return new RemoteTaskReply(
-                $"{command.Say}\n读不到树脂。两个办法：\n" +
+                $"{command.Say}\n读不到树脂。{reason}\n\n两个办法：\n" +
                 "· 游戏开在主界面/战斗界面时再问我一次（我识别画面顶栏）\n" +
                 "· 在设置里填米游社 Cookie 与原神 UID，不开游戏也能查");
         }
@@ -829,14 +830,35 @@ public sealed class RemoteTaskCommandHandler(
     /// <summary>
     /// 交给模型自由操作：看画面、点按钮，直到做完或放弃。
     /// </summary>
-    private async Task<RemoteTaskReply> PilotAsync(
+    /// <summary>
+    /// 显式要求 AI 接管：用户用 <c>/</c> 开头说话时走这条。
+    /// <para>
+    /// 与普通自由操作的区别是不做任何本地预判——不查路线、不看开关，
+    /// 直接把话和整套工具交给模型，由它自己决定下发任务还是操作界面。
+    /// </para>
+    /// </summary>
+    /// <param name="goal">用户要做什么，已经去掉前缀。</param>
+    /// <param name="onRunStarted">任务被受理后回调。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    public Task<RemoteTaskReply> ExecuteAgentAsync(
         string goal,
         Action<Guid>? onRunStarted,
         CancellationToken cancellationToken)
     {
+        return PilotAsync(goal, onRunStarted, cancellationToken, explicitRequest: true);
+    }
+
+    private async Task<RemoteTaskReply> PilotAsync(
+        string goal,
+        Action<Guid>? onRunStarted,
+        CancellationToken cancellationToken,
+        bool explicitRequest = false)
+    {
         // 采集请求经常被说成「你自己去捡一下」：先看盘上有没有路线，有就直接按路线跑。
         // 这条分支不花模型调用，也不要求开自由操作——采集本来就是跑图，不是临场点。
-        if (await TryStartPathingAsync(goal, null, onRunStarted, cancellationToken).ConfigureAwait(false)
+        // 但用户用 / 明确要求 AI 接管时跳过：他要的是模型自己判断，不是一个固定答案。
+        if (!explicitRequest
+            && await TryStartPathingAsync(goal, null, onRunStarted, cancellationToken).ConfigureAwait(false)
             is { } started)
         {
             logger.LogInformation("自由操作改走地图追踪：{Goal}", goal);
@@ -844,7 +866,7 @@ public sealed class RemoteTaskCommandHandler(
         }
 
         var config = configService.Get();
-        if (!config.RemoteTaskConfig.SelfLearningEnabled)
+        if (!explicitRequest && !config.RemoteTaskConfig.SelfLearningEnabled)
         {
             return new RemoteTaskReply("这个事没有对应任务，而「自由操作」是关着的。\n\n" + BuildHelp());
         }
@@ -872,7 +894,7 @@ public sealed class RemoteTaskCommandHandler(
         }
 
         logger.LogInformation("远程自由操作开始：{Goal}", goal);
-        var pilot = new GuiPilot(runtime, config, kernel, traces, ops);
+        var pilot = new GuiPilot(runtime, config, kernel, traces, ops, agentTasks);
         var outcome = await pilot.RunAsync(goal, cancellationToken).ConfigureAwait(false);
         var image = await CaptureAsync(cancellationToken).ConfigureAwait(false);
 

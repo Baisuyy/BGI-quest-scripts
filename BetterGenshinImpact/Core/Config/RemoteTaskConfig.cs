@@ -127,11 +127,14 @@ public partial class RemoteTaskConfig : ObservableValidator
 
     /// <summary>
     /// 一次自由操作最多走多少步。步数越多越可能做成复杂操作，也越费 token。
+    /// <para>
+    /// 默认 30：登录、下载资源、过场这类流程十几步走不完，16 步会在半路被硬截断。
+    /// </para>
     /// </summary>
     [ObservableProperty]
     [NotifyDataErrorInfo]
-    [Range(4, 40, ErrorMessage = "自由操作步数必须在 4 到 40 之间。")]
-    private int _selfLearningMaxSteps = 16;
+    [Range(6, 60, ErrorMessage = "自由操作步数必须在 6 到 60 之间。")]
+    private int _selfLearningMaxSteps = 30;
 
     /// <summary>
     /// 米游社 Cookie（含 ltoken / ltuid 或 cookie_token），用于直接查实时树脂。

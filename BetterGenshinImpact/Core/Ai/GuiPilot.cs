@@ -51,7 +51,8 @@ public sealed class GuiPilot(
     AllConfig config,
     AiKernel kernel,
     AiTraceStore traces,
-    GameOps ops)
+    GameOps ops,
+    AgentTasks agentTasks)
 {
     private static readonly ILogger Logger = App.GetLogger<GuiPilot>();
 
@@ -129,6 +130,10 @@ public sealed class GuiPilot(
                 },
                 ["required"] = new JsonArray("success", "summary"),
             }),
+
+        // 任务下发这一组排在后面，但优先级最高：能跑任务就不要用键鼠模拟。
+        // 之前只给界面工具，模型面对「切号」「采素材」这类事只能干瞪眼，然后开始乱点。
+        .. AgentTasks.Tools,
     ];
 
     /// <summary>
@@ -179,7 +184,8 @@ public sealed class GuiPilot(
     public async Task<PilotOutcome> RunAsync(string goal, CancellationToken ct = default)
     {
         var settings = config.RemoteTaskConfig;
-        var maxSteps = Math.Clamp(settings.SelfLearningMaxSteps, 4, 40);
+        // 登录、下载资源、过场这类流程本来就长，16 步根本走不完，模型会被硬截断
+        var maxSteps = Math.Clamp(settings.SelfLearningMaxSteps, 6, 60);
         var startedAt = DateTime.Now;
         var callsAtStart = kernel.Calls;
         var steps = new List<AiTraceStep>();
@@ -354,7 +360,8 @@ public sealed class GuiPilot(
 
             case "wait":
             {
-                var ms = Math.Clamp(GetInt(args, "ms", 800), 200, 10000);
+                // 下载资源、加载地图动辄几十秒，上限太低模型只能反复小步等，白烧步数
+                var ms = Math.Clamp(GetInt(args, "ms", 800), 200, 30000);
                 await Task.Delay(ms, ct).ConfigureAwait(false);
                 return (false, false, $"已等待 {ms} 毫秒。");
             }
@@ -363,7 +370,7 @@ public sealed class GuiPilot(
             {
                 var snapshot = await ops.ReadResinAsync(ct).ConfigureAwait(false);
                 return (false, false, snapshot == null
-                    ? "读不到树脂：米游社未配置且画面顶栏不可见。"
+                    ? $"读不到树脂：{ops.LastResinError ?? "米游社与画面两条路都不通"}。"
                     : snapshot.ToString());
             }
 
@@ -375,7 +382,14 @@ public sealed class GuiPilot(
             }
 
             default:
-                return (false, false, $"未知工具 {call.Name}。");
+                // 任务下发、路线、脚本都归 AgentTasks，参数校验与等待策略也在那边
+                if (AgentTasks.Handles(call.Name))
+                {
+                    var content = await agentTasks.ExecuteAsync(call.Name, args, ct).ConfigureAwait(false);
+                    return (false, false, content);
+                }
+
+                return (false, false, $"未知工具 {call.Name}。可用工具见系统提示。");
         }
     }
 
@@ -405,6 +419,13 @@ public sealed class GuiPilot(
             {
                 builder.Append("\n（还有 ").Append(lines.Count - MaxOcrItems).Append(" 条未列出）");
             }
+
+            // 认出「这是加载/下载界面」比给模型多十条文字更有用：
+            // 不然它会以为界面没反应，反复小步等待，把步数烧光。
+            if (DetectState(lines) is { Length: > 0 } hint)
+            {
+                builder.Append("\n判断：").Append(hint);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -417,6 +438,44 @@ public sealed class GuiPilot(
         }
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// 从画面文字里判断当前处于什么阶段，给模型一句人话提示。
+    /// </summary>
+    /// <param name="lines">OCR 出来的文字块。</param>
+    /// <returns>提示；认不出来时返回空串。</returns>
+    private static string DetectState(IReadOnlyList<(string Text, int X, int Y)> lines)
+    {
+        static bool Has(IReadOnlyList<(string Text, int X, int Y)> source, params string[] keys)
+            => source.Any(line => keys.Any(key => line.Text.Contains(key, StringComparison.Ordinal)));
+
+        if (Has(lines, "准备下载资源", "正在下载", "下载资源", "资源校验", "更新中"))
+        {
+            return "这是资源下载/更新界面，可能持续几分钟。用 wait 20000–30000 等，不要连点，也不要换做法。";
+        }
+
+        if (Has(lines, "正在连接", "重新连接", "连接超时", "网络异常", "二级地址解析失败"))
+        {
+            return "网络连接有问题，先等 5–10 秒看会不会自己恢复；一直失败就如实报告，别硬点。";
+        }
+
+        if (Has(lines, "正在加载", "加载中", "Now Loading", "Loading"))
+        {
+            return "场景正在加载，wait 3000–8000 再看，不要重复点击。";
+        }
+
+        if (Has(lines, "点击屏幕继续", "点击任意位置", "点击继续"))
+        {
+            return "当前是「点击继续」类提示，click 一次屏幕中央即可。";
+        }
+
+        if (Has(lines, "欢迎进入游戏", "UID:", "UID："))
+        {
+            return "已经进入游戏主界面，可以开始执行目标了。";
+        }
+
+        return string.Empty;
     }
 
     /// <summary>
@@ -497,30 +556,48 @@ public sealed class GuiPilot(
             builder.AppendLine(reuse.ToPlaybook());
         }
 
-        builder.AppendLine("先调用 look 看一眼当前画面，再决定点哪里。");
+        builder.AppendLine("先判断这件事有没有现成任务：不确定就调 list_tasks 看一眼（只花一步，比乱点便宜得多）。");
+        builder.AppendLine("没有对应任务再操作界面；操作界面第一步先 look。");
         return builder.ToString();
     }
 
     /// <summary>
     /// 系统提示词。
+    /// <para>
+    /// 这里的排序就是优先级：先任务、再路线、最后才是键鼠。以前只给界面工具，
+    /// 模型遇到「切号」「采素材」这类事只能硬点，点不动就开始原地等，最后报「做不到」。
+    /// </para>
     /// </summary>
     private static string BuildSystemPrompt(string goal, int maxSteps)
     {
         return $$"""
-                 你是原神自动化工具 BetterGI 的界面操作层，正在直接控制一台真实的游戏客户端。
+                 你是原神自动化工具 BetterGI 的操作中枢，正在直接控制一台真实的游戏客户端。
                  目标：{{goal}}
 
                  坐标约定：所有坐标都按 1920×1080 给出，(0,0) 是画面左上角。不要输出其他分辨率。
 
-                 行动规则：
-                 1. 每轮只调用一个工具，看返回的文字与坐标再决定下一步。
-                 2. 优先用 click_text 点文字，比猜坐标稳；文字要抄画面上原样的短语。
-                 3. 打开界面用 key（map/bag/character/wish/party/menu），不要一步步点菜单。
-                 4. 点完没反应先 wait 500–1500ms 再看，不要连点；连续两次同样动作没变化就换方法。
-                 5. 弹窗、确认框、加载中都要先处理掉再继续，否则点不到底下的东西。
-                 6. 做不到就如实 done(success=false)，不要用乱点来凑。
-                 7. 最多 {{maxSteps}} 步，步数紧张时只做最有把握的那一下。
-                 8. 不认识的界面先 look，靠画面文字判断自己在哪。
+                 ===== 能力与优先级 =====
+                 一、下发内置任务（首选，系统自己跑得比你点得稳）
+                 · list_tasks 看有哪些任务；describe_task 看参数；run_task 下发
+                 · list_pathing / run_pathing：采集素材、跑地图路线
+                 · list_scripts / run_script：跑用户脚本
+                 · task_status 查进度，stop_task 停止
+                 · 凡是内置任务能做的，绝不要用键鼠模拟替代。登录、领奖、刷本、清体力、采集都属于这一类。
+
+                 二、操作界面（内置任务做不到时）
+                 · look 看画面文字与坐标；click_text 点文字；click 点坐标；key 按键
+                 · 打开界面用 key：map 地图、bag 背包、character 角色、wish 祈愿、party 队伍、menu 派蒙菜单、esc 返回
+
+                 ===== 行动规则 =====
+                 1. 每轮只调用一个工具，看返回结果再决定下一步。
+                 2. 不确定有哪些能力时先 list_tasks，不要凭记忆编任务标识。
+                 3. 界面操作优先 click_text，比猜坐标稳；文字要抄画面上原样的短语。
+                 4. 看到「加载中」「准备下载资源」「过场」这类画面：用 wait 5000–30000 毫秒等，**不要连点**。
+                    连点只会把界面点到别处，然后彻底迷失。
+                 5. 连续两次同样的动作、画面没有变化，必须换方法或换目标。
+                 6. 弹窗、确认框、协议、年龄提示都要先处理掉，否则点不到底下的东西。
+                 7. 做不到就如实 done(success=false)，说清楚卡在哪一步、画面当时是什么、缺什么条件。
+                 8. 最多 {{maxSteps}} 步。步数紧张时只做最有把握的那一步。
                  """;
     }
 

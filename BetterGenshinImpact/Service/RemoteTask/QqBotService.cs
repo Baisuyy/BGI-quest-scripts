@@ -196,14 +196,40 @@ public sealed class QqBotService : IHostedService
         await _commandGate.WaitAsync().ConfigureAwait(false);
         try
         {
-            var command = await _resolver.ResolveAsync(message.Content, CancellationToken.None).ConfigureAwait(false);
-            // 启动前登记：任务可能几十毫秒就失败退出，等 ExecuteAsync 返回再登记就收不到结束事件了
-            reply = await _handler.ExecuteAsync(
-                    command,
-                    message,
-                    CancellationToken.None,
-                    runId => _pending[runId] = new PendingRun(runId, message.Target, message.MessageId, message.Content))
-                .ConfigureAwait(false);
+            // 以 / 开头表示「这次不要走规则，让模型自己看着办」：
+            // 规则表再全也有边界，遇到没录过的说法它只会回一句「没看懂」，用户还得重说一遍。
+            var content = (message.Content ?? string.Empty).Trim();
+            if (content.Length > 0 && content[0] == '/')
+            {
+                var goal = content[1..].Trim();
+                if (goal.Length == 0)
+                {
+                    reply = new RemoteTaskReply(
+                        "「/」后面写要做什么，例如：\n"
+                        + "· /采清心\n· /把今天体力清掉\n· /切到另一个号\n· /看看我现在在哪\n\n"
+                        + "带 / 的指令不套规则，直接交给模型自己选工具、自己判断。");
+                }
+                else
+                {
+                    _logger.LogInformation("AI 接管（/ 前缀）：{Goal}", goal);
+                    reply = await _handler.ExecuteAgentAsync(
+                            goal,
+                            runId => _pending[runId] = new PendingRun(runId, message.Target, message.MessageId, message.Content),
+                            CancellationToken.None)
+                        .ConfigureAwait(false);
+                }
+            }
+            else
+            {
+                var command = await _resolver.ResolveAsync(message.Content, CancellationToken.None).ConfigureAwait(false);
+                // 启动前登记：任务可能几十毫秒就失败退出，等 ExecuteAsync 返回再登记就收不到结束事件了
+                reply = await _handler.ExecuteAsync(
+                        command,
+                        message,
+                        CancellationToken.None,
+                        runId => _pending[runId] = new PendingRun(runId, message.Target, message.MessageId, message.Content))
+                    .ConfigureAwait(false);
+            }
         }
         catch (Exception exception)
         {
