@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,8 +25,8 @@ namespace BetterGenshinImpact.Core.Special;
 ///         手动检查、给出提示、跳转下载页，不做任何自动替换。
 ///     </para>
 ///     <para>
-///         GitHub 在国内经常连不上，所以 API 与下载都走「直连 → 代理镜像」的降级链，
-///         并在全部失败时把地址给出来让用户自己贴到浏览器，而不是只说一句「检查失败」。
+///         GitHub 在国内经常连不上，所以 API 走「直连 → 代理镜像 → releases.atom」三级降级，
+///         下载链接同时给两个镜像；全部失败时把可复制的地址给出来，而不是只说一句「检查失败」。
 ///     </para>
 /// </summary>
 public static class SpecialUpdater
@@ -36,12 +37,37 @@ public static class SpecialUpdater
     private const string ReleasesPage = "https://github.com/" + Repo + "/releases";
     private const string TagPrefix = "special-v";
 
-    /// <summary>能直连就走直连，不通再走这两个常见镜像。顺序即优先级。</summary>
+    /// <summary>
+    ///     JSON API。直连优先，其次 gh-proxy。
+    ///     <para>
+    ///         gh-proxy 对 api.github.com 有频率限制，连续查会 403，所以它只算第二道；
+    ///         实测 api.kkgithub.com 已经连不上，不要再加回来。
+    ///     </para>
+    /// </summary>
     private static readonly string[] ApiEndpoints =
     [
         "https://api.github.com/repos/" + Repo + "/releases?per_page=20",
         "https://gh-proxy.com/https://api.github.com/repos/" + Repo + "/releases?per_page=20",
-        "https://api.kkgithub.com/repos/" + Repo + "/releases?per_page=20",
+    ];
+
+    /// <summary>
+    ///     releases.atom 只有 18 KB，只含标题与 tag，不含资产名——但它是最后一个能出 tag 的渠道，
+    ///     拿到 tag 后按发布流水线的命名规则拼出安装包地址，仍然能下载。
+    /// </summary>
+    private static readonly string[] AtomEndpoints =
+    [
+        "https://gh-proxy.com/https://github.com/" + Repo + "/releases.atom",
+        "https://github.com/" + Repo + "/releases.atom",
+    ];
+
+    /// <summary>
+    ///     下载镜像。实测这两个都能对 release 资产返回 206；
+    ///     注意 ghproxy.net 代理 API 会 403，只能拿来下文件，不能拿它查列表。
+    /// </summary>
+    private static readonly string[] DownloadMirrors =
+    [
+        "https://gh-proxy.com/",
+        "https://ghproxy.net/",
     ];
 
     private static readonly string[] DownloadPageMirrors =
@@ -79,7 +105,7 @@ public static class SpecialUpdater
         var latest = releases
             .Where(r => !string.IsNullOrWhiteSpace(r.TagName)
                         && r.TagName.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(r => ParseBuild(r.TagName))
+            .OrderByDescending(r => ParseVersion(r.TagName))
             .FirstOrDefault();
 
         if (latest == null)
@@ -92,7 +118,9 @@ public static class SpecialUpdater
 
         string latestVersion = latest.TagName[TagPrefix.Length..];
 
-        if (string.Equals(latestVersion, current, StringComparison.OrdinalIgnoreCase))
+        // 只比“相等”会把降级也当成新版本：远端只剩更旧的包时，仍然弹「发现新版本」。
+        // 这里按 (主.次.修订, special 尾号) 比较，远端不更新就直说已是最新。
+        if (CompareVersion(latestVersion, current) <= 0)
         {
             await ThemedMessageBox.InformationAsync($"当前已是最新的特别版（{current}）。", "检查更新");
             return true;
@@ -100,9 +128,12 @@ public static class SpecialUpdater
 
         // 直接给安装包直链：发布页在大陆常常打不开，能让用户少走一步就少走一步
         string? assetUrl = PickAsset(latest);
-        string downloadUrl = assetUrl is null ? string.Empty : Mirror(assetUrl);
-        string hint = downloadUrl.Length > 0
-            ? "现在下载安装包？\n\n" + downloadUrl
+        var urls = assetUrl is null
+            ? Array.Empty<string>()
+            : DownloadMirrors.Select(m => m + assetUrl).ToArray();
+
+        string hint = urls.Length > 0
+            ? "安装包地址（任选一条，打不开就换下一条）：\n" + string.Join("\n", urls)
             : "现在打开下载页？\n\n" + string.Join("\n", DownloadPageMirrors);
 
         var open = await ThemedMessageBox.QuestionAsync(
@@ -112,14 +143,15 @@ public static class SpecialUpdater
 
         if (open == MessageBoxResult.Yes)
         {
-            Open(downloadUrl.Length > 0 ? downloadUrl : DownloadPageMirrors[^1]);
+            Open(urls.Length > 0 ? urls[0] : DownloadPageMirrors[^1]);
         }
 
         return true;
     }
 
     /// <summary>
-    ///     依次尝试直连与镜像。全部失败返回 null 与最后一次的错误，调用方据此提示。
+    ///     依次尝试直连 API、gh-proxy 的 API，再退到 releases.atom。
+    ///     全部失败返回 null 与最后一次的错误，调用方据此提示。
     /// </summary>
     private static async Task<(List<SpecialRelease>? Releases, string Error)> FetchReleasesAsync(
         IHttpClientFactory httpClientFactory, ILogger logger)
@@ -149,7 +181,67 @@ public static class SpecialUpdater
             }
         }
 
+        foreach (var endpoint in AtomEndpoints)
+        {
+            try
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(6));
+                string xml = await httpClient.GetStringAsync(endpoint, cts.Token).ConfigureAwait(false);
+                var releases = ParseAtom(xml);
+                if (releases is { Count: > 0 })
+                {
+                    logger.LogInformation("特别版更新信息来自 atom（不含资产名，按命名规则拼下载地址）");
+                    return (releases, string.Empty);
+                }
+
+                lastError = "atom 里没有特别版条目";
+            }
+            catch (Exception e)
+            {
+                lastError = e.Message;
+                logger.LogDebug(e, "atom 源不可用：{Endpoint}", endpoint);
+            }
+        }
+
         return (null, lastError);
+    }
+
+    /// <summary>
+    ///     从 releases.atom 里抠 tag。只用到 link 里的 tag 名，不解析整套 XML。
+    ///     <para>
+    ///         资产名拿不到，就按发布流水线的命名规则补上：
+    ///         BetterGI_v{版本}_Setup.exe 与 BetterGI_v{版本}_special-win-x64.7z。
+    ///         这两条名字由 build-special.yml 固定生成，改流水线时这里要一起改。
+    ///     </para>
+    /// </summary>
+    private static List<SpecialRelease>? ParseAtom(string xml)
+    {
+        var tags = Regex.Matches(xml, @"releases/tag/([^""'<>\s]+)")
+            .Select(m => m.Groups[1].Value)
+            .Where(t => t.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase))
+            .Distinct()
+            .ToList();
+        if (tags.Count == 0)
+        {
+            return null;
+        }
+
+        return tags.Select(tag =>
+        {
+            string version = tag[TagPrefix.Length..];
+            string root = $"https://github.com/{Repo}/releases/download/{tag}/";
+            string setup = $"BetterGI_v{version}_Setup.exe";
+            string archive = $"BetterGI_v{version}_special-win-x64.7z";
+            return new SpecialRelease
+            {
+                TagName = tag,
+                Assets =
+                [
+                    new SpecialAsset { Name = setup, Url = root + setup },
+                    new SpecialAsset { Name = archive, Url = root + archive },
+                ],
+            };
+        }).ToList();
     }
 
     /// <summary>优先安装包（setup.exe），其次 7z 压缩包。</summary>
@@ -167,14 +259,6 @@ public static class SpecialUpdater
                ?? assets.FirstOrDefault(a => a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))?.Url;
     }
 
-    /// <summary>GitHub 原始下载链接转成可用镜像；已经是镜像的不重复加前缀。</summary>
-    private static string Mirror(string url)
-    {
-        return url.Contains("gh-proxy.com", StringComparison.OrdinalIgnoreCase)
-            ? url
-            : "https://gh-proxy.com/" + url;
-    }
-
     /// <summary>当前版本号，去掉信息版本里附带的 +提交号。</summary>
     private static string CurrentVersion()
     {
@@ -183,11 +267,32 @@ public static class SpecialUpdater
         return plus > 0 ? version[..plus] : version;
     }
 
-    /// <summary>把 special.6 之类的尾号取出来用于排序，取不到就当 0。</summary>
-    private static int ParseBuild(string tag)
+    /// <summary>
+    ///     把 0.67.0-special.5 拆成可比较的四段。取不到主版本时返回 (-1, -1, -1, 0)，
+    ///     这样“未知版本”永远算旧，用户点检查更新能拿到提示。
+    /// </summary>
+    private static (int Major, int Minor, int Patch, int Build) ParseVersion(string text)
     {
-        int dot = tag.LastIndexOf('.');
-        return dot >= 0 && int.TryParse(tag[(dot + 1)..], out int build) ? build : 0;
+        text ??= string.Empty;
+        var m = Regex.Match(text, @"(\d+)\.(\d+)\.(\d+)");
+        if (!m.Success)
+        {
+            return (-1, -1, -1, 0);
+        }
+
+        int build = 0;
+        var b = Regex.Match(text, @"special\.(\d+)");
+        if (b.Success)
+        {
+            build = int.Parse(b.Groups[1].Value);
+        }
+
+        return (int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), build);
+    }
+
+    private static int CompareVersion(string left, string right)
+    {
+        return ParseVersion(left).CompareTo(ParseVersion(right));
     }
 
     private static void Open(string url)
