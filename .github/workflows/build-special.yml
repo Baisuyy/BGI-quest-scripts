@@ -101,6 +101,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: 检出源码
+        id: src
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref || github.ref }}
@@ -245,7 +246,9 @@ jobs:
           SETUP: ${{ steps.sfx.outputs.setup }}
           SETUP_MB: ${{ steps.sfx.outputs.setupMB }}
           REF: ${{ inputs.ref || 'bgi-special' }}
-          FULL_SHA: ${{ github.sha }}
+          # 构建的源码在 inputs.ref，未必是触发分支：用 --ref main 触发时 github.sha 是 main 的提交，
+          # 直接拿它当 target 会把 tag 打到 main 上（脚本仓库内容），而不是这次构建的客户端源码
+          FULL_SHA: ${{ steps.src.outputs.commit }}
         run: |
           $tag = "special-v$env:VERSION"
 
