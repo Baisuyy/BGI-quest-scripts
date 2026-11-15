@@ -225,6 +225,89 @@ jobs:
           "setupMB=$sizeMB" >> $env:GITHUB_OUTPUT
           Write-Host "自解压安装包：$setup（$sizeMB MB）"
 
+      # 增量包：只装与上一个 special 版本不同的文件。
+      # 完整包 546 MB，走 GitHub 代理镜像下载常常只有几百 KB/s，而一次发版真正变的通常只有
+      # 主程序 DLL 与前端产物（几十 MB 以内），所以让客户端优先下这个包。
+      - name: 生成增量包
+        id: patch
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $cur = '${{ steps.ver.outputs.version }}'
+          $repo = '${{ github.repository }}'
+
+          # 本轮 Release 还没创建，列表里第一条 special 就是上一个版本
+          # 排除本次自己的 tag：重跑失败任务时上一次可能已经建过同名 Release
+          $prevTag = (gh release list --repo $repo --limit 20 --json tagName |
+              ConvertFrom-Json |
+              Where-Object { $_.tagName -like 'special-v*' -and $_.tagName -ne "special-v$cur" } |
+              Select-Object -First 1).tagName
+          if (-not $prevTag) { Write-Host '没有可对比的历史版本，跳过增量包'; exit 0 }
+          $prevVer = $prevTag.Substring('special-v'.Length)
+          Write-Host "对比基准：$prevTag"
+
+          gh release download $prevTag --repo $repo --pattern '*special-win-x64.7z' --dir dist/prev --clobber
+          if ($LASTEXITCODE -ne 0) { throw '下载上一个版本失败' }
+          $prevArchive = Get-ChildItem 'dist/prev' -Filter '*.7z' | Select-Object -First 1
+          7z x $prevArchive.FullName "-odist/prev/extract" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw '解压上一个版本失败' }
+
+          $newRoot = (Resolve-Path 'dist/BetterGI').Path
+          $oldRoot = (Resolve-Path 'dist/prev/extract/BetterGI').Path
+
+          $files = New-Object System.Collections.Generic.List[object]
+          $removed = New-Object System.Collections.Generic.List[string]
+
+          foreach ($f in Get-ChildItem $newRoot -Recurse -File) {
+              $rel = $f.FullName.Substring($newRoot.Length).TrimStart('\')
+              $old = Join-Path $oldRoot $rel
+              $hash = $null
+              if (Test-Path $old) {
+                  # 大小相同才值得算哈希，省掉大半磁盘读取
+                  if ((Get-Item $old).Length -eq $f.Length) {
+                      $a = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
+                      $b = (Get-FileHash $old -Algorithm SHA256).Hash
+                      if ($a -eq $b) { continue }
+                      $hash = $a
+                  }
+              }
+              if (-not $hash) { $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash }
+              $files.Add([ordered]@{ path = $rel; size = $f.Length; sha256 = $hash })
+          }
+
+          foreach ($f in Get-ChildItem $oldRoot -Recurse -File) {
+              $rel = $f.FullName.Substring($oldRoot.Length).TrimStart('\')
+              if (-not (Test-Path (Join-Path $newRoot $rel))) { $removed.Add($rel) }
+          }
+
+          $stage = 'dist/patch'
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory "$stage/files" -Force | Out-Null
+          foreach ($item in $files) {
+              $dest = Join-Path "$stage/files" $item.path
+              New-Item -ItemType Directory (Split-Path $dest -Parent) -Force | Out-Null
+              Copy-Item (Join-Path $newRoot $item.path) $dest -Force
+          }
+
+          $manifest = [ordered]@{
+              from    = $prevVer
+              to      = $cur
+              base    = 'BetterGI'
+              files   = @($files)
+              removed = @($removed)
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Out-File "$stage/manifest.json" -Encoding utf8
+
+          $patchName = "BetterGI_v${cur}_patch-from-$prevVer.zip"
+          Compress-Archive -Path "$stage/*" -DestinationPath "dist/$patchName" -CompressionLevel Optimal
+          $patchMB = [math]::Round((Get-Item "dist/$patchName").Length / 1MB, 1)
+          "patch=dist/$patchName" >> $env:GITHUB_OUTPUT
+          "patchMB=$patchMB"      >> $env:GITHUB_OUTPUT
+          Write-Host "增量包：$patchName（$patchMB MB，变更 $($files.Count) 个、删除 $($removed.Count) 个）"
+
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
@@ -245,6 +328,8 @@ jobs:
           SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
           SETUP: ${{ steps.sfx.outputs.setup }}
           SETUP_MB: ${{ steps.sfx.outputs.setupMB }}
+          PATCH: ${{ steps.patch.outputs.patch }}
+          PATCH_MB: ${{ steps.patch.outputs.patchMB }}
           REF: ${{ inputs.ref || 'bgi-special' }}
           # 构建的源码在 inputs.ref，未必是触发分支：用 --ref main 触发时 github.sha 是 main 的提交，
           # 直接拿它当 target 会把 tag 打到 main 上（脚本仓库内容），而不是这次构建的客户端源码
@@ -274,6 +359,9 @@ jobs:
             $env:SETUP,
             (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe')
           )
+          # 增量包允许缺失（对比失败时不会生成），有就一起传
+          if ($env:PATCH -and (Test-Path $env:PATCH)) { $assets += (Resolve-Path $env:PATCH).Path }
+          $expected = $assets.Count
           foreach ($asset in $assets) {
               if (-not (Test-Path $asset)) { throw "资产缺失：$asset" }
               $ok = $false
@@ -289,8 +377,8 @@ jobs:
           }
 
           $listed = gh release view $tag --json assets --jq '.assets | length'
-          if ($lastExitCode -ne 0 -or [int]$listed -ne 3) { throw "资产数量异常：$listed（期望 3）" }
-          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 资产 $listed 个）"
+          if ($lastExitCode -ne 0 -or [int]$listed -ne $expected) { throw "资产数量异常：$listed（期望 $expected）" }
+          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 增量包 $env:PATCH_MB MB / 资产 $listed 个）"
 
       - name: 写入运行摘要
         if: always()

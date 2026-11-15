@@ -16,6 +16,7 @@ using BetterGenshinImpact.Core.Monitor;
 using BetterGenshinImpact.Core.Plugins.Hosting;
 using BetterGenshinImpact.Core.Plugins.Pluggables;
 using BetterGenshinImpact.Core.Script;
+using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
@@ -598,6 +599,8 @@ public partial class App : Application
                 // 宿主启动完成后实例上下文已初始化；主实例尽力清理遗留锁，失败也不影响启动。
                 TryCleanupPuloniaLockFiles();
                 await UrlProtocolHelper.RegisterAsync();
+                // 界面就绪后再问，避免弹窗被主窗口盖住
+                Dispatcher.BeginInvoke(new Action(async () => await PromptPendingUpdateAsync()));
             }
         }
         catch (Exception ex)
@@ -641,6 +644,63 @@ public partial class App : Application
             Shutdown();
         }
 
+    }
+
+    /// <summary>
+    ///     处理上次留下的更新：脚本失败要报告原因，等着装的要问一句。
+    ///     <para>
+    ///         增量更新需要进程退出后由脚本覆盖文件，所以「下载完先不重启」的用户下次启动时才会走到这里。
+    ///     </para>
+    /// </summary>
+    private async Task PromptPendingUpdateAsync()
+    {
+        try
+        {
+            if (SpecialPatch.ConsumeLastError() is { Length: > 0 } lastError)
+            {
+                await ThemedMessageBox.WarningAsync(
+                    $"上次更新没有完成：{lastError}\n\n可以重新检查更新，或下载完整包覆盖安装。", "更新未完成");
+            }
+
+            if (!SpecialPatch.IsPending || SpecialPatch.ReadPending() is not { } manifest)
+            {
+                return;
+            }
+
+            // 目标版本就是当前版本，说明文件已经换过、脚本只是没删掉标记（比如启动时报错前）
+            string current = (Global.Version ?? string.Empty).Split('+')[0];
+            if (string.Equals(manifest.To, current, StringComparison.OrdinalIgnoreCase))
+            {
+                SpecialPatch.ClearPending();
+                return;
+            }
+
+            var restart = await ThemedMessageBox.QuestionAsync(
+                $"特别版 {manifest.To} 的更新已经下载好了（{manifest.Files.Count} 个文件），需要重启才能生效。\n\n" +
+                "现在重启？（会先关闭当前窗口，几秒后自动打开新版）",
+                "更新待安装", MessageBoxButton.YesNo);
+
+            if (restart != MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            if (SpecialPatch.StartApplyAndRestart(App.GetLogger<App>()))
+            {
+                App.GetService<IConfigService>()?.Save();
+                Current.Shutdown();
+            }
+            else
+            {
+                await ThemedMessageBox.WarningAsync(
+                    "无法启动更新脚本，可能被安全软件拦截。更新文件已解压到 update\\staging，可手动覆盖。", "更新失败");
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e);
+            ConsoleHelper.WriteError($"处理待安装更新失败：{e.Message}");
+        }
     }
 
     /// <summary>尽力执行上次登记、推迟到本次启动的存储清理；失败时只记录日志，不影响 BetterGI 启动。</summary>
