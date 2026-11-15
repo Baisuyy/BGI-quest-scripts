@@ -108,7 +108,7 @@ public static class SpecialUpdater
         var latest = releases
             .Where(r => !string.IsNullOrWhiteSpace(r.TagName)
                         && r.TagName.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(r => ParseVersion(r.TagName))
+            .OrderByDescending(r => ParseVersion(r.TagName), StringComparer.Ordinal)
             .FirstOrDefault();
 
         if (latest == null)
@@ -412,31 +412,44 @@ public static class SpecialUpdater
     }
 
     /// <summary>
-    ///     把 0.67.0-special.5 拆成可比较的四段。取不到主版本时返回 (-1, -1, -1, 0)，
-    ///     这样“未知版本”永远算旧，用户点检查更新能拿到提示。
+    ///     把 <c>0.67.0-special.7.2</c> 编成可直接按字符串比较的定长键，例如
+    ///     <c>00000.00067.00000.00007.00002</c>。每段补足 5 位，所以字典序就是版本序。
+    ///     取不到主版本时返回空串，空串小于任何键，这样“未知版本”永远算旧，
+    ///     用户点检查更新能拿到提示；同时 <c>special.7</c> 与 <c>special.7.1</c>
+    ///     也能分出先后（前者是后者的前缀，比较时为小）。
     /// </summary>
-    private static (int Major, int Minor, int Patch, int Build) ParseVersion(string text)
+    private static string ParseVersion(string text)
     {
         text ??= string.Empty;
         var m = Regex.Match(text, @"(\d+)\.(\d+)\.(\d+)");
         if (!m.Success)
         {
-            return (-1, -1, -1, 0);
+            return string.Empty;
         }
 
-        int build = 0;
-        var b = Regex.Match(text, @"special\.(\d+)");
-        if (b.Success)
+        var parts = new List<int>
         {
-            build = int.Parse(b.Groups[1].Value);
+            int.Parse(m.Groups[1].Value),
+            int.Parse(m.Groups[2].Value),
+            int.Parse(m.Groups[3].Value)
+        };
+
+        // special 后面的尾号可能有多段：special.7 / special.7.1 / special.7.2
+        var tail = Regex.Match(text, @"special\.(\d+(?:\.\d+)*)", RegexOptions.IgnoreCase);
+        if (tail.Success)
+        {
+            foreach (string seg in tail.Groups[1].Value.Split('.'))
+            {
+                parts.Add(int.Parse(seg));
+            }
         }
 
-        return (int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value), int.Parse(m.Groups[3].Value), build);
+        return string.Join('.', parts.Select(p => p.ToString("D5")));
     }
 
     private static int CompareVersion(string left, string right)
     {
-        return ParseVersion(left).CompareTo(ParseVersion(right));
+        return string.CompareOrdinal(ParseVersion(left), ParseVersion(right));
     }
 
     private static void Open(string url)
