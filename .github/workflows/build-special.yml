@@ -405,7 +405,42 @@ jobs:
 
           $listed = gh release view $tag --json assets --jq '.assets | length'
           if ($lastExitCode -ne 0 -or [int]$listed -ne $expected) { throw "资产数量异常：$listed（期望 $expected）" }
-          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 增量包 $env:PATCH_MB MB / 资产 $listed 个）"
+          $patchInfo = if ([string]::IsNullOrWhiteSpace($env:PATCH_MB)) { "未生成" } else { "$env:PATCH_MB MB" }
+          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 增量包 $patchInfo / 资产 $listed 个）"
+
+      - name: 上传到 123 云盘
+        # 放在 Release 之后：这边失败不影响 GitHub 侧已经完成的发布
+        if: ${{ inputs.make_release || startsWith(github.ref, 'refs/tags/special-v') }}
+        continue-on-error: true
+        shell: pwsh
+        env:
+          PAN123_CLIENT_ID: ${{ secrets.PAN123_CLIENT_ID }}
+          PAN123_CLIENT_SECRET: ${{ secrets.PAN123_CLIENT_SECRET }}
+          PAN123_PARENT_ID: ${{ secrets.PAN123_PARENT_ID }}
+          ARCHIVE: ${{ steps.pack.outputs.archive }}
+          SETUP: ${{ steps.sfx.outputs.setup }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:PAN123_CLIENT_ID) -or
+              [string]::IsNullOrWhiteSpace($env:PAN123_CLIENT_SECRET)) {
+              Write-Host "::notice::未配置 PAN123_CLIENT_ID / PAN123_CLIENT_SECRET，跳过 123 云盘上传"
+              exit 0
+          }
+
+          python -m pip install --quiet --disable-pip-version-check requests
+          $parentId = if ([string]::IsNullOrWhiteSpace($env:PAN123_PARENT_ID)) { "0" } else { $env:PAN123_PARENT_ID.Trim() }
+
+          $files = @()
+          foreach ($path in @($env:ARCHIVE, $env:SETUP)) {
+              if (-not [string]::IsNullOrWhiteSpace($path) -and (Test-Path $path)) {
+                  $files += @("--file", (Split-Path $path -Leaf))
+              }
+          }
+          if ($files.Count -eq 0) { Write-Host "没有找到要上传的产物"; exit 0 }
+
+          $arguments = @("tools/bgi-special/upload_123pan.py", "--dir", "dist", "--parent-id", $parentId) + $files
+          Write-Host "执行：python $($arguments -join ' ')"
+          python @arguments
+          if ($LASTEXITCODE -ne 0) { throw "123 云盘上传失败，退出码 $LASTEXITCODE" }
 
       - name: 写入运行摘要
         if: always()
