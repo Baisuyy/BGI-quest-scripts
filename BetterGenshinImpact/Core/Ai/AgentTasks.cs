@@ -11,10 +11,12 @@ using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Core.Script.Group;
 using BetterGenshinImpact.Core.Script.Project;
 using BetterGenshinImpact.GameTask;
+using BetterGenshinImpact.GameTask.AutoPathing;
 using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
 using BetterGenshinImpact.Service;
 using BetterGenshinImpact.Service.Interface;
+using BetterGenshinImpact.Service.RemoteTask;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -131,11 +133,35 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
                 },
                 ["required"] = new JsonArray("name"),
             }),
+        new("list_pathing", "列出本地地图追踪路线（采集素材用），按素材名聚合。想知道「有没有清心的路线」就查这个。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["keyword"] = new JsonObject { ["type"] = "string", ["description"] = "按素材名或路线名过滤，可省略" },
+                },
+            }),
+        new("run_pathing", "跑一条地图追踪路线采集素材。参数可以是素材名（清心）、角色名（胡桃）或路线名。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["name"] = new JsonObject
+                    {
+                        ["type"] = "string",
+                        ["description"] = "素材名、角色名或路线名，来自 list_pathing",
+                    },
+                },
+                ["required"] = new JsonArray("name"),
+            }),
     ];
 
     /// <summary>工具名是否由本类处理，供上层分派。</summary>
     public static bool Handles(string name) => name is "list_tasks" or "describe_task" or "run_task"
-        or "task_status" or "stop_task" or "list_scripts" or "run_script";
+        or "task_status" or "stop_task" or "list_scripts" or "run_script"
+        or "list_pathing" or "run_pathing";
 
     /// <summary>在软件未完全初始化时尝试构造；缺少依赖时返回 null，由调用方退回纯文件助手。</summary>
     public static AgentTasks? TryCreate()
@@ -169,6 +195,8 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
                 "task_status" => Status(),
                 "stop_task" => await StopAsync().ConfigureAwait(false),
                 "list_scripts" => ListScripts(GetString(args, "keyword")),
+                "list_pathing" => ListPathing(GetString(args, "keyword")),
+                "run_pathing" => await RunPathingAsync(args, ct).ConfigureAwait(false),
                 "run_script" => await RunScriptAsync(args, ct).ConfigureAwait(false),
                 _ => $"未知动作 {name}",
             };
@@ -463,6 +491,66 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
 
         stop.StopAll(TaskStopReason.UserRequested);
         return "没有独立任务在跑，已向脚本运行发送停止信号。";
+    }
+
+    /// <summary>
+    /// 列出地图追踪路线，按素材聚合。
+    /// </summary>
+    private static string ListPathing(string? keyword)
+    {
+        var routes = string.IsNullOrWhiteSpace(keyword)
+            ? PathingRouteLibrary.All.ToList()
+            : PathingRouteLibrary.Find(keyword);
+        if (routes.Count == 0)
+        {
+            return string.IsNullOrWhiteSpace(keyword)
+                ? "本地还没有地图追踪路线。到「地图追踪」页下载，或在脚本仓库里订阅路线包。"
+                : $"没有匹配「{keyword}」的路线。用不带参数的 list_pathing 看全部素材。";
+        }
+
+        var groups = routes
+            .GroupBy(r => string.IsNullOrEmpty(r.Material) ? "（无素材信息）" : r.Material)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .Take(60)
+            .Select(g => $"- {g.Key}：{g.Count()} 条，例如 {g.First().Relative}");
+
+        return $"共 {routes.Count} 条路线：\n" + string.Join("\n", groups)
+            + "\n\nrun_pathing 的 name 传素材名即可。";
+    }
+
+    /// <summary>
+    /// 跑一条地图追踪路线。
+    /// </summary>
+    private async Task<string> RunPathingAsync(JsonObject args, CancellationToken ct)
+    {
+        var name = GetString(args, "name");
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return "缺少 name，先用 list_pathing 看有哪些素材。";
+        }
+
+        var routes = PathingRouteLibrary.Find(name);
+        if (routes.Count == 0)
+        {
+            return $"没有匹配「{name}」的路线。先用 list_pathing 确认素材名，或者让用户去地图追踪页下载。";
+        }
+
+        var route = routes[0];
+        var request = new SoloTaskStartRequest
+        {
+            RunId = Guid.NewGuid(),
+            TaskId = AutoPathingPathTask.TaskId,
+            Parameters = new JObject { ["file"] = route.Relative }
+        };
+
+        var response = await execution.StartAsync(request).ConfigureAwait(false);
+        if (!response.Accepted)
+        {
+            return $"没能开始采集：{response.ErrorMessage}";
+        }
+
+        var more = routes.Count > 1 ? $"，这个素材还有 {routes.Count - 1} 条路线没用" : string.Empty;
+        return $"开始跑「{route.Material}」的路线 {route.Name}（{route.Region}）{more}。用 task_status 查进度。";
     }
 
     /// <summary>列出用户脚本目录里可运行的脚本，读 manifest 拿显示名。</summary>

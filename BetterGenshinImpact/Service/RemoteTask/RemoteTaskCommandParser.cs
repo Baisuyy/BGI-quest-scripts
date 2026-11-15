@@ -91,6 +91,11 @@ public enum RemoteTaskCommandKind
     Login,
 
     /// <summary>
+    /// 跑一条地图追踪路线，通常用于采集素材。
+    /// </summary>
+    Path,
+
+    /// <summary>
     /// 交给模型自由操作：没有对应任务时，由它自己看画面点。
     /// </summary>
     Pilot,
@@ -465,8 +470,9 @@ public static class RemoteTaskCommandParser
         (RemoteTaskCommandKind.SwitchCharacter, ["切换角色", "切角色", "换角色", "切换人物", "切人", "换人", "切到", "换到"]),
         (RemoteTaskCommandKind.Script, ["运行脚本", "执行脚本", "跑脚本", "运行配置组"]),
         (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时"]),
+        (RemoteTaskCommandKind.Path, ["采集", "采一下", "采点", "挖", "收集", "采"]),
         (RemoteTaskCommandKind.Pilot, ["自由操作", "你自己操作", "你自己点", "看着点",
-            "采集", "采一下", "捡材料", "捡东西", "捡一下", "拾取材料"])
+            "捡材料", "捡东西", "捡一下", "拾取材料"])
     ];
 
     /// <summary>

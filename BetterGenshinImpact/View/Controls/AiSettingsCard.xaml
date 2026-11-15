@@ -317,6 +317,27 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
+                <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="限制调用次数" />
+                <ui:TextBlock Grid.Row="1"
+                              Grid.Column="0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              TextWrapping="Wrap"
+                              Text="关掉后不再按次数停机，只保留连续失败的冷却；自由操作一次最多十几轮，怕花销时再开回来" />
+                <ui:ToggleSwitch Grid.Row="0"
+                                 Grid.RowSpan="2"
+                                 Grid.Column="1"
+                                 Margin="0,0,36,0"
+                                 IsChecked="{Binding Config.AiConfig.LimitCalls, Mode=TwoWay}" />
+            </Grid>
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
                 <ui:TextBlock FontTypography="Body" TextWrapping="Wrap" Text="每小时调用上限" />
                 <ui:TextBlock Grid.Row="1"
                               Grid.Column="0"
@@ -332,6 +353,7 @@
                               Minimum="1"
                               Maximum="600"
                               SmallChange="1"
+                              IsEnabled="{Binding Config.AiConfig.LimitCalls}"
                               Value="{Binding Config.AiConfig.MaxCallsPerHour, Mode=TwoWay}" />
             </Grid>
             <Grid Margin="16">
@@ -358,6 +380,7 @@
                               Minimum="1"
                               Maximum="2000"
                               SmallChange="10"
+                              IsEnabled="{Binding Config.AiConfig.LimitCalls}"
                               Value="{Binding Config.AiConfig.MaxCallsPerRun, Mode=TwoWay}" />
             </Grid>
             <Grid Margin="16">

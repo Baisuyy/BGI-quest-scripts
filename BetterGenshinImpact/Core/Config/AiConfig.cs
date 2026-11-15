@@ -57,6 +57,22 @@ public partial class AiConfig : ObservableObject
     private int _timeoutSeconds = 60;
 
     /// <summary>
+    /// 是否限制调用次数。关掉后不受每小时与单次运行上限约束，也不因超限停机。
+    /// <para>
+    /// 只在明确不在乎花销时关：自由操作一次最多十几轮，很容易撞上每小时 60 次。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveLimitCalls))]
+    private bool _limitCalls = true;
+
+    /// <summary>
+    /// 实际是否限制调用：关掉后上限条目在界面上灰掉，但数值保留，随时能开回来。
+    /// </summary>
+    [JsonIgnore]
+    public bool EffectiveLimitCalls => LimitCalls;
+
+    /// <summary>
     /// 每小时调用上限。内置决策和脚本共用同一个预算，防止循环里把额度烧光。
     /// </summary>
     [ObservableProperty]

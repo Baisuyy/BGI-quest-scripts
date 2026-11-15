@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
+using BetterGenshinImpact.GameTask.AutoPathing;
 using BetterGenshinImpact.GameTask.Common;
 using BetterGenshinImpact.GameTask.Runtime;
 using BetterGenshinImpact.GameTask.SoloTask;
@@ -126,6 +127,8 @@ public sealed class RemoteTaskCommandHandler(
             RemoteTaskCommandKind.Script => await ScriptAsync(command, cancellationToken).ConfigureAwait(false),
             RemoteTaskCommandKind.Schedule => new RemoteTaskReply(Schedule(command)),
             RemoteTaskCommandKind.Login => await LoginAsync(command, cancellationToken).ConfigureAwait(false),
+            RemoteTaskCommandKind.Path => await PathingAsync(command, onRunStarted, cancellationToken)
+                .ConfigureAwait(false),
             RemoteTaskCommandKind.Pilot => await PilotAsync(command.Args ?? message.Content, cancellationToken)
                 .ConfigureAwait(false),
             RemoteTaskCommandKind.Plan => StartPlan(command),
@@ -249,6 +252,24 @@ public sealed class RemoteTaskCommandHandler(
         if (string.Equals(taskId, OneDragonTaskId, StringComparison.OrdinalIgnoreCase))
         {
             return EnsureOneDragonConfig(text);
+        }
+
+        if (string.Equals(taskId, AutoPathingPathTask.TaskId, StringComparison.OrdinalIgnoreCase))
+        {
+            // 这里收到的是素材名，要换成本地实际存在的路线文件
+            var routes = PathingRouteLibrary.Find(text);
+            if (routes.Count == 0)
+            {
+                return new PreparedParameters(null, null,
+                    string.IsNullOrWhiteSpace(text)
+                        ? "没说采什么。例如「采清心」「采胡桃」。"
+                        : $"本地没有「{text}」的路线。{BuildPathingHelp()}");
+            }
+
+            return new PreparedParameters(
+                new JObject { ["file"] = routes[0].Relative },
+                routes.Count > 1 ? $"这个素材有 {routes.Count} 条路线，先跑「{routes[0].Name}」。" : null,
+                null);
         }
 
         return new PreparedParameters(null, null, null);
@@ -549,6 +570,148 @@ public sealed class RemoteTaskCommandHandler(
         var list = string.Join(" → ", steps.Select(step => step.TaskName));
         return new RemoteTaskReply(
             $"{command.Say}\n按顺序来：{list}\n共 {steps.Count} 步，每步跑完接着下一步，全部结束后我把汇总发给你。".Trim());
+    }
+
+    /// <summary>
+    /// 跑一条地图追踪路线采集素材。
+    /// <para>
+    /// 「采清心」直接用素材名找路线；「采胡桃突破材料」这种说法先用模型翻成素材名再找。
+    /// 找不到路线时不做自由操作——采集靠路线走，让模型临场找路只会更难走完。
+    /// </para>
+    /// </summary>
+    private async Task<RemoteTaskReply> PathingAsync(
+        RemoteTaskCommand command,
+        Action<Guid>? onRunStarted,
+        CancellationToken cancellationToken)
+    {
+        var goal = (command.Args ?? string.Empty).Trim();
+        if (goal.Length == 0)
+        {
+            return new RemoteTaskReply(BuildPathingHelp());
+        }
+
+        var note = string.Empty;
+        var routes = PathingRouteLibrary.Find(goal);
+        if (routes.Count == 0 && kernel.Available)
+        {
+            // 角色名到素材名的映射不在客户端里，交给模型做这一步翻译最省事
+            if (await TranslateMaterialAsync(goal, cancellationToken).ConfigureAwait(false) is { Length: > 0 } material)
+            {
+                routes = PathingRouteLibrary.Find(material);
+                if (routes.Count > 0)
+                {
+                    note = $"「{goal}」按「{material}」找路线。";
+                }
+            }
+        }
+
+        if (routes.Count == 0)
+        {
+            return new RemoteTaskReply(BuildPathingHelp(goal));
+        }
+
+        var route = routes[0];
+        var request = new SoloTaskStartRequest
+        {
+            RunId = Guid.NewGuid(),
+            TaskId = AutoPathingPathTask.TaskId,
+            Parameters = new JObject { ["file"] = route.Relative }
+        };
+
+        onRunStarted?.Invoke(request.RunId);
+        var response = await executionService.StartAsync(request).ConfigureAwait(false);
+        if (!response.Accepted)
+        {
+            return new RemoteTaskReply($"没能开始采集：{response.ErrorMessage}");
+        }
+
+        logger.LogInformation("远程采集：{Material} → {Route}（{RunId}）", route.Material, route.Relative, request.RunId);
+
+        var head = string.IsNullOrWhiteSpace(command.Say) ? $"开始采「{route.Material}」。" : command.Say.Trim();
+        if (note.Length > 0)
+        {
+            head = $"{head}\n{note}";
+        }
+
+        if (routes.Count > 1)
+        {
+            head += $"\n这个素材有 {routes.Count} 条路线，先跑「{route.Name}」。";
+        }
+
+        return new RemoteTaskReply($"{head}\n跑完会把结果和截图发回来，发「停止」可以中断。", RunId: request.RunId);
+    }
+
+    /// <summary>
+    /// 把「胡桃突破材料」翻成「霓裳花」这类素材名。模型不可用或答非所问时返回空串。
+    /// </summary>
+    private async Task<string> TranslateMaterialAsync(string goal, CancellationToken cancellationToken)
+    {
+        const string prompt = """
+                              你是原神素材名转换器。用户想采集某种东西，但它可能是角色名、角色突破材料、
+                              或者模糊说法。请输出这次真正要去采的采集物名称（植物、矿物、食材等的中文名），
+                              例如「胡桃」→「霓裳花」，「雷电将军突破材料」→「天云草实」。
+                              只输出素材名本身，不要解释、不要标点。不确定就输出「不确定」。
+                              """;
+
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(TimeSpan.FromSeconds(20));
+            var answer = (await kernel.AskAsync("采集素材识别", goal, prompt, cts.Token).ConfigureAwait(false)).Trim();
+            answer = answer.Trim('「', '」', '"', '。', '，', ' ');
+
+            // 模型爱加解释，取第一行并限制长度，避免把一整段话当素材名去匹配
+            var firstLine = answer.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
+            if (firstLine.Length is 0 or > 12 || firstLine.Contains("不确定", StringComparison.Ordinal))
+            {
+                return string.Empty;
+            }
+
+            return firstLine;
+        }
+        catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogInformation("识别采集素材超时，按原词找路线");
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "识别采集素材失败");
+        }
+
+        return string.Empty;
+    }
+
+    /// <summary>
+    /// 采集的用法说明，顺带列出本地已有的素材路线。
+    /// </summary>
+    private static string BuildPathingHelp(string? goal = null)
+    {
+        var materials = PathingRouteLibrary.Materials();
+        var lines = new StringBuilder();
+        if (goal is { Length: > 0 })
+        {
+            lines.Append($"没找到「{goal}」对应的路线。\n");
+        }
+
+        lines.Append("采集靠地图追踪路线走，得先有路线文件。\n");
+        lines.Append("· 说素材名：「采清心」「采集霓裳花」\n");
+        lines.Append("· 说角色名也行，我会自己换成突破材料：「采胡桃」\n");
+
+        if (materials.Count == 0)
+        {
+            lines.Append("\n本地还没有任何路线：到「地图追踪」页下载，或在脚本仓库里订阅路线包。");
+        }
+        else
+        {
+            var preview = materials.Count > 24 ? materials.Take(24) : materials;
+            lines.Append($"\n本地已有 {materials.Count} 种素材的路线：{string.Join("、", preview)}");
+            if (materials.Count > 24)
+            {
+                lines.Append("…");
+            }
+        }
+
+        return lines.ToString();
     }
 
     /// <summary>
@@ -871,7 +1034,8 @@ public sealed class RemoteTaskCommandHandler(
                · 脚本 —— 列出或运行用户脚本
                · 定时 —— 定时任务管理
                · 状态 / 停止 / 任务
-               没有专门任务的活（采集、翻某个界面、点某个按钮），说「自由操作」加要做什么，我自己看着画面点。
+               采素材走地图追踪路线：「采清心」「采胡桃」都行，角色名我会自己换成突破材料。
+               没有专门任务的活（翻某个界面、点某个按钮），说「自由操作」加要做什么，我自己看着画面点。
                换号：先「关游戏」，在电脑上重开原神，停在登录界面时发「切号」，我把二维码截给你。
                """;
     }

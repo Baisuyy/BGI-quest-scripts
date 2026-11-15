@@ -109,15 +109,19 @@ public sealed class AiKernel(AllConfig config, ILogger<AiKernel> logger)
                     return $"连续失败已冷却至 {_cooldownUntil.ToLocalTime():HH:mm:ss}";
                 }
 
-                PruneHourWindow();
-                if (_hourWindow.Count >= Settings.MaxCallsPerHour)
+                // 关掉限制时只保留熔断（连续失败冷却），不拦调用次数
+                if (Settings.LimitCalls)
                 {
-                    return $"已达每小时上限 {Settings.MaxCallsPerHour} 次";
-                }
+                    PruneHourWindow();
+                    if (_hourWindow.Count >= Settings.MaxCallsPerHour)
+                    {
+                        return $"已达每小时上限 {Settings.MaxCallsPerHour} 次";
+                    }
 
-                if (_runCalls >= Settings.MaxCallsPerRun)
-                {
-                    return $"已达本次运行上限 {Settings.MaxCallsPerRun} 次";
+                    if (_runCalls >= Settings.MaxCallsPerRun)
+                    {
+                        return $"已达本次运行上限 {Settings.MaxCallsPerRun} 次";
+                    }
                 }
             }
 
