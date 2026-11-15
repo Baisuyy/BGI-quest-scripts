@@ -35,7 +35,68 @@ env:
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
 jobs:
+  # 官方发布流水线会把两个前端产物塞进 Assets：脚本仓库页与地图编辑器页。
+  # 特别版漏了这一步，客户端打开「脚本仓库」时 WebView2 找不到目录，
+  # SetVirtualHostNameToFolderMapping 抛 0x80070003，窗口直接空白。
+  # 前端构建失败不阻断客户端出包，代码侧有缺目录兜底。
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - name: 构建脚本仓库页
+        id: scripts
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: zaodonganqi/bettergi-script-web
+
+      - name: 安装 Node
+        if: ${{ steps.scripts.outcome == 'success' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 打包脚本仓库页
+        if: ${{ steps.scripts.outcome == 'success' }}
+        continue-on-error: true
+        run: npm install && npm run build:single
+
+      - name: 上传脚本仓库页
+        if: ${{ steps.scripts.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: web_scripts_list
+          path: dist/
+          if-no-files-found: warn
+          retention-days: 3
+
+      - name: 检出地图编辑器
+        id: map
+        continue-on-error: true
+        uses: actions/checkout@v4
+        with:
+          repository: huiyadanli/bettergi-map
+          path: map
+
+      - name: 打包地图编辑器
+        if: ${{ steps.map.outcome == 'success' }}
+        continue-on-error: true
+        run: cd map && npm install && npm run build:single
+
+      - name: 上传地图编辑器
+        if: ${{ steps.map.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: web_map_editor
+          path: map/dist/
+          if-no-files-found: warn
+          retention-days: 3
+
   build:
+    needs: [web]
     runs-on: windows-latest
     timeout-minutes: 60
     steps:
@@ -81,6 +142,22 @@ jobs:
             --nologo
           if ($LASTEXITCODE -ne 0) { throw "dotnet publish 失败，退出码 $LASTEXITCODE" }
 
+      # 前端产物先落到 dist，随下面的 Copy-Item 一起进包。取不到就跳过，
+      # 客户端会退化成可读提示而不是白屏。
+      - name: 取脚本仓库页
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: web_scripts_list
+          path: dist/BetterGI/Assets/Web/ScriptRepo
+
+      - name: 取地图编辑器页
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: web_map_editor
+          path: dist/BetterGI/Assets/Map/Editor
+
       - name: 整理并打包
         id: pack
         shell: pwsh
@@ -109,6 +186,44 @@ jobs:
           "sizeMB=$sizeMB"   >> $env:GITHUB_OUTPUT
           Write-Host "压缩包：$archive（$sizeMB MB）"
 
+      - name: 生成自解压安装包
+        id: sfx
+        shell: pwsh
+        run: |
+          $v = '${{ steps.ver.outputs.version }}'
+          $archive = '${{ steps.pack.outputs.archive }}'
+
+          # 7-Zip 自带的自解压模块，双击后选目录解压，不做任何在线更新
+          $module = Join-Path ${env:ProgramFiles} '7-Zip\7z.sfx'
+          if (-not (Test-Path $module)) { $module = Join-Path ${env:ProgramFiles(x86)} '7-Zip\7z.sfx' }
+          if (-not (Test-Path $module)) { throw '未找到 7z.sfx，无法生成自解压安装包' }
+
+          $config = @"
+          ;!@Install@!UTF-8!
+          Title="BetterGI 特别版 $v"
+          BeginPrompt="解压到所选目录，完成后自动启动 BetterGI？"
+          Progress="yes"
+          RunProgram="BetterGI\BetterGI.exe"
+          ;!@InstallEnd@!
+          "@
+          # 必须是 UTF-8 无 BOM，否则 7z 会把 BOM 当作配置内容
+          $configPath = 'dist/sfx-config.txt'
+          [IO.File]::WriteAllText((Resolve-Path 'dist').Path + '/sfx-config.txt', $config.Trim(), (New-Object System.Text.UTF8Encoding $false))
+
+          $setup = "dist/BetterGI_v${v}_Setup.exe"
+          $out = [IO.File]::Create($setup)
+          try {
+              foreach ($part in @($module, $configPath, $archive)) {
+                  $in = [IO.File]::OpenRead($part)
+                  try { $in.CopyTo($out) } finally { $in.Dispose() }
+              }
+          } finally { $out.Dispose() }
+
+          $sizeMB = [math]::Round((Get-Item $setup).Length / 1MB, 1)
+          "setup=$setup"    >> $env:GITHUB_OUTPUT
+          "setupMB=$sizeMB" >> $env:GITHUB_OUTPUT
+          Write-Host "自解压安装包：$setup（$sizeMB MB）"
+
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
@@ -127,6 +242,8 @@ jobs:
           SHA: ${{ steps.ver.outputs.sha }}
           ARCHIVE: ${{ steps.pack.outputs.archive }}
           SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
+          SETUP: ${{ steps.sfx.outputs.setup }}
+          SETUP_MB: ${{ steps.sfx.outputs.setupMB }}
           REF: ${{ inputs.ref || 'bgi-special' }}
           FULL_SHA: ${{ github.sha }}
         run: |
@@ -139,16 +256,38 @@ jobs:
           $notes = $notes.Replace('{{SHA}}', $env:SHA)
           $notes | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
 
+          # 先建空壳再逐个上传：一次带上 1.3GB 资产容易在中途断流，
+          # 断在这里只能得到半成品 Release，且重跑会重复占用 tag。
           gh release delete $tag -y --cleanup-tag 2>$null
           gh release create $tag `
-            $env:ARCHIVE `
-            (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe') `
             --target $env:FULL_SHA `
             --title "BetterGI 特别版 $env:VERSION" `
             --notes-file 'RELEASE_NOTES.md' `
             --prerelease
           if ($LASTEXITCODE -ne 0) { throw "Release 创建失败，退出码 $LASTEXITCODE" }
-          Write-Host "已发布 $tag（压缩包 $env:SIZE_MB MB）"
+
+          $assets = @(
+            $env:ARCHIVE,
+            $env:SETUP,
+            (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe')
+          )
+          foreach ($asset in $assets) {
+              if (-not (Test-Path $asset)) { throw "资产缺失：$asset" }
+              $ok = $false
+              for ($i = 1; $i -le 3; $i++) {
+                  gh release upload $tag $asset --clobber
+                  if ($LASTEXITCODE -eq 0) { $ok = $true; break }
+                  Write-Host "上传 $asset 第 $i 次失败，退避 $($i * 15) 秒后重试"
+                  Start-Sleep -Seconds ($i * 15)
+              }
+              if (-not $ok) { throw "资产上传失败：$asset" }
+              $mb = [math]::Round((Get-Item $asset).Length / 1MB, 1)
+              Write-Host "已上传 $(Split-Path $asset -Leaf)（$mb MB）"
+          }
+
+          $listed = gh release view $tag --json assets --jq '.assets | length'
+          if ($lastExitCode -ne 0 -or [int]$listed -ne 3) { throw "资产数量异常：$listed（期望 3）" }
+          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 资产 $listed 个）"
 
       - name: 写入运行摘要
         if: always()
@@ -161,6 +300,8 @@ jobs:
             "| 上游基线 | ${{ steps.ver.outputs.base }} |",
             "| 源码 ref | ${{ inputs.ref || github.ref_name }} |",
             "| 压缩包 | ${{ steps.pack.outputs.archive }} |",
-            "| 体积 | ${{ steps.pack.outputs.sizeMB }} MB |"
+            "| 体积 | ${{ steps.pack.outputs.sizeMB }} MB |",
+            "| 安装包 | ${{ steps.sfx.outputs.setup }} |",
+            "| 安装包体积 | ${{ steps.sfx.outputs.setupMB }} MB |"
           )
           $rows | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
