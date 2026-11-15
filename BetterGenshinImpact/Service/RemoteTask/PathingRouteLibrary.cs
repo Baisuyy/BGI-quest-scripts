@@ -37,6 +37,18 @@ public static class PathingRouteLibrary
     private static readonly object Gate = new();
 
     private static IReadOnlyList<PathingRoute> _routes = [];
+
+    /// <summary>
+    /// 素材名 → 路线。目录名就是素材名，按它建索引后最常见的查法不用再扫全表。
+    /// </summary>
+    private static Dictionary<string, List<PathingRoute>> _byMaterial =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// 素材名去重排序后的缓存，提示词和帮助文案每次都要用。
+    /// </summary>
+    private static IReadOnlyList<string> _materials = [];
+
     private static DateTime _loadedAt = DateTime.MinValue;
 
     /// <summary>
@@ -55,7 +67,13 @@ public static class PathingRouteLibrary
             {
                 if (DateTime.UtcNow - _loadedAt > CacheLifetime)
                 {
-                    _routes = Scan();
+                    var routes = Scan();
+                    _routes = routes;
+                    _byMaterial = BuildIndex(routes);
+                    _materials = _byMaterial.Keys
+                        .Where(name => !string.IsNullOrWhiteSpace(name))
+                        .OrderBy(name => name, StringComparer.Ordinal)
+                        .ToList();
                     _loadedAt = DateTime.UtcNow;
                 }
 
@@ -77,10 +95,9 @@ public static class PathingRouteLibrary
         }
 
         var all = All;
-        var exact = all.Where(r => string.Equals(r.Material, text, StringComparison.OrdinalIgnoreCase)).ToList();
-        if (exact.Count > 0)
+        if (_byMaterial.TryGetValue(text, out var exact) && exact.Count > 0)
         {
-            return exact;
+            return [.. exact];
         }
 
         var byMaterial = all
@@ -102,12 +119,34 @@ public static class PathingRouteLibrary
     /// </summary>
     public static List<string> Materials()
     {
-        return All
-            .Select(r => r.Material)
-            .Where(name => !string.IsNullOrWhiteSpace(name))
-            .Distinct(StringComparer.Ordinal)
-            .OrderBy(name => name, StringComparer.Ordinal)
-            .ToList();
+        // 先触发一次加载，索引里的素材名与 _routes 同批更新
+        _ = All;
+        return [.. _materials];
+    }
+
+    /// <summary>
+    /// 按素材名分组。同名的多条路线保持扫描顺序，第一条仍是「先跑这条」。
+    /// </summary>
+    private static Dictionary<string, List<PathingRoute>> BuildIndex(List<PathingRoute> routes)
+    {
+        var index = new Dictionary<string, List<PathingRoute>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var route in routes)
+        {
+            if (string.IsNullOrWhiteSpace(route.Material))
+            {
+                continue;
+            }
+
+            if (!index.TryGetValue(route.Material, out var list))
+            {
+                list = [];
+                index[route.Material] = list;
+            }
+
+            list.Add(route);
+        }
+
+        return index;
     }
 
     /// <summary>

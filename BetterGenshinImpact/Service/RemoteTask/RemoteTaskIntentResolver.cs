@@ -20,6 +20,7 @@ namespace BetterGenshinImpact.Service.RemoteTask;
 public sealed class RemoteTaskIntentResolver(
     AiKernel kernel,
     RemoteTaskCommandHandler handler,
+    GenshinWikiClient wiki,
     IConfigService configService,
     ILogger<RemoteTaskIntentResolver> logger)
 {
@@ -47,6 +48,13 @@ public sealed class RemoteTaskIntentResolver(
         {
             logger.LogInformation("素材对照命中「{Text}」→ {Material}", text, known);
             return new RemoteTaskCommand(RemoteTaskCommandKind.Path, Args: known);
+        }
+
+        // 图鉴能查到角色，就按真实突破材料走：模型不认识新角色，问它反而容易编
+        if (await MatchWikiAsync(text, cancellationToken).ConfigureAwait(false) is { Length: > 0 } fromWiki)
+        {
+            logger.LogInformation("图鉴命中「{Text}」→ {Material}", text, fromWiki);
+            return new RemoteTaskCommand(RemoteTaskCommandKind.Path, Args: fromWiki);
         }
 
         if (!kernel.Available)
@@ -78,6 +86,35 @@ public sealed class RemoteTaskIntentResolver(
         }
 
         return quick;
+    }
+
+    /// <summary>
+    /// 查图鉴：把角色名换成突破材料，并要求本地确实有对应路线。
+    /// <para>
+    /// 只有「短且像名字」的输入才会查。闲聊和长句子直接跳过，
+    /// 免得每条消息都去蹭一次接口。
+    /// </para>
+    /// </summary>
+    /// <param name="text">用户原话。</param>
+    /// <param name="cancellationToken">取消令牌。</param>
+    /// <returns>本地有路线的突破材料名；没有则返回 null。</returns>
+    private async Task<string?> MatchWikiAsync(string text, CancellationToken cancellationToken)
+    {
+        var name = RemoteTaskCommandParser.StripMaterialNoise(text);
+        if (name.Length is 0 or > 12 || name.Contains(' ', StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        foreach (var material in await wiki.GetAscensionMaterialsAsync(name, cancellationToken).ConfigureAwait(false))
+        {
+            if (PathingRouteLibrary.Find(material).Count > 0)
+            {
+                return material;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

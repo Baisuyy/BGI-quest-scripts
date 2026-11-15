@@ -415,6 +415,9 @@ public partial class App : Application
                 services.AddSingleton<MysDailyNoteClient>(sp => new MysDailyNoteClient(
                     sp.GetRequiredService<IHttpClientFactory>().CreateClient(),
                     sp.GetRequiredService<ILogger<MysDailyNoteClient>>()));
+                services.AddSingleton<GenshinWikiClient>(sp => new GenshinWikiClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
+                    sp.GetRequiredService<ILogger<GenshinWikiClient>>()));
                 services.AddSingleton<GameOps>();
                 services.AddSingleton<AgentTasks>();
                 services.AddSingleton<RemoteTaskPlanRunner>();

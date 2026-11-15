@@ -47,6 +47,7 @@ public sealed class RemoteTaskCommandHandler(
     AiKernel kernel,
     AiTraceStore traces,
     RemoteTaskPlanRunner planRunner,
+    GenshinWikiClient wiki,
     ILogger<RemoteTaskCommandHandler> logger)
 {
     /// <summary>
@@ -656,9 +657,40 @@ public sealed class RemoteTaskCommandHandler(
 
         var note = string.Empty;
         var routes = PathingRouteLibrary.Find(text);
+
+        // 1. 记过的说法：本地经验最快，也不花模型调用
+        if (routes.Count == 0 && MaterialAliasStore.TryGet(text) is { Length: > 0 } remembered)
+        {
+            routes = PathingRouteLibrary.Find(remembered);
+            if (routes.Count > 0)
+            {
+                note = $"「{text}」按「{remembered}」找路线。";
+            }
+        }
+
+        // 2. 角色名：先查图鉴拿真实突破材料，再对本地路线。
+        //    模型不认识新角色，问它只会得到一个编出来的名字，还得再校验一轮。
+        if (routes.Count == 0)
+        {
+            foreach (var material in await wiki
+                         .GetAscensionMaterialsAsync(text, cancellationToken)
+                         .ConfigureAwait(false))
+            {
+                var hit = PathingRouteLibrary.Find(material);
+                if (hit.Count == 0)
+                {
+                    continue;
+                }
+
+                routes = hit;
+                note = $"「{text}」的突破材料是「{material}」。";
+                break;
+            }
+        }
+
+        // 3. 图鉴也没查到（多半是这条路线上没有的采集物），最后让模型从本地清单里挑
         if (routes.Count == 0 && kernel.Available)
         {
-            // 角色名到素材名的映射不在客户端里，交给模型做这一步翻译最省事
             if (await TranslateMaterialAsync(raw, cancellationToken).ConfigureAwait(false) is { Length: > 0 } material)
             {
                 routes = PathingRouteLibrary.Find(material);
@@ -711,12 +743,27 @@ public sealed class RemoteTaskCommandHandler(
     /// </summary>
     private async Task<string> TranslateMaterialAsync(string goal, CancellationToken cancellationToken)
     {
-        const string prompt = """
-                              你是原神素材名转换器。用户想采集某种东西，但它可能是角色名、角色突破材料、
-                              或者模糊说法。请输出这次真正要去采的采集物名称（植物、矿物、食材等的中文名），
-                              例如「胡桃」→「霓裳花」，「雷电将军突破材料」→「天云草实」。
-                              只输出素材名本身，不要解释、不要标点。不确定就输出「不确定」。
-                              """;
+        // 盘上一条路线都没有时，问模型也凑不出可执行的东西，白花一次调用
+        var materials = PathingRouteLibrary.Materials();
+        if (materials.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        // 把本地清单塞进提示词：模型不知道你装了什么路线，不告诉它就只能瞎猜
+        var list = string.Join("、", materials.Take(80));
+        var prompt = $"""
+                      你是原神素材名转换器。用户想采集某种东西，但它可能是角色名、角色突破材料或模糊说法。
+                      请从下面的「本地已有路线的采集物」里，挑出这次真正要去采的那一种，只输出它的名字。
+
+                      本地已有路线的采集物：
+                      {list}
+
+                      规则：
+                      - 只能从上面的清单里选，清单之外的名字一律不要输出。
+                      - 一个都对不上就输出「不确定」，不要硬猜。
+                      - 只输出素材名本身，不要解释、不要标点、不要引号。
+                      """;
 
         try
         {
