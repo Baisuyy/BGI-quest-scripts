@@ -74,6 +74,16 @@ public sealed class QqBotService : IHostedService
     private PendingRun? _pending;
 
     /// <summary>
+    /// 最近一次收到消息的会话。多步计划不是单个 RunId，结束时要靠它把汇总发回原会话。
+    /// </summary>
+    private (QqBotTarget Target, string MessageId)? _lastChat;
+
+    /// <summary>
+    /// 多步计划执行器，用于订阅计划结束并主动回报。
+    /// </summary>
+    private readonly RemoteTaskPlanRunner _planRunner;
+
+    /// <summary>
     /// 创建远程任务宿主。
     /// </summary>
     public QqBotService(
@@ -81,6 +91,7 @@ public sealed class QqBotService : IHostedService
         RemoteTaskCommandHandler handler,
         RemoteTaskIntentResolver resolver,
         SoloTaskExecutionService executionService,
+        RemoteTaskPlanRunner planRunner,
         IHttpClientFactory httpClientFactory,
         InstanceService instanceService,
         ILogger<QqBotService> logger)
@@ -89,6 +100,7 @@ public sealed class QqBotService : IHostedService
         _handler = handler;
         _resolver = resolver;
         _executionService = executionService;
+        _planRunner = planRunner;
         _httpClientFactory = httpClientFactory;
         _instanceService = instanceService;
         _logger = logger;
@@ -127,6 +139,7 @@ public sealed class QqBotService : IHostedService
             var gateway = new QqBotGatewayClient(api, _logger, HttpClient.DefaultProxy);
             gateway.MessageReceived += OnMessageReceivedAsync;
             _executionService.RunCompleted += OnRunCompleted;
+            _planRunner.Finished += OnPlanFinished;
             _gateway = gateway;
             // 连接循环自己管理生命周期，只由 StopAsync 结束，避免宿主启动令牌提前回收。
             gateway.Start(CancellationToken.None);
@@ -145,6 +158,7 @@ public sealed class QqBotService : IHostedService
     public async Task StopAsync(CancellationToken cancellationToken)
     {
         _executionService.RunCompleted -= OnRunCompleted;
+        _planRunner.Finished -= OnPlanFinished;
         var gateway = _gateway;
         _gateway = null;
         if (gateway is not null)
@@ -173,6 +187,8 @@ public sealed class QqBotService : IHostedService
             await ReplyAsync(message.Target, "群聊下发已关闭，请私聊机器人。", null, message.MessageId).ConfigureAwait(false);
             return;
         }
+
+        _lastChat = (message.Target, message.MessageId);
 
         RemoteTaskReply reply;
         await _commandGate.WaitAsync().ConfigureAwait(false);
@@ -212,6 +228,53 @@ public sealed class QqBotService : IHostedService
 
         _pending = null;
         _ = NotifyCompletionAsync(pending, e);
+    }
+
+    /// <summary>
+    /// 多步计划跑完：把每一步的结果汇总发回最近一次发消息的会话。
+    /// <para>
+    /// 计划里的每一步都是独立的 RunId，走不了单任务的回传通道，所以单独订阅计划结束事件。
+    /// </para>
+    /// </summary>
+    private void OnPlanFinished(string summary)
+    {
+        if (_lastChat is not { } chat)
+        {
+            return;
+        }
+
+        _ = SendPlanSummaryAsync(chat, summary);
+    }
+
+    /// <summary>
+    /// 发送计划汇总。结束时间可能已超出被动回复窗口，先试被动回复再退回主动消息。
+    /// </summary>
+    private async Task SendPlanSummaryAsync((QqBotTarget Target, string MessageId) chat, string summary)
+    {
+        try
+        {
+            var config = _configService.Get().RemoteTaskConfig;
+            byte[]? image = null;
+            if (config.ScreenshotOnFinish)
+            {
+                image = await _handler.CaptureAsync(CancellationToken.None, allowStartCapture: false).ConfigureAwait(false);
+            }
+
+            var text = "计划跑完了：\n" + summary;
+            try
+            {
+                await ReplyAsync(chat.Target, text, image, chat.MessageId).ConfigureAwait(false);
+            }
+            catch (QqBotApiException exception)
+            {
+                _logger.LogInformation("被动回复计划汇总失败，改用主动消息：{Message}", exception.Message);
+                await ReplyAsync(chat.Target, text, image, null).ConfigureAwait(false);
+            }
+        }
+        catch (Exception exception)
+        {
+            _logger.LogWarning(exception, "发送计划汇总失败");
+        }
     }
 
     /// <summary>

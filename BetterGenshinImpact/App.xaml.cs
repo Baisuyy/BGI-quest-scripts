@@ -411,10 +411,20 @@ public partial class App : Application
                 services.AddSingleton<NotificationService>();
                 services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
                 // 远程任务：QQ 机器人把聊天指令转成独立任务并回传截图，只在主实例启动
+                services.AddSingleton<AiTraceStore>();
+                services.AddSingleton<MysDailyNoteClient>(sp => new MysDailyNoteClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(),
+                    sp.GetRequiredService<ILogger<MysDailyNoteClient>>()));
+                services.AddSingleton<GameOps>();
+                services.AddSingleton<AgentTasks>();
+                services.AddSingleton<RemoteTaskPlanRunner>();
                 services.AddSingleton<RemoteTaskCommandHandler>();
                 services.AddSingleton<RemoteTaskIntentResolver>();
                 services.AddSingleton<QqBotService>();
                 services.AddHostedService(sp => sp.GetRequiredService<QqBotService>());
+                // 定时任务：按时间点或树脂阈值自动触发，与手动点开始同一条执行路径
+                services.AddSingleton<RemoteScheduleService>();
+                services.AddHostedService(sp => sp.GetRequiredService<RemoteScheduleService>());
                 services.AddSingleton<NotifierManager>();
                 services.AddSingleton<IScriptService, ScriptService>();
                 // Pulonia：纯任务保持无游戏依赖；游戏能力通过统一协调器按需准备会话和输入所有权。

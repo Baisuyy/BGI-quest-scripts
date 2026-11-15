@@ -466,6 +466,74 @@
                                 Text="{Binding Config.RemoteTaskConfig.QqBotAllowedOpenIds, Mode=TwoWay}"
                                 TextWrapping="Wrap" />
                 </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <ui:TextBlock FontTypography="Body" Text="对话人格" />
+                        <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="只影响措辞，不影响任务解析"
+                                      TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ComboBox Grid.Column="1"
+                              Margin="0,0,36,0"
+                              SelectedValue="{Binding Config.RemoteTaskConfig.PersonaPreset, Mode=TwoWay}"
+                              SelectedValuePath="Tag">
+                        <ComboBoxItem Content="默认助手" Tag="default" />
+                        <ComboBoxItem Content="哥伦比娅" Tag="columbina" />
+                        <ComboBoxItem Content="别扭的同伴" Tag="tsundere" />
+                    </ComboBox>
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <ui:TextBlock FontTypography="Body" Text="自由操作" />
+                        <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="没有对应任务时，由大模型看画面自己点；右侧是一次最多几步"
+                                      TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ui:ToggleSwitch Grid.Column="1"
+                                     Margin="0,0,16,0"
+                                     VerticalAlignment="Center"
+                                     IsChecked="{Binding Config.RemoteTaskConfig.SelfLearningEnabled, Mode=TwoWay}" />
+                    <ui:TextBox Grid.Column="2"
+                                Width="80"
+                                Margin="0,0,24,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding Config.RemoteTaskConfig.SelfLearningMaxSteps, Mode=TwoWay, ValidatesOnNotifyDataErrors=True}" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <ui:TextBlock FontTypography="Body" Text="米游社 Cookie / UID" />
+                        <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="填了就能不开游戏查树脂；留空时改为截图识别"
+                                      TextWrapping="Wrap" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="0,0,36,0">
+                        <ui:TextBox MinHeight="56"
+                                    MaxHeight="100"
+                                    AcceptsReturn="True"
+                                    PlaceholderText="ltuid_v2=...; ltoken_v2=..."
+                                    Text="{Binding Config.RemoteTaskConfig.MysCookie, Mode=TwoWay}"
+                                    TextWrapping="Wrap" />
+                        <ui:TextBox Margin="0,8,0,0"
+                                    PlaceholderText="原神 UID，例如 100000000"
+                                    Text="{Binding Config.RemoteTaskConfig.MysUid, Mode=TwoWay}" />
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </ui:CardExpander>
 

@@ -100,4 +100,59 @@ public partial class RemoteTaskConfig : ObservableValidator
     [NotifyDataErrorInfo]
     [Range(100, 4000, ErrorMessage = "回复长度上限必须在 100 到 4000 之间。")]
     private int _replyMaxChars = 1200;
+
+    /// <summary>
+    /// 对话人格预设标识，见 <c>PersonaPresets</c>。空串等同 <c>default</c>。
+    /// <para>
+    /// 人格只影响聊天与解释类回复的措辞，不影响任务解析：同一个任务不会因为换了人格就解析不出来。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    private string _personaPreset = "default";
+
+    /// <summary>
+    /// 自定义人格描述。填写后覆盖预设，直接作为系统提示词里的角色设定。
+    /// </summary>
+    [ObservableProperty]
+    private string _customPersona = string.Empty;
+
+    /// <summary>
+    /// 允许模型在「任务没注册」时自己开一个操作循环，边看画面边点击。
+    /// <para>
+    /// 关掉后，未注册的请求只会被拒绝并建议可用的任务，不会动键鼠——适合只想用确定性任务的场景。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    private bool _selfLearningEnabled = true;
+
+    /// <summary>
+    /// 一次自由操作最多走多少步。步数越多越可能做成复杂操作，也越费 token。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [Range(4, 40, ErrorMessage = "自由操作步数必须在 4 到 40 之间。")]
+    private int _selfLearningMaxSteps = 16;
+
+    /// <summary>
+    /// 米游社 Cookie（含 ltoken / ltuid 或 cookie_token），用于直接查实时树脂。
+    /// <para>
+    /// 留空时改为「打开地图截一张图再用 OCR 读数」，不需要任何账号凭据。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    private string _mysCookie = string.Empty;
+
+    /// <summary>
+    /// 米游社查询用的 UID。留空时由 Cookie 自动推断。
+    /// </summary>
+    [ObservableProperty]
+    private string _mysUid = string.Empty;
+
+    /// <summary>
+    /// 树脂达到该值时，定时任务里的「满树脂提醒 / 自动清体力」才会触发。
+    /// </summary>
+    [ObservableProperty]
+    [NotifyDataErrorInfo]
+    [Range(20, 200, ErrorMessage = "树脂阈值必须在 20 到 200 之间。")]
+    private int _resinAlertThreshold = 160;
 }

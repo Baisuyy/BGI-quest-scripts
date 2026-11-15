@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Ai;
+using BetterGenshinImpact.Service.Interface;
 using Microsoft.Extensions.Logging;
 
 namespace BetterGenshinImpact.Service.RemoteTask;
@@ -19,6 +20,7 @@ namespace BetterGenshinImpact.Service.RemoteTask;
 public sealed class RemoteTaskIntentResolver(
     AiKernel kernel,
     RemoteTaskCommandHandler handler,
+    IConfigService configService,
     ILogger<RemoteTaskIntentResolver> logger)
 {
     /// <summary>
@@ -77,22 +79,30 @@ public sealed class RemoteTaskIntentResolver(
     private string BuildPrompt()
     {
         var taskLines = string.Join("\n", handler.Tasks.Select(t => $"- {t.TaskId} = {t.DisplayName}"));
+        var persona = PersonaPresets.Resolve(configService.Get().RemoteTaskConfig);
         // 用 $$ 前缀：raw string 里单大括号是字面量，插值要写双大括号。
         return $$"""
+                {{persona}}
+
+                ===== 以下是指令解析规则，优先级高于人设的语气 =====
                 你是 BetterGI 的指令解析器。把用户这一句话变成一条指令，只输出一个 JSON 对象，不要解释、不要代码块。
 
                 可下发的任务：
                 {{taskLines}}
 
-                输出三选一：
+                输出四选一：
                 1. 要干活：{"intent":"run","task_id":"上面的某个标识","say":"一句中文确认"}
                 2. 要看状态/截图/停止/帮助/任务清单：{"intent":"control","action":"status|screenshot|stop|help|list","say":"一句中文"}
-                3. 与下发任务无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
+                3. 清单里没有对应任务，但可以在游戏界面上点出来（查看背包、翻菜单、点某个按钮）：
+                   {"intent":"pilot","goal":"一句话说清要做什么","say":"一句中文"}
+                4. 与游戏操作无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
 
                 规则：
                 - task_id 必须来自上面的清单，不要编造。
                 - 用户说「重新执行」「再来一次」时，如果没法确定是哪个任务，用 chat 追问，不要猜。
-                - say 要说人话，不超过 40 字，不要复述 JSON。
+                - 只有确实是「去游戏里点几下就能完成」的事才用 pilot；问知识、问你在干嘛、闲聊一律 chat。
+                - pilot 的 goal 要写成能直接执行的祈使句，例如「打开背包看有多少摩拉」。
+                - say 用上面人设的语气，说人话，不超过 40 字，不要复述 JSON。
                 """;
     }
 
@@ -122,6 +132,7 @@ public sealed class RemoteTaskIntentResolver(
             {
                 "run" => ResolveRun(GetString(root, "task_id"), say),
                 "control" => ResolveControl(GetString(root, "action"), say),
+                "pilot" => ResolvePilot(GetString(root, "goal"), say),
                 "chat" => new RemoteTaskCommand(RemoteTaskCommandKind.Chat, Say: say),
                 _ => null
             };
@@ -147,6 +158,21 @@ public sealed class RemoteTaskIntentResolver(
         return string.IsNullOrEmpty(matched.TaskId)
             ? null
             : new RemoteTaskCommand(RemoteTaskCommandKind.RunTask, matched.TaskId, matched.DisplayName, say);
+    }
+
+    /// <summary>
+    /// 模型判断「这事得在界面上点」，转到自由操作。goal 为空时退回聊天，避免空目标乱点。
+    /// </summary>
+    private static RemoteTaskCommand? ResolvePilot(string? goal, string? say)
+    {
+        if (string.IsNullOrWhiteSpace(goal))
+        {
+            return string.IsNullOrWhiteSpace(say)
+                ? null
+                : new RemoteTaskCommand(RemoteTaskCommandKind.Chat, Say: say);
+        }
+
+        return new RemoteTaskCommand(RemoteTaskCommandKind.Pilot, Say: say, Args: goal.Trim());
     }
 
     /// <summary>

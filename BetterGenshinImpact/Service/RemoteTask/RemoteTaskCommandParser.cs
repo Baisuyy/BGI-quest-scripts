@@ -30,6 +30,11 @@ public enum RemoteTaskCommandKind
     Screenshot,
 
     /// <summary>
+    /// 回传一张整个桌面的截图（含游戏窗口外的内容）。
+    /// </summary>
+    FullscreenScreenshot,
+
+    /// <summary>
     /// 停止当前任务。
     /// </summary>
     Stop,
@@ -45,10 +50,67 @@ public enum RemoteTaskCommandKind
     RunTask,
 
     /// <summary>
+    /// 查询树脂。
+    /// </summary>
+    Resin,
+
+    /// <summary>
+    /// 查看背包：打开界面并回传截图。
+    /// </summary>
+    Inventory,
+
+    /// <summary>
+    /// 查看抽卡：打开祈愿界面并回传截图。
+    /// </summary>
+    Wish,
+
+    /// <summary>
+    /// 关闭游戏进程。
+    /// </summary>
+    CloseGame,
+
+    /// <summary>
+    /// 切换到队伍中的第 N 位角色。
+    /// </summary>
+    SwitchCharacter,
+
+    /// <summary>
+    /// 运行一个脚本或脚本配置组。
+    /// </summary>
+    Script,
+
+    /// <summary>
+    /// 查看/新增/启用/停用定时任务。
+    /// </summary>
+    Schedule,
+
+    /// <summary>
+    /// 打开登录界面并回传二维码，用于换号。
+    /// </summary>
+    Login,
+
+    /// <summary>
+    /// 交给模型自由操作：没有对应任务时，由它自己看画面点。
+    /// </summary>
+    Pilot,
+
+    /// <summary>
+    /// 一句话里点了好几件事，按顺序串起来跑。
+    /// </summary>
+    Plan,
+
+    /// <summary>
     /// 与下发任务无关的话，由大模型直接回答。
     /// </summary>
     Chat
 }
+
+/// <summary>
+/// 计划中的一步。
+/// </summary>
+/// <param name="TaskId">任务标识。</param>
+/// <param name="TaskName">任务显示名。</param>
+public sealed record RemoteTaskStep(string TaskId, string TaskName);
 
 /// <summary>
 /// 一条解析后的远程指令。
@@ -57,31 +119,40 @@ public enum RemoteTaskCommandKind
 /// <param name="TaskId">要运行的独立任务标识，仅 <see cref="RemoteTaskCommandKind.RunTask"/> 有值。</param>
 /// <param name="TaskName">任务显示名，用于回复文案。</param>
 /// <param name="Say">大模型给出的确认语或回答，规则解析时为 null。</param>
+/// <param name="Args">指令参数：角色序号、脚本名、定时规则、自由操作目标等。</param>
+/// <param name="Steps">计划中的步骤，仅 <see cref="RemoteTaskCommandKind.Plan"/> 有值。</param>
 public sealed record RemoteTaskCommand(
     RemoteTaskCommandKind Kind,
     string? TaskId = null,
     string? TaskName = null,
-    string? Say = null);
+    string? Say = null,
+    string? Args = null,
+    IReadOnlyList<RemoteTaskStep>? Steps = null);
 
 /// <summary>
 /// 把聊天文本解析成远程指令。
 /// <para>
-/// 识别顺序：内置指令关键词 → 任务标识 → 任务显示名 → 中文别名。全部不命中时返回
-/// <see cref="RemoteTaskCommandKind.Unknown"/>，由上层回复用法提示。
+/// 识别顺序：整句内置指令 → 带参数的指令前缀 → 任务标识 → 任务显示名 → 中文别名 →
+/// 宽松内置指令。全部不命中时返回 <see cref="RemoteTaskCommandKind.Unknown"/>，由上层决定
+/// 是让模型自由操作，还是回一句用法提示。
 /// </para>
 /// </summary>
 public static class RemoteTaskCommandParser
 {
     /// <summary>
     /// 常见叫法到任务标识的别名，命中后仍以注册表里的显示名为准。
+    /// <para>
+    /// 「体力」「树脂」这两个词不在这里：它们太容易被当成「我现在有多少体力」，
+    /// 查询走 <see cref="RemoteTaskCommandKind.Resin"/>，清体力请说「清体力」「体力计划」。
+    /// </para>
     /// </summary>
     private static readonly Dictionary<string, string> Aliases = new(StringComparer.OrdinalIgnoreCase)
     {
         ["一条龙"] = "one_dragon",
         ["日常"] = "one_dragon",
         ["清体力"] = "resin_plan",
-        ["体力"] = "resin_plan",
-        ["树脂"] = "resin_plan",
+        ["体力计划"] = "resin_plan",
+        ["刷体力"] = "resin_plan",
         ["邮件"] = "claim_mail",
         ["领邮件"] = "claim_mail",
         ["每日奖励"] = "claim_daily_rewards",
@@ -102,6 +173,9 @@ public static class RemoteTaskCommandParser
         ["烹饪"] = "auto_cook",
         ["七圣召唤"] = "auto_genius_invokation",
         ["幽境危战"] = "auto_stygian_onslaught",
+        ["幽静"] = "auto_stygian_onslaught",
+        ["幽境"] = "auto_stygian_onslaught",
+        ["危战"] = "auto_stygian_onslaught",
         ["兑换码"] = "redeem_code",
         ["分解圣遗物"] = "auto_artifact_salvage",
         ["返回主界面"] = "return_main_ui"
@@ -121,7 +195,10 @@ public static class RemoteTaskCommandParser
     public static RemoteTaskCommand Parse(string? text, IReadOnlyList<(string TaskId, string DisplayName)> tasks)
     {
         ArgumentNullException.ThrowIfNull(tasks);
-        var normalized = Normalize(text);
+        // 原文保留标点与空格：时间（04:00）、脚本名、任务名之间的分隔符都靠它们区分。
+        // 规整串（去掉标点空格）只用于关键词与任务名的精确比较。
+        var raw = (text ?? string.Empty).Replace('\r', ' ').Replace('\n', ' ').Trim();
+        var normalized = Compact(raw);
         if (normalized.Length == 0)
         {
             return new RemoteTaskCommand(RemoteTaskCommandKind.Help);
@@ -133,7 +210,19 @@ public static class RemoteTaskCommandParser
             return new RemoteTaskCommand(builtin);
         }
 
-        // 2. 去掉运行前缀后再匹配任务名，支持「运行一条龙」「帮我跑个清体力」。
+        // 2. 带参数的指令：前缀命中后，其余部分作为参数交给上层解释。
+        if (TryMatchWithArgs(raw) is { } withArgs)
+        {
+            return withArgs;
+        }
+
+        // 3. 一件以上的事：先看是不是「A，然后 B」，是就串起来跑。
+        if (ParsePlan(raw, tasks) is { Count: > 1 } steps)
+        {
+            return new RemoteTaskCommand(RemoteTaskCommandKind.Plan, Steps: steps);
+        }
+
+        // 4. 去掉运行前缀后再匹配任务名，支持「运行一条龙」「帮我跑个清体力」。
         var subject = normalized;
         foreach (var prefix in RunPrefixes)
         {
@@ -150,11 +239,148 @@ public static class RemoteTaskCommandParser
             return new RemoteTaskCommand(RemoteTaskCommandKind.RunTask, task.TaskId, task.DisplayName);
         }
 
-        // 3. 任务名没命中时，再放宽成「以指令开头」，支持「截图看看」「停止任务」。
-        return TryMatchBuiltin(normalized, exactOnly: false) is { } loose
-            ? new RemoteTaskCommand(loose)
-            : new RemoteTaskCommand(RemoteTaskCommandKind.Unknown);
+        // 4. 任务名没命中时，再放宽成「以指令开头」，支持「截图看看」「停止任务」。
+        if (TryMatchBuiltin(normalized, exactOnly: false) is { } loose)
+        {
+            return new RemoteTaskCommand(loose);
+        }
+
+        // 5. 都不认识：交给上层判断要不要让模型自己上手。
+        return new RemoteTaskCommand(RemoteTaskCommandKind.Unknown, Say: text?.Trim());
     }
+
+    /// <summary>
+    /// 把一句话拆成多个任务，按顺序执行。
+    /// <para>
+    /// 只在拆出「两个以上不同的任务」时才返回结果：一句话里提到一个任务加一堆客套话，
+    /// 仍然走单任务，不会被当成计划。同名任务只保留第一次出现的位置，避免「清体力然后再清一次体力」跑两遍。
+    /// </para>
+    /// </summary>
+    /// <param name="text">已去掉空格的正文。</param>
+    /// <param name="tasks">可用任务清单。</param>
+    private static List<RemoteTaskStep>? ParsePlan(
+        string text,
+        IReadOnlyList<(string TaskId, string DisplayName)> tasks)
+    {
+        var segments = SplitClauses(text);
+        if (segments.Count < 2)
+        {
+            return null;
+        }
+
+        var steps = new List<RemoteTaskStep>();
+        foreach (var segment in segments)
+        {
+            var subject = StripConnector(segment);
+            if (subject.Length == 0)
+            {
+                continue;
+            }
+
+            var matched = MatchTask(subject, tasks);
+            if (matched is not { } task)
+            {
+                continue;
+            }
+
+            if (steps.Any(step => string.Equals(step.TaskId, task.TaskId, StringComparison.OrdinalIgnoreCase)))
+            {
+                continue;
+            }
+
+            steps.Add(new RemoteTaskStep(task.TaskId, task.DisplayName));
+        }
+
+        return steps.Count > 1 ? steps : null;
+    }
+
+    /// <summary>
+    /// 按标点与连接词切句。标点先切，剩下含连接词的长句再切一次，
+    /// 这样「合成树脂然后打幽静」这种没标点的口语也能拆开。
+    /// </summary>
+    private static List<string> SplitClauses(string text)
+    {
+        var byPunctuation = text.Split(['，', ',', '、', '；', ';', '。', '→', '>'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.Trim())
+            .Where(part => part.Length > 0)
+            .ToList();
+
+        var result = new List<string>();
+        foreach (var part in byPunctuation)
+        {
+            var pieces = ConnectorRegex.Split(part)
+                .Select(piece => piece.Trim())
+                .Where(piece => piece.Length > 0);
+            result.AddRange(pieces);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 切句用的连接词。单独成句的「再」也算，所以「打完再领邮件」能拆开。
+    /// </summary>
+    private static readonly System.Text.RegularExpressions.Regex ConnectorRegex =
+        new("然后|接着|之后|随后|最后|顺便|再打|再去|再跑|然后再|再", System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    /// <summary>
+    /// 去掉句首的客套前缀与运行前缀，让剩下的部分能被任务名匹配。
+    /// <para>
+    /// 只去掉「帮我/先/去」这类虚词和「运行/执行」这类动词，不去掉任务名本身可能用到的字——
+    /// 别名匹配是包含式，「打幽静」照样能命中「幽静」，不需要把「打」削掉。
+    /// </para>
+    /// </summary>
+    private static string StripConnector(string segment)
+    {
+        var trimmed = segment.TrimStart('帮', '我', '你', '给', '把', '先', '去', '就', '都', '那', '这');
+        foreach (var prefix in RunPrefixes)
+        {
+            if (trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && trimmed.Length > prefix.Length)
+            {
+                trimmed = trimmed[prefix.Length..];
+                break;
+            }
+        }
+
+        return trimmed.TrimStart(' ', '个', '一', '下', '：', ':');
+    }
+
+    /// <summary>
+    /// 带参数的指令：前缀命中即返回，剩余文本作为参数。
+    /// <para>
+    /// 前缀按长度倒序匹配，「切换角色」不会被「切角色」抢先。
+    /// </para>
+    /// </summary>
+    private static RemoteTaskCommand? TryMatchWithArgs(string text)
+    {
+        foreach (var (kind, prefixes) in ArgCommands)
+        {
+            foreach (var prefix in prefixes)
+            {
+                if (!text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var args = text[prefix.Length..].Trim().TrimStart(' ', '到', '成', '：', ':', '第', '个')
+                    .TrimEnd(' ', '个', '号', '。', '！', '!');
+                return new RemoteTaskCommand(kind, Args: args);
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 需要参数的内置指令。
+    /// </summary>
+    private static readonly (RemoteTaskCommandKind Kind, string[] Prefixes)[] ArgCommands =
+    [
+        (RemoteTaskCommandKind.SwitchCharacter, ["切换角色", "切角色", "换角色", "切换人物", "切人", "换人", "切到", "换到"]),
+        (RemoteTaskCommandKind.Script, ["运行脚本", "执行脚本", "跑脚本", "运行配置组"]),
+        (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时"]),
+        (RemoteTaskCommandKind.Pilot, ["自由操作", "你自己操作", "你自己点", "看着点"])
+    ];
 
     /// <summary>
     /// 匹配内置指令。exactOnly 为 true 时要求整句相等，否则允许指令作为句子开头。
@@ -181,11 +407,22 @@ public static class RemoteTaskCommandParser
 
     /// <summary>
     /// 内置指令关键词，按优先级排列；「任务」类放最后，避免抢占任务名。
+    /// <para>
+    /// 查询类指令只做整句匹配：一旦允许「以…开头」，用户说「体力不够了帮我清一下」就会被当成查询。
+    /// </para>
     /// </summary>
     private static readonly (RemoteTaskCommandKind Kind, string[] Keywords)[] BuiltinKeywords =
     [
-        (RemoteTaskCommandKind.Help, ["help", "帮助", "菜单", "指令", "用法"]),
-        (RemoteTaskCommandKind.Status, ["status", "progress", "状态", "进度", "在跑吗", "在干嘛"]),
+        (RemoteTaskCommandKind.Help, ["help", "帮助", "菜单", "指令", "用法", "你能做什么"]),
+        (RemoteTaskCommandKind.Status, ["status", "progress", "状态", "进度", "在跑吗", "在干嘛", "跑完了吗"]),
+        (RemoteTaskCommandKind.CloseGame, ["关游戏", "关闭游戏", "退出游戏", "关掉游戏", "把游戏关了", "关原神", "退出原神", "结束游戏"]),
+        (RemoteTaskCommandKind.FullscreenScreenshot, ["全屏截图", "截全屏", "屏幕截图", "桌面截图", "全局截图", "整个屏幕"]),
+        (RemoteTaskCommandKind.Resin, ["查体力", "看体力", "体力多少", "体力查询", "有多少体力", "还剩多少体力", "体力还剩多少",
+            "查树脂", "看树脂", "树脂多少", "树脂查询", "有多少树脂", "体力", "树脂"]),
+        (RemoteTaskCommandKind.Inventory, ["背包", "看背包", "查看背包", "打开背包", "包里有什么", "查看物品"]),
+        (RemoteTaskCommandKind.Wish, ["抽卡", "祈愿", "看抽卡", "抽卡记录", "祈愿记录"]),
+        (RemoteTaskCommandKind.Login, ["切号", "换号", "换账号", "扫码登录", "登录二维码", "登录界面"]),
+        (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时", "有哪些定时"]),
         (RemoteTaskCommandKind.Screenshot, ["screenshot", "截图", "画面", "看看"]),
         (RemoteTaskCommandKind.Stop, ["stop", "cancel", "停止", "取消", "打断", "停"]),
         (RemoteTaskCommandKind.TaskList, ["tasks", "list", "任务列表", "任务", "列表", "能做什么"])
