@@ -92,7 +92,9 @@ public sealed class RemoteTaskIntentResolver(
 
                 输出四选一：
                 1. 要干活：{"intent":"run","task_id":"上面的某个标识","say":"一句中文确认"}
-                2. 要看状态/截图/停止/帮助/任务清单：{"intent":"control","action":"status|screenshot|stop|help|list","say":"一句中文"}
+                   兑换码要把码本身带上：{"intent":"run","task_id":"redeem_code","code":"8HZH86K6E2PW","say":"一句中文"}
+                2. 这些日常操作不用跑任务，直接说要做哪个：
+                   {"intent":"control","action":"status|screenshot|stop|help|list|resin|inventory|wish|close_game","say":"一句中文"}
                 3. 清单里没有对应任务，但可以在游戏界面上点出来（查看背包、翻菜单、点某个按钮）：
                    {"intent":"pilot","goal":"一句话说清要做什么","say":"一句中文"}
                 4. 与游戏操作无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
@@ -102,6 +104,8 @@ public sealed class RemoteTaskIntentResolver(
                 - 用户说「重新执行」「再来一次」时，如果没法确定是哪个任务，用 chat 追问，不要猜。
                 - 只有确实是「去游戏里点几下就能完成」的事才用 pilot；问知识、问你在干嘛、闲聊一律 chat。
                 - pilot 的 goal 要写成能直接执行的祈使句，例如「打开背包看有多少摩拉」。
+                - 用户单独发来一串字母数字（例如 8HZH86K6E2PW），就是兑换码，用 run + redeem_code，并把码放进 code。
+                - 问「还有多少树脂/体力」用 control + resin；「清体力」「把体力刷完」才用 run + resin_plan。
                 - say 用上面人设的语气，说人话，不超过 40 字，不要复述 JSON。
                 """;
     }
@@ -130,7 +134,7 @@ public sealed class RemoteTaskIntentResolver(
             var say = GetString(root, "say");
             return intent switch
             {
-                "run" => ResolveRun(GetString(root, "task_id"), say),
+                "run" => ResolveRun(GetString(root, "task_id"), GetString(root, "code"), say),
                 "control" => ResolveControl(GetString(root, "action"), say),
                 "pilot" => ResolvePilot(GetString(root, "goal"), say),
                 "chat" => new RemoteTaskCommand(RemoteTaskCommandKind.Chat, Say: say),
@@ -146,7 +150,7 @@ public sealed class RemoteTaskIntentResolver(
     /// <summary>
     /// 校验模型给出的任务标识一定在注册表里，避免把编造的标识传给状态机。
     /// </summary>
-    private RemoteTaskCommand? ResolveRun(string? taskId, string? say)
+    private RemoteTaskCommand? ResolveRun(string? taskId, string? code, string? say)
     {
         if (string.IsNullOrWhiteSpace(taskId))
         {
@@ -155,9 +159,16 @@ public sealed class RemoteTaskIntentResolver(
 
         var matched = handler.Tasks.FirstOrDefault(t =>
             string.Equals(t.TaskId, taskId.Trim(), StringComparison.OrdinalIgnoreCase));
-        return string.IsNullOrEmpty(matched.TaskId)
-            ? null
-            : new RemoteTaskCommand(RemoteTaskCommandKind.RunTask, matched.TaskId, matched.DisplayName, say);
+        if (string.IsNullOrEmpty(matched.TaskId))
+        {
+            return null;
+        }
+
+        // 兑换码是唯一需要模型回填内容的任务：码本身不在任务清单里，只能从这句话里带出来
+        var args = string.Equals(matched.TaskId, "redeem_code", StringComparison.OrdinalIgnoreCase)
+            ? code?.Trim()
+            : null;
+        return new RemoteTaskCommand(RemoteTaskCommandKind.RunTask, matched.TaskId, matched.DisplayName, say, args);
     }
 
     /// <summary>
@@ -187,6 +198,10 @@ public sealed class RemoteTaskIntentResolver(
             "stop" => new RemoteTaskCommand(RemoteTaskCommandKind.Stop, Say: say),
             "help" => new RemoteTaskCommand(RemoteTaskCommandKind.Help, Say: say),
             "list" => new RemoteTaskCommand(RemoteTaskCommandKind.TaskList, Say: say),
+            "resin" or "stamina" => new RemoteTaskCommand(RemoteTaskCommandKind.Resin, Say: say),
+            "inventory" or "bag" => new RemoteTaskCommand(RemoteTaskCommandKind.Inventory, Say: say),
+            "wish" or "gacha" => new RemoteTaskCommand(RemoteTaskCommandKind.Wish, Say: say),
+            "close_game" or "closegame" => new RemoteTaskCommand(RemoteTaskCommandKind.CloseGame, Say: say),
             _ => null
         };
     }

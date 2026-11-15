@@ -165,7 +165,19 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "QQ 机器人网关连接中断，{Delay} 秒后重连", delay.TotalSeconds);
+                // 证书校验失败几乎都是代理/抓包工具劫持了 api.sgroup.qq.com，堆栈看不懂，
+                // 这里直接把可操作的话说出来，省得以为是机器人坏了
+                if (IsCertificateInterception(exception))
+                {
+                    _logger.LogWarning(
+                        "QQ 机器人网关连不上：api.sgroup.qq.com 的证书校验未通过，通常是开了代理或抓包工具。" +
+                        "把 api.sgroup.qq.com 加入直连后会自动恢复，{Delay} 秒后重试",
+                        delay.TotalSeconds);
+                }
+                else
+                {
+                    _logger.LogWarning(exception, "QQ 机器人网关连接中断，{Delay} 秒后重连", delay.TotalSeconds);
+                }
             }
             finally
             {
@@ -185,6 +197,27 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
         }
 
         _logger.LogInformation("QQ 机器人网关已停止");
+    }
+
+    /// <summary>
+    /// 是否是证书被中间人替换导致的连接失败。
+    /// </summary>
+    private static bool IsCertificateInterception(Exception exception)
+    {
+        for (var current = exception; current is not null; current = current.InnerException)
+        {
+            if (current is System.Security.Authentication.AuthenticationException)
+            {
+                return true;
+            }
+
+            if (current.Message.Contains("certificate", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

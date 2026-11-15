@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BetterGenshinImpact.Service.RemoteTask;
 
@@ -216,7 +217,13 @@ public static class RemoteTaskCommandParser
             return withArgs;
         }
 
-        // 3. 一件以上的事：先看是不是「A，然后 B」，是就串起来跑。
+        // 3. 一串兑换码：没有「兑换码」三个字也认，「8HZH86K6E2PW」直接发过来就该去兑换。
+        if (TryMatchRedeemCode(raw) is { } redeem)
+        {
+            return redeem;
+        }
+
+        // 4. 一件以上的事：先看是不是「A，然后 B」，是就串起来跑。
         if (ParsePlan(raw, tasks) is { Count: > 1 } steps)
         {
             return new RemoteTaskCommand(RemoteTaskCommandKind.Plan, Steps: steps);
@@ -236,16 +243,23 @@ public static class RemoteTaskCommandParser
         var matched = MatchTask(subject, tasks) ?? MatchTask(normalized, tasks);
         if (matched is { } task)
         {
-            return new RemoteTaskCommand(RemoteTaskCommandKind.RunTask, task.TaskId, task.DisplayName);
+            return new RemoteTaskCommand(
+                RemoteTaskCommandKind.RunTask, task.TaskId, task.DisplayName, Args: ExtractTaskArgs(task.TaskId, subject));
         }
 
-        // 4. 任务名没命中时，再放宽成「以指令开头」，支持「截图看看」「停止任务」。
+        // 5. 「查看当前树脂」这类问句：不在整句表里，但意图很明确。
+        if (TryMatchResinQuery(normalized))
+        {
+            return new RemoteTaskCommand(RemoteTaskCommandKind.Resin);
+        }
+
+        // 6. 任务名没命中时，再放宽成「以指令开头」，支持「截图看看」「停止任务」。
         if (TryMatchBuiltin(normalized, exactOnly: false) is { } loose)
         {
             return new RemoteTaskCommand(loose);
         }
 
-        // 5. 都不认识：交给上层判断要不要让模型自己上手。
+        // 7. 都不认识：交给上层判断要不要让模型自己上手。
         return new RemoteTaskCommand(RemoteTaskCommandKind.Unknown, Say: text?.Trim());
     }
 
@@ -320,7 +334,7 @@ public static class RemoteTaskCommandParser
     /// <summary>
     /// 切句用的连接词。单独成句的「再」也算，所以「打完再领邮件」能拆开。
     /// </summary>
-    private static readonly System.Text.RegularExpressions.Regex ConnectorRegex =
+    private static readonly Regex ConnectorRegex =
         new("然后|接着|之后|随后|最后|顺便|再打|再去|再跑|然后再|再", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     /// <summary>
@@ -343,6 +357,78 @@ public static class RemoteTaskCommandParser
         }
 
         return trimmed.TrimStart(' ', '个', '一', '下', '：', ':');
+    }
+
+    /// <summary>
+    /// 从句子尾巴上取出任务参数：目前只有一条龙需要，「一条龙 日常」里的「日常」就是配置名。
+    /// </summary>
+    private static string? ExtractTaskArgs(string taskId, string subject)
+    {
+        if (!string.Equals(taskId, "one_dragon", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var index = subject.IndexOf("一条龙", StringComparison.Ordinal);
+        if (index < 0)
+        {
+            return null;
+        }
+
+        var rest = subject[(index + "一条龙".Length)..].Trim();
+        return rest.Length == 0 ? null : rest;
+    }
+
+    /// <summary>
+    /// 兑换码形态：8–20 位，只含字母数字，且至少一个数字。
+    /// <para>
+    /// 原神的兑换码形如 8HZH86K6E2PW。要求含数字是为了不把「hello」这种普通英文当兑换码；
+    /// 允许原文里夹着「领取激活码」之类的前后缀，取最长的那段码。
+    /// </para>
+    /// </summary>
+    private static RemoteTaskCommand? TryMatchRedeemCode(string text)
+    {
+        var best = string.Empty;
+        foreach (Match match in CodeRegex.Matches(text))
+        {
+            var code = match.Value;
+            // 纯英文单词（screenshot、dragon）不是兑换码，必须有数字
+            if (!code.Any(char.IsAsciiDigit) || code.Length <= best.Length)
+            {
+                continue;
+            }
+
+            best = code;
+        }
+
+        return best.Length == 0
+            ? null
+            : new RemoteTaskCommand(RemoteTaskCommandKind.RunTask, "redeem_code", "兑换码", Args: best);
+    }
+
+    /// <summary>
+    /// 兑换码正则：边界处不能紧挨字母数字，避免把长串切出一个子串。
+    /// </summary>
+    private static readonly Regex CodeRegex = new(
+        @"(?<![A-Za-z0-9])[A-Za-z0-9]{8,20}(?![A-Za-z0-9])",
+        RegexOptions.Compiled);
+
+    /// <summary>
+    /// 是否在问树脂有多少。
+    /// <para>
+    /// 只认「查询类动词 + 树脂/体力」的组合，所以「体力不够了帮我清一下」不会被当成查询，
+    /// 而是继续往下走任务名匹配。
+    /// </para>
+    /// </summary>
+    private static bool TryMatchResinQuery(string compact)
+    {
+        if (!compact.Contains("树脂", StringComparison.Ordinal) && !compact.Contains("体力", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        string[] asks = ["查", "看", "多少", "还剩", "还有", "剩余", "剩多"];
+        return asks.Any(ask => compact.Contains(ask, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -379,7 +465,8 @@ public static class RemoteTaskCommandParser
         (RemoteTaskCommandKind.SwitchCharacter, ["切换角色", "切角色", "换角色", "切换人物", "切人", "换人", "切到", "换到"]),
         (RemoteTaskCommandKind.Script, ["运行脚本", "执行脚本", "跑脚本", "运行配置组"]),
         (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时"]),
-        (RemoteTaskCommandKind.Pilot, ["自由操作", "你自己操作", "你自己点", "看着点"])
+        (RemoteTaskCommandKind.Pilot, ["自由操作", "你自己操作", "你自己点", "看着点",
+            "采集", "采一下", "捡材料", "捡东西", "捡一下", "拾取材料"])
     ];
 
     /// <summary>

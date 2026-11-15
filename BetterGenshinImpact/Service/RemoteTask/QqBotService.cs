@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -71,7 +72,7 @@ public sealed class QqBotService : IHostedService
     /// <summary>
     /// 最近一次由聊天指令发起的运行，用于在结束事件里决定是否回传。
     /// </summary>
-    private PendingRun? _pending;
+    private readonly ConcurrentDictionary<Guid, PendingRun> _pending = new();
 
     /// <summary>
     /// 最近一次收到消息的会话。多步计划不是单个 RunId，结束时要靠它把汇总发回原会话。
@@ -189,13 +190,20 @@ public sealed class QqBotService : IHostedService
         }
 
         _lastChat = (message.Target, message.MessageId);
+        PruneStalePending();
 
         RemoteTaskReply reply;
         await _commandGate.WaitAsync().ConfigureAwait(false);
         try
         {
             var command = await _resolver.ResolveAsync(message.Content, CancellationToken.None).ConfigureAwait(false);
-            reply = await _handler.ExecuteAsync(command, message, CancellationToken.None).ConfigureAwait(false);
+            // 启动前登记：任务可能几十毫秒就失败退出，等 ExecuteAsync 返回再登记就收不到结束事件了
+            reply = await _handler.ExecuteAsync(
+                    command,
+                    message,
+                    CancellationToken.None,
+                    runId => _pending[runId] = new PendingRun(runId, message.Target, message.MessageId, message.Content))
+                .ConfigureAwait(false);
         }
         catch (Exception exception)
         {
@@ -207,12 +215,32 @@ public sealed class QqBotService : IHostedService
             _commandGate.Release();
         }
 
+        // 兜底：万一某条路径没走启动回调，这里仍然登记一次（已在字典里就不重复覆盖）
         if (reply.RunId is { } runId)
         {
-            _pending = new PendingRun(runId, message.Target, message.MessageId, message.Content);
+            _pending.TryAdd(runId, new PendingRun(runId, message.Target, message.MessageId, message.Content));
         }
 
         await ReplyAsync(message.Target, reply.Text, reply.Image, message.MessageId).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 清掉一小时前登记的待回传记录。
+    /// <para>
+    /// 任务被拒绝（比如另一个任务在跑）时不会触发结束事件，记录会留在字典里；
+    /// 数量很少，但没必要一直攒着。
+    /// </para>
+    /// </summary>
+    private void PruneStalePending()
+    {
+        var cutoff = DateTimeOffset.UtcNow.AddHours(-1);
+        foreach (var pair in _pending)
+        {
+            if (pair.Value.StartedAt < cutoff)
+            {
+                _pending.TryRemove(pair.Key, out _);
+            }
+        }
     }
 
     /// <summary>
@@ -220,13 +248,12 @@ public sealed class QqBotService : IHostedService
     /// </summary>
     private void OnRunCompleted(object? sender, SoloTaskRunCompletedEventArgs e)
     {
-        var pending = _pending;
-        if (pending is null || pending.RunId != e.RunId)
+        // 按 RunId 取，而不是「最近一条」：连着下发两个任务时，前一个的回传不能丢
+        if (!_pending.TryRemove(e.RunId, out var pending))
         {
             return;
         }
 
-        _pending = null;
         _ = NotifyCompletionAsync(pending, e);
     }
 
@@ -370,6 +397,12 @@ public sealed class QqBotService : IHostedService
             ? text[..config.ReplyMaxChars] + "\n…（内容过长已截断）"
             : text;
         await api.SendTextAsync(target, trimmed, messageId).ConfigureAwait(false);
+        _logger.LogInformation(
+            "已回传消息：{Length} 字，{Image}，目标 {Target}",
+            trimmed.Length,
+            image is { Length: > 0 } ? $"含图 {image.Length / 1024} KB" : "纯文本",
+            $"{target.Scope}/{target.Id}");
+
         if (image is { Length: > 0 })
         {
             await api.SendImageAsync(target, image, messageId).ConfigureAwait(false);

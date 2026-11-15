@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Ai;
@@ -13,6 +15,7 @@ using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
 using BetterGenshinImpact.Service.Interface;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using OpenCvSharp;
 
 namespace BetterGenshinImpact.Service.RemoteTask;
@@ -46,6 +49,16 @@ public sealed class RemoteTaskCommandHandler(
     ILogger<RemoteTaskCommandHandler> logger)
 {
     /// <summary>
+    /// 兑换码任务的标识，参数需要单独拼。
+    /// </summary>
+    private const string RedeemCodeTaskId = "redeem_code";
+
+    /// <summary>
+    /// 一条龙任务的标识，启动前要先确认配置存在。
+    /// </summary>
+    private const string OneDragonTaskId = "one_dragon";
+
+    /// <summary>
     /// 可下发的任务清单：只保留可以在独立任务入口直接运行的任务。
     /// </summary>
     public IReadOnlyList<(string TaskId, string DisplayName)> Tasks { get; } = registry.All
@@ -73,10 +86,18 @@ public sealed class RemoteTaskCommandHandler(
     /// <param name="message">已去除 @ 的入站消息。</param>
     /// <param name="cancellationToken">取消令牌。</param>
     /// <returns>回复内容。</returns>
+    /// <param name="onRunStarted">
+    /// 任务真正开始前回调一次，交给调用方登记回传目标。
+    /// <para>
+    /// 必须在 StartAsync 之前回调：像兑换码这种任务几十毫秒就失败退出，
+    /// 等 ExecuteAsync 返回再登记，结束事件早就发过了，用户什么也收不到。
+    /// </para>
+    /// </param>
     public async Task<RemoteTaskReply> ExecuteAsync(
         RemoteTaskCommand command,
         QqBotIncomingMessage message,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Action<Guid>? onRunStarted = null)
     {
         return command.Kind switch
         {
@@ -91,7 +112,8 @@ public sealed class RemoteTaskCommandHandler(
                 .ConfigureAwait(false),
             RemoteTaskCommandKind.Stop => new RemoteTaskReply(await StopAsync().ConfigureAwait(false)),
             RemoteTaskCommandKind.RunTask => await StartAsync(
-                    command.TaskId!, command.TaskName ?? command.TaskId!, command.Say, cancellationToken)
+                    command.TaskId!, command.TaskName ?? command.TaskId!, command.Say, command.Args,
+                    onRunStarted, cancellationToken)
                 .ConfigureAwait(false),
             RemoteTaskCommandKind.Resin => await ResinAsync(command, cancellationToken).ConfigureAwait(false),
             RemoteTaskCommandKind.Inventory => await OpenPanelAsync(command, "bag", "背包", cancellationToken)
@@ -157,13 +179,25 @@ public sealed class RemoteTaskCommandHandler(
         string taskId,
         string taskName,
         string? say,
+        string? args,
+        Action<Guid>? onRunStarted,
         CancellationToken cancellationToken)
     {
+        // 带参数的任务先把参数备好；备不出来就直接回原因，不要启动一个必然失败的任务
+        var built = PrepareParameters(taskId, args);
+        if (built.BlockedReason is { Length: > 0 } reason)
+        {
+            return new RemoteTaskReply($"没能启动「{taskName}」：{reason}");
+        }
+
         var request = new SoloTaskStartRequest
         {
             RunId = Guid.NewGuid(),
-            TaskId = taskId
+            TaskId = taskId,
+            Parameters = built.Parameters
         };
+        // 先登记再启动，否则瞬间失败的任务其结束事件会在登记之前发出
+        onRunStarted?.Invoke(request.RunId);
         var response = await executionService.StartAsync(request).ConfigureAwait(false);
         if (!response.Accepted)
         {
@@ -172,9 +206,152 @@ public sealed class RemoteTaskCommandHandler(
 
         logger.LogInformation("远程下发任务：{TaskId}（{RunId}）", taskId, request.RunId);
         var head = string.IsNullOrWhiteSpace(say) ? $"已开始「{taskName}」。" : say.Trim();
+        if (built.Note is { Length: > 0 } note)
+        {
+            head = $"{head}\n{note}";
+        }
+
         return new RemoteTaskReply(
             $"{head}\n发送「状态」查看进度，发送「停止」可中断，跑完会自动回传截图。",
             RunId: request.RunId);
+    }
+
+    /// <summary>
+    /// 组装启动参数的结果。
+    /// </summary>
+    /// <param name="Parameters">要传给任务的参数；为空时使用任务默认值。</param>
+    /// <param name="Note">需要额外告知用户的话，比如自动换了配置。</param>
+    /// <param name="BlockedReason">非空表示不该启动，内容是要回复的原因。</param>
+    private sealed record PreparedParameters(JObject? Parameters, string? Note, string? BlockedReason);
+
+    /// <summary>
+    /// 按任务组装启动参数。
+    /// </summary>
+    /// <param name="taskId">任务标识。</param>
+    /// <param name="args">聊天里解析出的参数，可能是兑换码或一条龙配置名。</param>
+    private PreparedParameters PrepareParameters(string taskId, string? args)
+    {
+        var text = (args ?? string.Empty).Trim();
+
+        if (string.Equals(taskId, RedeemCodeTaskId, StringComparison.OrdinalIgnoreCase))
+        {
+            var code = ExtractRedeemCode(text);
+            if (code is null)
+            {
+                return new PreparedParameters(null, null, "没看到兑换码。直接把码发过来就行，例如 8HZH86K6E2PW。");
+            }
+
+            // 参数按 SoloTaskJson 的 SnakeCaseLower 命名策略落键，写成 Codes 会反序列化不到
+            var payload = new JObject { ["codes"] = new JArray(code) };
+            return new PreparedParameters(payload, null, null);
+        }
+
+        if (string.Equals(taskId, OneDragonTaskId, StringComparison.OrdinalIgnoreCase))
+        {
+            return EnsureOneDragonConfig(text);
+        }
+
+        return new PreparedParameters(null, null, null);
+    }
+
+    /// <summary>
+    /// 从文本里挑出兑换码：最长的一段 8–20 位字母数字，且含数字。
+    /// </summary>
+    private static string? ExtractRedeemCode(string text)
+    {
+        string? best = null;
+        foreach (Match match in Regex.Matches(text, "[A-Za-z0-9]{8,20}"))
+        {
+            var code = match.Value;
+            if (!code.Any(char.IsAsciiDigit) || (best is not null && code.Length <= best.Length))
+            {
+                continue;
+            }
+
+            best = code;
+        }
+
+        return best;
+    }
+
+    /// <summary>
+    /// 一条龙要先有配置才能跑。返回 null 表示配置可用；否则返回给用户的说明。
+    /// <para>
+    /// 配置名默认取「当前选中的一条龙配置」，但全新安装时这个名字可能指向一个不存在的文件，
+    /// 于是直接报「未找到配置」。这里改成先看盘上到底有哪些配置：只有一个就直接用，
+    /// 一个都没有就叫用户去界面建，别让一句「没找到」把路堵死。
+    /// </para>
+    /// </summary>
+    private PreparedParameters EnsureOneDragonConfig(string requestedName)
+    {
+        var config = configService.Get();
+        var name = string.IsNullOrWhiteSpace(requestedName) ? config.SelectedOneDragonFlowConfigName : requestedName;
+        if (OneDragonExists(name))
+        {
+            return new PreparedParameters(null, null, null);
+        }
+
+        var available = ListOneDragonConfigs();
+        if (available.Count == 0)
+        {
+            return new PreparedParameters(null, null,
+                "还没有一条龙配置。先到 BGI 界面 →「一条龙」→ 新建一个配置，再让我跑。");
+        }
+
+        if (available.Count == 1)
+        {
+            // 只有一个配置时没得选，直接用它；顺手把它设成当前选中的，界面上也一致
+            var only = available[0];
+            config.SelectedOneDragonFlowConfigName = only;
+            configService.Save();
+            return new PreparedParameters(
+                new JObject { ["config_name"] = only },
+                $"当前选中的配置「{name}」不存在，已改用唯一可用的「{only}」。",
+                null);
+        }
+
+        return new PreparedParameters(null, null,
+            $"「{name}」这个配置不存在。现有的配置有：{string.Join("、", available)}。说「一条龙 配置名」就能指定。");
+    }
+
+    /// <summary>
+    /// 一条龙配置文件是否存在。
+    /// </summary>
+    private static bool OneDragonExists(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return false;
+        }
+
+        var path = OneDragonFlowConfigStore.GetFilePath(name);
+        return File.Exists(path);
+    }
+
+    /// <summary>
+    /// 列出磁盘上已有的一条龙配置名。
+    /// </summary>
+    private static List<string> ListOneDragonConfigs()
+    {
+        try
+        {
+            var folder = OneDragonFlowConfigStore.Folder;
+            if (!Directory.Exists(folder))
+            {
+                return [];
+            }
+
+            return Directory.EnumerateFiles(folder, "*.json")
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Select(name => name!)
+                .OrderBy(name => name, StringComparer.Ordinal)
+                .ToList();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return [];
+        }
     }
 
     /// <summary>
