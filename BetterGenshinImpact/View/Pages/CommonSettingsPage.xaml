@@ -257,6 +257,176 @@
             </StackPanel>
         </ui:CardExpander>
 
+        <!-- 远程任务：QQ 机器人下发任务与截图回传；凭证留空时复用通知设置里的 QQ 凭证 -->
+        <ui:CardExpander Margin="0,0,0,12"
+                         ContentPadding="0"
+                         Icon="{ui:SymbolIcon Chat24}">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <ui:TextBlock Grid.Row="0"
+                                  FontTypography="Body"
+                                  Text="远程任务（QQ 机器人）"
+                                  TextWrapping="Wrap" />
+                    <ui:TextBlock Grid.Row="1"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="在 QQ 里发「一条龙」「截图」即可让 BetterGI 开跑，跑完自动回传截图；启用状态与端口一样重启后生效"
+                                  TextWrapping="Wrap" />
+                </Grid>
+            </ui:CardExpander.Header>
+            <StackPanel>
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Row="0" FontTypography="Body" Text="启用远程任务" />
+                    <ui:TextBlock Grid.Row="1"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="只用主实例连接 QQ 开放平台，桌面分身不会重复登录"
+                                  TextWrapping="Wrap" />
+                    <ui:ToggleSwitch Grid.Row="0"
+                                     Grid.RowSpan="2"
+                                     Grid.Column="1"
+                                     Margin="0,0,24,0"
+                                     IsChecked="{Binding Config.RemoteTaskConfig.QqBotEnabled, Mode=TwoWay}" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Row="0" FontTypography="Body" Text="接受群聊指令" />
+                    <ui:TextBlock Grid.Row="1"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="关闭后只接受私聊；群聊里需要 @机器人 才会响应"
+                                  TextWrapping="Wrap" />
+                    <ui:ToggleSwitch Grid.Row="0"
+                                     Grid.RowSpan="2"
+                                     Grid.Column="1"
+                                     Margin="0,0,24,0"
+                                     IsChecked="{Binding Config.RemoteTaskConfig.QqBotAllowGroup, Mode=TwoWay}" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Row="0" Grid.Column="0" FontTypography="Body" Text="AppID" TextWrapping="Wrap" />
+                    <ui:TextBlock Grid.Row="1" Grid.Column="0"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="留空则复用「通知设置」里的 QQ AppID"
+                                  TextWrapping="Wrap" />
+                    <ui:TextBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                MinWidth="180" MaxWidth="800" Margin="0,0,36,0"
+                                Text="{Binding Config.RemoteTaskConfig.QqBotAppId, Mode=TwoWay}"
+                                TextWrapping="NoWrap" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Row="0" Grid.Column="0" FontTypography="Body" Text="AppSecret" TextWrapping="Wrap" />
+                    <ui:TextBlock Grid.Row="1" Grid.Column="0"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="留空则复用「通知设置」里的 QQ AppSecret"
+                                  TextWrapping="Wrap" />
+                    <ui:TextBox Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                                MinWidth="180" MaxWidth="800" Margin="0,0,36,0"
+                                Text="{Binding Config.RemoteTaskConfig.QqBotAppSecret, Mode=TwoWay}"
+                                TextWrapping="NoWrap" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Row="0" FontTypography="Body" Text="任务结束后回传截图" />
+                    <ui:TextBlock Grid.Row="1"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="回传失败时自动降级为纯文本"
+                                  TextWrapping="Wrap" />
+                    <ui:ToggleSwitch Grid.Row="0"
+                                     Grid.RowSpan="2"
+                                     Grid.Column="1"
+                                     Margin="0,0,24,0"
+                                     IsChecked="{Binding Config.RemoteTaskConfig.ScreenshotOnFinish, Mode=TwoWay}" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <ui:TextBlock FontTypography="Body" Text="截图最长边 / 质量" />
+                        <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="最长边 0 表示不缩放；质量越低上传越快"
+                                      TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ui:TextBox Grid.Column="1"
+                                Width="90"
+                                Margin="16,0,8,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding Config.RemoteTaskConfig.ScreenshotMaxWidth, Mode=TwoWay, ValidatesOnNotifyDataErrors=True}" />
+                    <ui:TextBox Grid.Column="2"
+                                Width="90"
+                                Margin="0,0,24,0"
+                                VerticalAlignment="Center"
+                                Text="{Binding Config.RemoteTaskConfig.ScreenshotQuality, Mode=TwoWay, ValidatesOnNotifyDataErrors=True}" />
+                </Grid>
+                <Separator Margin="-18,0" BorderThickness="0,1,0,0" />
+                <Grid Margin="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <ui:TextBlock FontTypography="Body" Text="允许的 OpenID" />
+                        <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="逗号或换行分隔；留空时第一个发消息的人自动成为所有者"
+                                      TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ui:TextBox Grid.Column="1"
+                                MinHeight="60"
+                                MaxHeight="120"
+                                Margin="0,0,36,0"
+                                AcceptsReturn="True"
+                                Text="{Binding Config.RemoteTaskConfig.QqBotAllowedOpenIds, Mode=TwoWay}"
+                                TextWrapping="Wrap" />
+                </Grid>
+            </StackPanel>
+        </ui:CardExpander>
+
         <!-- 网络与代理：卡片标题右侧显示当前模式，内容由 NetworkSettingsView 提供 -->
         <ui:CardExpander Margin="0,0,0,12"
                          ContentPadding="0"

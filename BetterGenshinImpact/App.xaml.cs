@@ -44,6 +44,7 @@ using BetterGenshinImpact.Service.AccountRecords;
 using BetterGenshinImpact.Service.ChildSession;
 using BetterGenshinImpact.Service.ExternalAccess;
 using BetterGenshinImpact.Service.ExternalAccess.Logging;
+using BetterGenshinImpact.Service.RemoteTask;
 using BetterGenshinImpact.Service.Guide;
 using BetterGenshinImpact.Service.Instance;
 using BetterGenshinImpact.Service.I18n;
@@ -408,6 +409,10 @@ public partial class App : Application
                 services.AddSingleton<RecognitionTemplateEditorService>();
                 services.AddSingleton<NotificationService>();
                 services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
+                // 远程任务：QQ 机器人把聊天指令转成独立任务并回传截图，只在主实例启动
+                services.AddSingleton<RemoteTaskCommandHandler>();
+                services.AddSingleton<QqBotService>();
+                services.AddHostedService(sp => sp.GetRequiredService<QqBotService>());
                 services.AddSingleton<NotifierManager>();
                 services.AddSingleton<IScriptService, ScriptService>();
                 // Pulonia：纯任务保持无游戏依赖；游戏能力通过统一协调器按需准备会话和输入所有权。
