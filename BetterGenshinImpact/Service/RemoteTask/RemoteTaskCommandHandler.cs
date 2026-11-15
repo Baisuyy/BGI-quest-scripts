@@ -189,6 +189,26 @@ public sealed class RemoteTaskCommandHandler(
     {
         // 带参数的任务先把参数备好；备不出来就直接回原因，不要启动一个必然失败的任务
         var built = PrepareParameters(taskId, args);
+
+        // 模型给的可能是角色名（「米提亚」），而盘上只有采集物名；翻一次再试，
+        // 免得把「本地没有这条路线」直接甩给用户。
+        if (built.BlockedReason is { Length: > 0 }
+            && string.Equals(taskId, AutoPathingPathTask.TaskId, StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(args)
+            && kernel.Available)
+        {
+            var material = await TranslateMaterialAsync(args, cancellationToken).ConfigureAwait(false);
+            if (material.Length > 0 && !string.Equals(material, args, StringComparison.Ordinal))
+            {
+                var retried = PrepareParameters(taskId, material);
+                if (retried.BlockedReason is null)
+                {
+                    logger.LogInformation("「{Args}」按「{Material}」找到路线", args, material);
+                    built = retried;
+                }
+            }
+        }
+
         if (built.BlockedReason is { Length: > 0 } reason)
         {
             return new RemoteTaskReply($"没能启动「{taskName}」：{reason}");
@@ -209,6 +229,15 @@ public sealed class RemoteTaskCommandHandler(
         }
 
         logger.LogInformation("远程下发任务：{TaskId}（{RunId}）", taskId, request.RunId);
+
+        // 记住「用户说法 → 实际采集物」，下次同一个说法不用再问模型
+        if (string.Equals(taskId, AutoPathingPathTask.TaskId, StringComparison.OrdinalIgnoreCase)
+            && built.Parameters?["file"]?.Value<string>() is { Length: > 0 } file
+            && PathingRouteLibrary.All.FirstOrDefault(r => r.Relative == file) is { } started)
+        {
+            MaterialAliasStore.Remember(args, started.Material);
+        }
+
         var head = string.IsNullOrWhiteSpace(say) ? $"已开始「{taskName}」。" : say.Trim();
         if (built.Note is { Length: > 0 } note)
         {
@@ -661,6 +690,7 @@ public sealed class RemoteTaskCommandHandler(
         }
 
         logger.LogInformation("远程采集：{Material} → {Route}（{RunId}）", route.Material, route.Relative, request.RunId);
+        MaterialAliasStore.Remember(raw, route.Material);
 
         var head = string.IsNullOrWhiteSpace(say) ? $"开始采「{route.Material}」。" : say.Trim();
         if (note.Length > 0)
