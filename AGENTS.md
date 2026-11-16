@@ -67,5 +67,8 @@ dotnet msbuild BetterGenshinImpact.sln -restore -p:Configuration=Debug -nologo -
 
 - **安装包用 Kachina**：安装器由 `YuehaiTeam/kachina-installer` 的 `kachina-builder.exe` 生成，配置在 `Build/kachina.special.config.json`，产物名 `BetterGI.Install.<版本>.exe`。旧的 `7z.sfx` 自解压包不再使用。
 - **123 云盘默认落在 `BGI.special`**：上传目标目录固定为云盘根下的 `BGI.special`，按版本再分一层（`/BGI.special/<版本>`）。脚本的 `--parent-name` / `PAN123_WEBDAV_ROOT` 默认值都是它，不要再传根目录。
-- **版本号**：`0.67.0-special.7.2` 这种形式，主版本跟随上游，`special.N` 是特别版序号，更新检查按尾号比较。
+- **版本号**：`0.67.0-special.7.3` 这种形式。前缀 `<上游版本>` 跟随上游，**只有 `special.N` 这个尾号属于特别版自己的版本线**，更新检查也按尾号比较。
+  - 用户说"版本号 +0.1"= 尾号 +0.1（`special.7.2` → `special.7.3`），**前缀不动**。
+  - 上游升版时才改前缀（例如上游从 0.67.0 到 0.68.0），此时尾号继续在原序列上递增，不回退。
+  - tag 与产物名一律用完整版本串：`special-v0.67.0-special.7.3`。
 - **产物三件套**：`BetterGI.Install.<版本>.exe`（Kachina 安装器）、`BetterGI_v<版本>_special-win-x64.7z`（免安装压缩包）、增量包（可选）。
