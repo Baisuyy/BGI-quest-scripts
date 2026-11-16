@@ -12,8 +12,11 @@ using BetterGenshinImpact.Core.Script.Group;
 using BetterGenshinImpact.Core.Script.Project;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.AutoPathing;
+using BetterGenshinImpact.GameTask.GenshinAccountSwitch;
 using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
+using BetterGenshinImpact.Pulonia.Models;
+using BetterGenshinImpact.Pulonia.Services;
 using BetterGenshinImpact.Service;
 using BetterGenshinImpact.Service.Interface;
 using BetterGenshinImpact.Service.RemoteTask;
@@ -156,12 +159,18 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
                 },
                 ["required"] = new JsonArray("name"),
             }),
+        new("list_accounts", "列出「账号」页里配置过的账号：名称、UID、能否自动切换、当前登录的是哪个。切号前先看这个，不要凭印象编账号名。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject(),
+            }),
     ];
 
     /// <summary>工具名是否由本类处理，供上层分派。</summary>
     public static bool Handles(string name) => name is "list_tasks" or "describe_task" or "run_task"
         or "task_status" or "stop_task" or "list_scripts" or "run_script"
-        or "list_pathing" or "run_pathing";
+        or "list_pathing" or "run_pathing" or "list_accounts";
 
     /// <summary>在软件未完全初始化时尝试构造；缺少依赖时返回 null，由调用方退回纯文件助手。</summary>
     public static AgentTasks? TryCreate()
@@ -197,6 +206,7 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
                 "list_scripts" => ListScripts(GetString(args, "keyword")),
                 "list_pathing" => ListPathing(GetString(args, "keyword")),
                 "run_pathing" => await RunPathingAsync(args, ct).ConfigureAwait(false),
+                "list_accounts" => await ListAccountsAsync(ct).ConfigureAwait(false),
                 "run_script" => await RunScriptAsync(args, ct).ConfigureAwait(false),
                 _ => $"未知动作 {name}",
             };
@@ -491,6 +501,59 @@ public sealed class AgentTasks(SoloTaskRegistry registry, SoloTaskExecutionServi
 
         stop.StopAll(TaskStopReason.UserRequested);
         return "没有独立任务在跑，已向脚本运行发送停止信号。";
+    }
+
+    /// <summary>
+    /// 列出账户页里配置的账号，标出哪些能自动切换、当前登录的是哪个。
+    /// <para>
+    /// 切号本身是内置任务 <c>switch_account</c>，但模型得先知道账号叫什么，
+    /// 否则只会凭空编一个名字，白跑一次失败。
+    /// </para>
+    /// </summary>
+    private static async Task<string> ListAccountsAsync(CancellationToken ct)
+    {
+        var accounts = App.GetService<IPuloniaAccountService>();
+        if (accounts is null)
+        {
+            return "账号功能不可用（账户服务没有注册）。";
+        }
+
+        PuloniaGenshinAccountSettings settings;
+        PuloniaGenshinAccountProfile? current;
+        try
+        {
+            settings = await accounts.LoadAccountsAsync(ct).ConfigureAwait(false);
+            current = await accounts.GetCurrentAccountAsync(accounts.CurrentInstanceKey, ct).ConfigureAwait(false);
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            return "读取账户目录失败：" + e.Message;
+        }
+
+        var list = settings.Accounts;
+        if (list.Count == 0)
+        {
+            return "账户目录是空的。到「账号」页添加账号并填 UID，才能切号。";
+        }
+
+        var builder = new StringBuilder();
+        builder.Append("共 ").Append(list.Count).Append(" 个账号");
+        if (current is not null)
+        {
+            builder.Append("；本实例当前账户是「").Append(current.Name).Append('」');
+        }
+
+        builder.AppendLine("：");
+        foreach (var account in list)
+        {
+            var uid = string.IsNullOrWhiteSpace(account.Uid) ? "无 UID" : "UID " + account.Uid;
+            var ready = SwitchAccountTask.IsReady(account) ? "" : "，缺登录资料不能自动切";
+            builder.Append("- 「").Append(account.Name).Append("」").Append(uid).Append(ready)
+                .Append(current?.Id == account.Id ? "（当前）" : "").AppendLine();
+        }
+
+        builder.Append("切号：run_task switch_account，params 填 {\"account\":\"账号名或UID\"}。");
+        return builder.ToString();
     }
 
     /// <summary>

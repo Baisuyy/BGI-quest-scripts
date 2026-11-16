@@ -52,6 +52,23 @@ public sealed class LlmConversation
     public void AddAssistant(LlmReply reply) => _turns.Add(new LlmAssistantTurn(reply.Text, reply.Calls));
 
     public void AddToolResult(string callId, string content) => _turns.Add(new LlmToolResultTurn(callId, content));
+
+    /// <summary>对话里是否有图片。发图失败时据此决定要不要去掉图片重发。</summary>
+    public bool HasImages
+    {
+        get
+        {
+            foreach (var turn in _turns)
+            {
+                if (turn is LlmUserTurn { ImageBase64.Length: > 0 })
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
 }
 
 /// <summary>
@@ -66,11 +83,34 @@ public sealed class LlmClient
     private const int AnthropicMaxTokens = 1024;
 
     /// <summary>发一轮请求。<paramref name="tools"/> 为空表示纯文本对话。</summary>
+    /// <remarks>
+    /// 对话里带图片而服务端拒绝（模型不支持多模态、图片超限等）时，去掉图片重发一次：
+    /// 这一步看不见可以接受，整轮操作因为一张图直接失败不行。
+    /// </remarks>
     public async Task<LlmReply> SendAsync(
         AiConfig config,
         string systemPrompt,
         LlmConversation conversation,
         IReadOnlyList<LlmTool>? tools,
+        CancellationToken ct)
+    {
+        try
+        {
+            return await SendOnceAsync(config, systemPrompt, conversation, tools, true, ct).ConfigureAwait(false);
+        }
+        catch (InvalidOperationException) when (conversation.HasImages)
+        {
+            return await SendOnceAsync(config, systemPrompt, conversation, tools, false, ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>实际发一次请求；<paramref name="includeImages"/> 为 false 时对话里的图片一律不发。</summary>
+    private static async Task<LlmReply> SendOnceAsync(
+        AiConfig config,
+        string systemPrompt,
+        LlmConversation conversation,
+        IReadOnlyList<LlmTool>? tools,
+        bool includeImages,
         CancellationToken ct)
     {
         var isAnthropic = config.IsAnthropic;
@@ -84,8 +124,8 @@ public sealed class LlmClient
             : BuildOpenAiChatUrl(baseUri);
 
         var payload = isAnthropic
-            ? BuildAnthropicPayload(config, systemPrompt, conversation, tools)
-            : BuildOpenAiPayload(config, systemPrompt, conversation, tools);
+            ? BuildAnthropicPayload(config, systemPrompt, conversation, tools, includeImages)
+            : BuildOpenAiPayload(config, systemPrompt, conversation, tools, includeImages);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, url)
         {
@@ -124,7 +164,7 @@ public sealed class LlmClient
     }
 
     private static string BuildOpenAiPayload(AiConfig config, string systemPrompt,
-        LlmConversation conversation, IReadOnlyList<LlmTool>? tools)
+        LlmConversation conversation, IReadOnlyList<LlmTool>? tools, bool includeImages)
     {
         var messages = new JsonArray();
         if (!string.IsNullOrWhiteSpace(systemPrompt))
@@ -148,7 +188,7 @@ public sealed class LlmClient
             switch (turn)
             {
                 case LlmUserTurn user:
-                    messages.Add(BuildOpenAiUserMessage(user));
+                    messages.Add(BuildOpenAiUserMessage(user, includeImages));
                     break;
                 case LlmAssistantTurn assistant:
                 {
@@ -232,9 +272,9 @@ public sealed class LlmClient
         return payload.ToJsonString();
     }
 
-    private static JsonObject BuildOpenAiUserMessage(LlmUserTurn user)
+    private static JsonObject BuildOpenAiUserMessage(LlmUserTurn user, bool includeImages)
     {
-        if (string.IsNullOrEmpty(user.ImageBase64))
+        if (!includeImages || string.IsNullOrEmpty(user.ImageBase64))
         {
             return new JsonObject { ["role"] = "user", ["content"] = user.Text };
         }
@@ -252,7 +292,7 @@ public sealed class LlmClient
     }
 
     private static string BuildAnthropicPayload(AiConfig config, string systemPrompt,
-        LlmConversation conversation, IReadOnlyList<LlmTool>? tools)
+        LlmConversation conversation, IReadOnlyList<LlmTool>? tools, bool includeImages)
     {
         var messages = new JsonArray();
         foreach (var turn in conversation.Turns)
@@ -262,7 +302,7 @@ public sealed class LlmClient
                 case LlmUserTurn user:
                 {
                     var parts = new JsonArray { new JsonObject { ["type"] = "text", ["text"] = user.Text } };
-                    if (!string.IsNullOrEmpty(user.ImageBase64))
+                    if (includeImages && !string.IsNullOrEmpty(user.ImageBase64))
                     {
                         parts.Add(new JsonObject
                         {

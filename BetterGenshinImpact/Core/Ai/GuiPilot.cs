@@ -57,6 +57,16 @@ public sealed class GuiPilot(
     private static readonly ILogger Logger = App.GetLogger<GuiPilot>();
 
     /// <summary>
+    /// 截图编码器：模型要求看图时用它把画面压成 base64 JPEG。
+    /// </summary>
+    private readonly GameStateProbe _probe = new(runtime);
+
+    /// <summary>
+    /// 本步要附给模型的截图。工具结果只能是文本，图片在回填结果后单独作为一条用户消息发出。
+    /// </summary>
+    private string? _pendingImage;
+
+    /// <summary>
     /// 模型坐标系宽度。
     /// </summary>
     private const int LogicalWidth = 1920;
@@ -76,7 +86,20 @@ public sealed class GuiPilot(
     /// </summary>
     private static readonly LlmTool[] Tools =
     [
-        new("look", "重新看一眼当前画面，返回屏幕上的关键文字与坐标。不确定点了有没有生效时使用。", EmptySchema()),
+        new("look", "重新看一眼当前画面，返回屏幕上的关键文字与坐标。不确定点了有没有生效时使用。"
+                    + "如果光靠文字判断不了（纯图标按钮、开关状态、图片选项、界面布局），传 image=true 附一张截图。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["image"] = new JsonObject
+                    {
+                        ["type"] = "boolean",
+                        ["description"] = "是否附带截图。文字够用时省略；需要看图标或界面布局时才传 true",
+                    },
+                },
+            }),
         new("click", "点击画面上的一个位置。坐标按 1920×1080 给出，左上角是 (0,0)。",
             new JsonObject
             {
@@ -249,6 +272,13 @@ public sealed class GuiPilot(
 
                 conversation.AddToolResult(call.Id, content);
 
+                // 截图单独补一条用户消息：tool 消息只能是文本，图片挂在 user 上面才发得出去
+                if (_pendingImage is { } image)
+                {
+                    _pendingImage = null;
+                    conversation.AddUser("这是刚才那张截图：", image);
+                }
+
                 // 模型偶尔一次返回多个工具调用，这里只跑第一个。其余的必须各回一条 tool 消息，
                 // 否则下一轮请求会因为「tool_calls 后面缺 tool 响应」被服务端直接 400 打断。
                 for (var i = 1; i < reply.Calls.Count; i++)
@@ -284,11 +314,14 @@ public sealed class GuiPilot(
     private async Task<(bool Finished, bool Success, string Content)> ExecuteAsync(LlmToolCall call, int step,
         CancellationToken ct)
     {
+        // 上一轮没发出去的截图不能带到这一步，否则模型会拿旧图解释新动作
+        _pendingImage = null;
         var args = ParseArgs(call.ArgumentsJson);
         switch (call.Name)
         {
             case "look":
-                return (false, false, await SnapshotAsync("当前画面", ct).ConfigureAwait(false));
+                return (false, false, await SnapshotAsync("当前画面", ct, GetBool(args, "image", false))
+                    .ConfigureAwait(false));
 
             case "click":
             {
@@ -394,11 +427,16 @@ public sealed class GuiPilot(
     }
 
     /// <summary>
-    /// 抓一张当前画面，返回 OCR 文字清单给模型；开着视觉模式时附带截图。
+    /// 抓一张当前画面，返回 OCR 文字清单给模型；<paramref name="withImage"/> 为 true 时另外附一张截图。
+    /// <para>
+    /// 截图不放进文字里，是因为工具结果只能是文本：这里先记下 base64，
+    /// 由调用方在回填工具结果后作为一条用户消息补发。
+    /// </para>
     /// </summary>
     /// <param name="prefix">结果前缀，说明刚才做了什么。</param>
     /// <param name="ct">取消令牌。</param>
-    private async Task<string> SnapshotAsync(string prefix, CancellationToken ct)
+    /// <param name="withImage">是否附带截图。</param>
+    private async Task<string> SnapshotAsync(string prefix, CancellationToken ct, bool withImage = false)
     {
         var builder = new StringBuilder(prefix);
         try
@@ -406,6 +444,13 @@ public sealed class GuiPilot(
             ops.EnsureForeground();
             using var screen = runtime.CaptureToRectArea();
             var lines = await Task.Run(() => ReadTexts(screen, screen.Width, screen.Height), ct).ConfigureAwait(false);
+
+            if (withImage)
+            {
+                // 尺寸压到 768 宽，一张大约 1500 以内的视觉 token，够看清图标和布局
+                _pendingImage = _probe.EncodeScreenshot(screen);
+                builder.Append(_pendingImage is null ? "\n（截图失败，只能看文字）" : "\n（后面附了一张当前画面）");
+            }
 
             builder.Append('\n');
             builder.Append("屏幕文字：");
@@ -581,11 +626,15 @@ public sealed class GuiPilot(
                  · list_tasks 看有哪些任务；describe_task 看参数；run_task 下发
                  · list_pathing / run_pathing：采集素材、跑地图路线
                  · list_scripts / run_script：跑用户脚本
+                 · list_accounts 看账号页里配了哪些号；切号用 run_task switch_account，params 填 {"account":"账号名或UID"}
+                   —— 登录界面全是图标和图片，靠点击点不出来，不要自己去试
                  · task_status 查进度，stop_task 停止
-                 · 凡是内置任务能做的，绝不要用键鼠模拟替代。登录、领奖、刷本、清体力、采集都属于这一类。
+                 · 凡是内置任务能做的，绝不要用键鼠模拟替代。登录、切号、领奖、刷本、清体力、采集都属于这一类。
 
                  二、操作界面（内置任务做不到时）
                  · look 看画面文字与坐标；click_text 点文字；click 点坐标；key 按键
+                 · 只有图标没有文字的地方（设置齿轮、开关、图片选项）OCR 读不到，
+                   look 带 image=true 要一张截图，看清位置再点
                  · 打开界面用 key：map 地图、bag 背包、character 角色、wish 祈愿、party 队伍、menu 派蒙菜单、esc 返回
 
                  ===== 行动规则 =====
