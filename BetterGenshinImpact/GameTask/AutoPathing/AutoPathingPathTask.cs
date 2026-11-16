@@ -106,6 +106,19 @@ public class AutoPathingPathTask : ISoloTask<AutoPathingPathParam, NoData>
 
         _logger.LogInformation("地图追踪开始：{File}", relative);
 
+        // 采集路线到点后自己不做拾取动作，靠实时触发器识别 F 抬头的交互提示再按键。
+        // 但进入任务模式后，调度器只运行任务显式租用的触发器，用户开启的实时触发器一律停用，
+        // 所以这里必须租用 AutoPick，否则整条路线走过去什么也捡不到（脚本组里由 ScriptGroupProject 租用）。
+        var autoPickEnabled = _config.AutoPickConfig.Enabled;
+        if (!autoPickEnabled)
+        {
+            _logger.LogWarning("自动拾取未开启，本次采集只会走路、不会捡东西。要采集素材请先在实时触发器里打开自动拾取");
+        }
+
+        using var autoPickLease = autoPickEnabled
+            ? TaskTriggerDispatcher.Instance().AddTrigger("AutoPick", null)
+            : null;
+
         // PathExecutor 自己处理战斗、拾取与传送，这里只负责把结果翻成人话
         var result = await new PathExecutor(_runtime, _config, ct).Pathing(task);
         if (!result.IsSuccess)
