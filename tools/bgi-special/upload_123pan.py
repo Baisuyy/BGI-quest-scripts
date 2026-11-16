@@ -40,6 +40,9 @@ BASE = "https://open-api.123pan.com"
 # 平台标识，开放平台的每个请求都要带，缺了会返回「请在请求头中携带 platform 平台字段」
 PLATFORM = "open_platform"
 
+# 云盘上特别版的归档目录，安装包默认落在这里
+DEFAULT_PARENT_NAME = "BGI.special"
+
 # 分片并发。官方说明接口只支持两个同时请求，这里保守取 2。
 CONCURRENCY = 2
 
@@ -88,6 +91,51 @@ def auth_headers(token: str) -> dict[str, str]:
         "Platform": PLATFORM,
         "Content-Type": "application/json",
     }
+
+
+def resolve_parent(token: str, name: str, fallback: int = 0) -> int:
+    """在根目录按名字找文件夹 ID。
+
+    目录 ID 各账号不同，写死在配置里换个账号就失效，所以默认按名字找；
+    找不到时退回 fallback（根目录），只提示不失败。
+    """
+    name = (name or "").strip().strip("/")
+    if not name:
+        return fallback
+    try:
+        response = requests.post(
+            f"{BASE}/api/v1/file/list",
+            headers=auth_headers(token),
+            json={
+                "parentFileId": 0,
+                "limit": 100,
+                "next": 0,
+                "orderBy": "file_name",
+                "orderDirection": "asc",
+                "trashed": False,
+                "searchData": "",
+                "Page": 1,
+                "onlyLookAbnormalFile": 0,
+            },
+            timeout=TIMEOUT,
+        )
+        payload = response.json()
+        if payload.get("code") != 0:
+            log(f"列目录失败：{payload.get('message')}，退回根目录")
+            return fallback
+        data = payload.get("data") or {}
+        # 开放平台不同版本字段名不一致，两种都认
+        infos = data.get("InfoList") or data.get("fileList") or []
+        for item in infos:
+            if str(item.get("FileName")) == name and int(item.get("Type") or 0) == 1:
+                file_id = int(item.get("FileId") or 0)
+                log(f"目标目录 {name} → parentFileId={file_id}")
+                return file_id
+    except Exception as error:  # noqa: BLE001 - 只是找目录，失败不该阻断上传
+        log(f"列目录异常：{error}，退回根目录")
+        return fallback
+    log(f"根目录下没有名为 {name} 的文件夹，先传到根目录")
+    return fallback
 
 
 def create_upload(token: str, parent_id: int, path: Path, size: int, etag: str) -> dict[str, Any]:
@@ -228,7 +276,10 @@ def upload_slice_once(token: str, preupload_id: str, slice_no: int, data: bytes)
 def main() -> int:
     parser = argparse.ArgumentParser(description="上传构建产物到 123 云盘")
     parser.add_argument("--dir", default="dist", help="文件所在目录")
-    parser.add_argument("--parent-id", type=int, default=0, help="目标目录 ID，0 为根目录")
+    parser.add_argument("--parent-id", type=int, default=None,
+                        help="目标目录 ID；不填则按 --parent-name 在根目录按名字找")
+    parser.add_argument("--parent-name", default=os.environ.get("PAN123_PARENT_NAME", DEFAULT_PARENT_NAME),
+                        help=f"父目录名，默认 {DEFAULT_PARENT_NAME}")
     parser.add_argument("--file", action="append", default=[], help="要上传的文件名，可重复")
     parser.add_argument("--glob", default="", help="按通配符挑选文件，例如 *.7z")
     args = parser.parse_args()
@@ -267,8 +318,11 @@ def main() -> int:
 
     try:
         token = get_access_token(client_id, client_secret)
+        parent_id = args.parent_id
+        if parent_id is None:
+            parent_id = resolve_parent(token, args.parent_name)
         for path in unique:
-            upload_file(token, args.parent_id, path)
+            upload_file(token, parent_id, path)
     except Exception as error:  # noqa: BLE001 - 顶层兜底，统一转成退出码
         log(f"上传失败：{error}")
         return 1

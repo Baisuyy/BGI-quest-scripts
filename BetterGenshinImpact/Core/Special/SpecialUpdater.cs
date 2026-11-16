@@ -354,7 +354,7 @@ public static class SpecialUpdater
     ///     从 releases.atom 里抠 tag。只用到 link 里的 tag 名，不解析整套 XML。
     ///     <para>
     ///         资产名拿不到，就按发布流水线的命名规则补上：
-    ///         BetterGI_v{版本}_Setup.exe 与 BetterGI_v{版本}_special-win-x64.7z。
+    ///         BetterGI.Install.{版本}.exe（Kachina 安装器）与 BetterGI_v{版本}_special-win-x64.7z。
     ///         这两条名字由 build-special.yml 固定生成，改流水线时这里要一起改。
     ///     </para>
     /// </summary>
@@ -374,7 +374,7 @@ public static class SpecialUpdater
         {
             string version = tag[TagPrefix.Length..];
             string root = $"https://github.com/{Repo}/releases/download/{tag}/";
-            string setup = $"BetterGI_v{version}_Setup.exe";
+            string setup = $"BetterGI.Install.{version}.exe";
             string archive = $"BetterGI_v{version}_special-win-x64.7z";
             return new SpecialRelease
             {
@@ -388,7 +388,7 @@ public static class SpecialUpdater
         }).ToList();
     }
 
-    /// <summary>优先安装包（setup.exe），其次 7z 压缩包。</summary>
+    /// <summary>优先 Kachina 安装器（Install.exe），其次旧的自解压包（Setup.exe），再次 7z 压缩包。</summary>
     private static string? PickAsset(SpecialRelease release)
     {
         var assets = release.Assets;
@@ -397,8 +397,11 @@ public static class SpecialUpdater
             return null;
         }
 
-        return assets.FirstOrDefault(a => a.Name.Contains("setup", StringComparison.OrdinalIgnoreCase)
+        // Install 与 setup 都可能是安装器；先挑名字里带 install 的，旧版本只有 setup 时再退回
+        return assets.FirstOrDefault(a => a.Name.Contains("install", StringComparison.OrdinalIgnoreCase)
                                           && a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))?.Url
+               ?? assets.FirstOrDefault(a => a.Name.Contains("setup", StringComparison.OrdinalIgnoreCase)
+                                             && a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))?.Url
                ?? assets.FirstOrDefault(a => a.Name.EndsWith(".7z", StringComparison.OrdinalIgnoreCase))?.Url
                ?? assets.FirstOrDefault(a => a.Name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))?.Url;
     }

@@ -33,6 +33,8 @@ import requests
 API = "https://api.123278.com/b/api"
 TIMEOUT = 60
 PART_RETRY = 4
+# 云盘上特别版的归档目录，安装包默认落在这里，不再散在根目录
+DEFAULT_PARENT_NAME = "BGI.special"
 
 
 class PanError(RuntimeError):
@@ -69,8 +71,64 @@ class PanWebClient:
             raise PanError(f"{path} 失败：code={body.get('code')} {body.get('message')}")
         return body.get("data") or {}
 
+    def _get(self, path: str, params: dict[str, Any]) -> dict[str, Any]:
+        """带查询参数的 GET。文件列表这类接口只认 query，不认 JSON body。"""
+        url = f"{API}/{path.lstrip('/')}"
+        resp = self.session.get(url, params=params, timeout=TIMEOUT)
+        if resp.status_code == 401:
+            raise PanError("登录态已失效（HTTP 401）：token 是单设备会话，请重新登录网页端再取一次")
+        try:
+            body = resp.json()
+        except ValueError:
+            raise PanError(f"{path} 返回非 JSON（HTTP {resp.status_code}）：{resp.text[:200]}")
+        if body.get("code") != 0:
+            raise PanError(f"{path} 失败：code={body.get('code')} {body.get('message')}")
+        return body.get("data") or {}
+
     def whoami(self) -> dict[str, Any]:
         return self._call("user/info", method="GET")
+
+    def list_dir(self, parent_id: int = 0, limit: int = 100) -> list[dict[str, Any]]:
+        """列出一层目录内容。网页端的列表接口走 GET + query，event 固定为 homeListFile。"""
+        data = self._get("file/list/new", {
+            "driveId": 0,
+            "limit": limit,
+            "next": 0,
+            "orderBy": "file_name",
+            "orderDirection": "asc",
+            "parentFileId": parent_id,
+            "trashed": "false",
+            "SearchData": "",
+            "Page": 1,
+            "OnlyLookAbnormalFile": 0,
+            "event": "homeListFile",
+            "operateType": 4,
+        })
+        return data.get("InfoList") or []
+
+    def resolve_parent(self, name: str, fallback: int = 0) -> int:
+        """按目录名在根目录找文件夹 ID。
+
+        云盘的目录 ID 每个账号都不一样，配置里写死 ID 换个账号就失效，
+        所以默认按名字找；找不到就退回 fallback（根目录），由调用方提示用户。
+        """
+        name = (name or "").strip().strip("/")
+        if not name:
+            return fallback
+        try:
+            items = self.list_dir(0)
+        except PanError as exc:
+            print(f"列目录失败（{exc}），退回根目录上传", file=sys.stderr)
+            return fallback
+        for item in items:
+            # Type: 0 文件 / 1 文件夹
+            if str(item.get("FileName")) == name and int(item.get("Type") or 0) == 1:
+                file_id = int(item.get("FileId") or 0)
+                print(f"目标目录 {name} → parentFileId={file_id}")
+                return file_id
+        print(f"根目录下没有名为 {name} 的文件夹，先传到根目录；"
+              f"需要归档请用 --parent-id 指定目录 ID", file=sys.stderr)
+        return fallback
 
     def upload(self, path: str, parent_id: int, workers: int = 3) -> dict[str, Any]:
         name = os.path.basename(path)
@@ -230,7 +288,10 @@ def main() -> int:
     parser.add_argument("--file", action="append", default=[], help="要上传的本地文件，可重复")
     parser.add_argument("--dir", default="", help="本地目录，配合 --glob 用")
     parser.add_argument("--glob", default="", help="按通配符挑文件，例如 *.exe")
-    parser.add_argument("--parent-id", type=int, default=0, help="目标目录 ID，0 为根目录")
+    parser.add_argument("--parent-id", type=int, default=None,
+                        help="目标目录 ID；不填则按 --parent-name 在根目录按名字找")
+    parser.add_argument("--parent-name", default=os.environ.get("PAN123_PARENT_NAME", DEFAULT_PARENT_NAME),
+                        help=f"父目录名，默认 {DEFAULT_PARENT_NAME}")
     parser.add_argument("--workers", type=int, default=3, help="分片并发数")
     parser.add_argument("--whoami", action="store_true", help="只打印当前登录账号，不上传")
     args = parser.parse_args()
@@ -254,11 +315,16 @@ def main() -> int:
             if not files:
                 return 0
 
+        parent_id = args.parent_id
+        if parent_id is None:
+            parent_id = client.resolve_parent(args.parent_name)
+        print(f"上传目标 parentFileId={parent_id}")
+
         for path in files:
             if not os.path.isfile(path):
                 print(f"跳过（不是文件）：{path}", file=sys.stderr)
                 continue
-            client.upload(path, args.parent_id, args.workers)
+            client.upload(path, parent_id, args.workers)
     except PanError as exc:
         print(f"失败：{exc}", file=sys.stderr)
         return 3

@@ -201,43 +201,42 @@ jobs:
           "sizeMB=$sizeMB"   >> $env:GITHUB_OUTPUT
           Write-Host "压缩包：$archive（$sizeMB MB）"
 
-      - name: 生成自解压安装包
+      - name: 下载 kachina-builder
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "YuehaiTeam/kachina-installer"
+          latest: true
+          fileName: "kachina-builder.exe"
+
+      - name: 用 Kachina 生成安装包
         id: sfx
         shell: pwsh
         run: |
           $v = '${{ steps.ver.outputs.version }}'
-          $archive = '${{ steps.pack.outputs.archive }}'
+          if (-not (Test-Path 'kachina-builder.exe')) { throw 'kachina-builder.exe 未下载成功' }
 
-          # 7-Zip 自带的自解压模块，双击后选目录解压，不做任何在线更新
-          $module = Join-Path ${env:ProgramFiles} '7-Zip\7z.sfx'
-          if (-not (Test-Path $module)) { $module = Join-Path ${env:ProgramFiles(x86)} '7-Zip\7z.sfx' }
-          if (-not (Test-Path $module)) { throw '未找到 7z.sfx，无法生成自解压安装包' }
+          # 先把内置更新器放进待打包目录：装完之后程序自己「检查更新」用的就是它
+          & .\kachina-builder.exe pack -c Build\kachina.special.config.json -o dist/BetterGI/BetterGI.update.exe
+          if ($LASTEXITCODE -ne 0) { throw "生成内置更新器失败，退出码 $LASTEXITCODE" }
 
-          $config = @"
-          ;!@Install@!UTF-8!
-          Title="BetterGI 特别版 $v"
-          BeginPrompt="解压到所选目录，完成后自动启动 BetterGI？"
-          Progress="yes"
-          RunProgram="BetterGI\BetterGI.exe"
-          ;!@InstallEnd@!
-          "@
-          # 必须是 UTF-8 无 BOM，否则 7z 会把 BOM 当作配置内容
-          $configPath = 'dist/sfx-config.txt'
-          [IO.File]::WriteAllText((Resolve-Path 'dist').Path + '/sfx-config.txt', $config.Trim(), (New-Object System.Text.UTF8Encoding $false))
-
-          $setup = "dist/BetterGI_v${v}_Setup.exe"
-          $out = [IO.File]::Create($setup)
+          Push-Location dist
           try {
-              foreach ($part in @($module, $configPath, $archive)) {
-                  $in = [IO.File]::OpenRead($part)
-                  try { $in.CopyTo($out) } finally { $in.Dispose() }
-              }
-          } finally { $out.Dispose() }
+              # gen 生成带哈希的安装清单，-r 指定更新仓库，-u 指定随包分发的更新器
+              ..\kachina-builder.exe gen -j 6 -i BetterGI -m metadata.json -o hashed `
+                  -r Baisuyy/BGI-quest-scripts -t $v -u .\BetterGI\BetterGI.update.exe
+              if ($LASTEXITCODE -ne 0) { throw "kachina gen 失败，退出码 $LASTEXITCODE" }
 
-          $sizeMB = [math]::Round((Get-Item $setup).Length / 1MB, 1)
-          "setup=$setup"    >> $env:GITHUB_OUTPUT
+              $setup = "BetterGI.Install.$v.exe"
+              ..\kachina-builder.exe pack -c ..\Build\kachina.special.config.json -m metadata.json -d hashed -o $setup
+              if ($LASTEXITCODE -ne 0) { throw "kachina pack 失败，退出码 $LASTEXITCODE" }
+          } finally { Pop-Location }
+
+          $setupPath = "dist/BetterGI.Install.$v.exe"
+          if (-not (Test-Path $setupPath)) { throw "安装包没有生成：$setupPath" }
+          $sizeMB = [math]::Round((Get-Item $setupPath).Length / 1MB, 1)
+          "setup=$setupPath" >> $env:GITHUB_OUTPUT
           "setupMB=$sizeMB" >> $env:GITHUB_OUTPUT
-          Write-Host "自解压安装包：$setup（$sizeMB MB）"
+          Write-Host "Kachina 安装包：$setupPath（$sizeMB MB）"
 
       # 增量包：只装与上一个 special 版本不同的文件。
       # 完整包 546 MB，走 GitHub 代理镜像下载常常只有几百 KB/s，而一次发版真正变的通常只有
@@ -448,7 +447,8 @@ jobs:
 
           if ($hasWebdav) {
               # WebDAV：MKCOL 逐级建目录 + 流式 PUT，内存占用与包体大小无关
-              $root = if ([string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_ROOT)) { "/BetterGI" } else { $env:PAN123_WEBDAV_ROOT.Trim() }
+              # 云盘侧固定落在 BGI.special 目录下，按版本再分一层，避免和历史版本混在根目录
+              $root = if ([string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_ROOT)) { "/BGI.special" } else { $env:PAN123_WEBDAV_ROOT.Trim() }
               $root = $root.TrimEnd("/")
               $remote = "$root/$($env:VERSION)"
               Write-Host "走 WebDAV，远端目录：$remote"
@@ -459,9 +459,13 @@ jobs:
           }
           else {
               # 开放平台：clientID/clientSecret 换 token 后分片上传
-              $parentId = if ([string]::IsNullOrWhiteSpace($env:PAN123_PARENT_ID)) { "0" } else { $env:PAN123_PARENT_ID.Trim() }
-              Write-Host "走开放平台 API，父目录 ID：$parentId"
-              $arguments = @("tools/bgi-special/upload_123pan.py", "--dir", "dist", "--parent-id", $parentId) + $files
+              # 目录默认按名字在根目录找 BGI.special；要指定别处就配 PAN123_PARENT_ID
+              $parentArgs = @("--parent-name", "BGI.special")
+              if (-not [string]::IsNullOrWhiteSpace($env:PAN123_PARENT_ID)) {
+                  $parentArgs = @("--parent-id", $env:PAN123_PARENT_ID.Trim())
+              }
+              Write-Host "走开放平台 API，目标目录：$($parentArgs -join ' ')"
+              $arguments = @("tools/bgi-special/upload_123pan.py", "--dir", "dist") + $parentArgs + $files
               Write-Host "执行：python $($arguments -join ' ')"
               python @arguments
               if ($LASTEXITCODE -ne 0) { throw "123 云盘开放平台上传失败，退出码 $LASTEXITCODE" }

@@ -41,6 +41,12 @@
 - 键鼠操作后再识图，必须适当延时：游戏响应通常有 30～60 ms 延迟，截图来源也有延迟。
 - 键鼠操作之间也需合理间隔，避免在 30 fps 游戏中因操作过快而丢失输入。
 
+## 任务模式与实时触发器
+
+- 任务（`TaskRunner` / `SoloTask`）一开始就进入任务模式：调度器只运行任务用 `AddTrigger` 租用的触发器，用户配置里开的自动拾取、自动剧情、自动吃药在任务期间一律停用。
+- 所以凡是依赖实时触发器的任务，必须在自己的 `RunAsync` 里显式租用，并用 `using` 覆盖执行期间。踩过的坑：`auto_pathing`（机器人下发的采集）包成 SoloTask 时漏了 `AddTrigger("AutoPick")`，整条路线走完什么都没捡。
+- 同一条路线手动跑正常、远程跑不拾取，就是这个原因——手动的入口是 `ScriptGroupProject`，那里已经租用了 `AutoPick`。排查时看日志：任务期间若只有「实时触发器 自动拾取 停用」而没有对应的启用，就是没租用。
+
 ## 编译验证
 
 禁止直接运行主程序进行测试或截图（包括启动 exe、`dotnet run` 或通过 IDE 启动）。主程序要求管理员权限，harness 无法通过启动 exe 完成模拟测试和截图感知，因此不要将启动主程序作为验证步骤。
@@ -54,3 +60,12 @@ dotnet msbuild BetterGenshinImpact.sln -restore -p:Configuration=Debug -nologo -
 ## 代码审查
 
 仅在执行代码审查时，读取并遵循 [.agents/code-review.md](.agents/code-review.md)。
+
+## 特别版发布约定
+
+以下几条是维护者定下的固定做法，改流水线或写发布脚本时按这里的约定来，不要临时另起一套。
+
+- **安装包用 Kachina**：安装器由 `YuehaiTeam/kachina-installer` 的 `kachina-builder.exe` 生成，配置在 `Build/kachina.special.config.json`，产物名 `BetterGI.Install.<版本>.exe`。旧的 `7z.sfx` 自解压包不再使用。
+- **123 云盘默认落在 `BGI.special`**：上传目标目录固定为云盘根下的 `BGI.special`，按版本再分一层（`/BGI.special/<版本>`）。脚本的 `--parent-name` / `PAN123_WEBDAV_ROOT` 默认值都是它，不要再传根目录。
+- **版本号**：`0.67.0-special.7.2` 这种形式，主版本跟随上游，`special.N` 是特别版序号，更新检查按尾号比较。
+- **产物三件套**：`BetterGI.Install.<版本>.exe`（Kachina 安装器）、`BetterGI_v<版本>_special-win-x64.7z`（免安装压缩包）、增量包（可选）。
