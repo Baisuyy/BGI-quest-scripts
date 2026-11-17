@@ -84,17 +84,20 @@ public static class SpecialUpdater
     /// </summary>
     public static async Task<bool> TryHandleAsync(UpdateOption option, IHttpClientFactory httpClientFactory, ILogger logger)
     {
-        // 启动时的自动检查直接跳过：特别版不弹更新提醒，避免每次开机都打扰
-        if (option.Trigger != UpdateTrigger.Manual)
-        {
-            return true;
-        }
-
+        // 启动时的自动检查也走这里，但只在新版本出现时弹一次窗：
+        // 「连不上」「已是最新」这类结果对自动检查没有意义，静默跳过。
+        bool manual = option.Trigger == UpdateTrigger.Manual;
         string current = CurrentVersion();
 
         var (releases, error) = await FetchReleasesAsync(httpClientFactory, logger).ConfigureAwait(false);
         if (releases == null)
         {
+            if (!manual)
+            {
+                logger.LogInformation("启动检查特别版更新失败，本次跳过：{Error}", error);
+                return true;
+            }
+
             logger.LogWarning("获取特别版发布信息失败：{Error}", error);
             await ThemedMessageBox.InformationAsync(
                 "检查更新失败：连不上 GitHub，镜像也没通。\n\n" +
@@ -113,6 +116,11 @@ public static class SpecialUpdater
 
         if (latest == null)
         {
+            if (!manual)
+            {
+                return true;
+            }
+
             await ThemedMessageBox.InformationAsync(
                 $"当前版本：{current}\n\nGitHub 上没有找到特别版发布，请手动打开发布页查看。\n" +
                 string.Join("\n", DownloadPageMirrors), "检查更新");
@@ -125,8 +133,27 @@ public static class SpecialUpdater
         // 这里按 (主.次.修订, special 尾号) 比较，远端不更新就直说已是最新。
         if (CompareVersion(latestVersion, current) <= 0)
         {
-            await ThemedMessageBox.InformationAsync($"当前已是最新的特别版（{current}）。", "检查更新");
+            if (manual)
+            {
+                await ThemedMessageBox.InformationAsync($"当前已是最新的特别版（{current}）。", "检查更新");
+            }
+
             return true;
+        }
+
+        // 自动检查时同一个版本只提醒一次：用户上次点了「稍后」或「关闭」，
+        // 下次启动就不该再被同一个版本拦住，否则每次开机都弹。
+        if (!manual)
+        {
+            string? notified = App.GetService<IConfigService>()?.Get()?.CommonConfig.LastNotifiedSpecialVersion;
+            if (string.Equals(notified, latestVersion, StringComparison.OrdinalIgnoreCase))
+            {
+                logger.LogInformation("特别版 {Version} 已提醒过，跳过本次弹窗", latestVersion);
+                return true;
+            }
+
+            RememberNotified(latestVersion, logger);
+            logger.LogInformation("发现特别版新版本 {Version}（当前 {Current}），弹出更新提示", latestVersion, current);
         }
 
         // 直接给安装包直链：发布页在大陆常常打不开，能让用户少走一步就少走一步
@@ -134,6 +161,9 @@ public static class SpecialUpdater
         var urls = assetUrl is null
             ? Array.Empty<string>()
             : DownloadMirrors.Select(m => m + assetUrl).ToArray();
+
+        // 自动检查只提醒一次，弹窗里写明，免得用户以为每次开机都会被拦
+        string onceHint = manual ? "" : "\n\n本次只提醒一次，选「否」后不再提示这个版本。";
 
         // 增量包优先：完整包 546 MB，走镜像常只有几百 KB/s，一次升级要等十几分钟；
         // 而一次发版真正变的通常只有主程序 DLL 与前端产物，增量包往往只有几十 MB。
@@ -143,7 +173,7 @@ public static class SpecialUpdater
             var go = await ThemedMessageBox.QuestionAsync(
                 $"特别版最新发布：{latestVersion}\n当前版本：{current}\n\n" +
                 $"可以只下载变化的文件增量更新{sizeText}，装完自动重启，不用重新下 546 MB 的完整包。\n\n" +
-                "现在更新？（选「否」则给出完整包链接，自行覆盖安装）",
+                "现在更新？（选「否」则给出完整包链接，自行覆盖安装）" + onceHint,
                 "发现新版本", MessageBoxButton.YesNo);
 
             if (go == MessageBoxResult.Yes)
@@ -162,7 +192,7 @@ public static class SpecialUpdater
 
         var open = await ThemedMessageBox.QuestionAsync(
             $"特别版最新发布：{latestVersion}\n当前版本：{current}\n\n" +
-            "特别版没有在线自动更新（官方更新通道会把客户端覆盖回官方版），需要下载安装包覆盖安装。\n\n" + hint,
+            "特别版没有在线自动更新（官方更新通道会把客户端覆盖回官方版），需要下载安装包覆盖安装。\n\n" + hint + onceHint,
             "发现新版本", MessageBoxButton.YesNo);
 
         if (open == MessageBoxResult.Yes)
@@ -171,6 +201,29 @@ public static class SpecialUpdater
         }
 
         return true;
+    }
+
+    /// <summary>
+    ///     记下已经提醒过的版本，避免每次启动都弹同一个版本。
+    ///     <para>弹窗前就写盘：即使用户直接关掉对话框，下次也不再重复打扰。</para>
+    /// </summary>
+    private static void RememberNotified(string version, ILogger logger)
+    {
+        try
+        {
+            var configService = App.GetService<IConfigService>();
+            if (configService?.Get() is not { } config)
+            {
+                return;
+            }
+
+            config.CommonConfig.LastNotifiedSpecialVersion = version;
+            configService.Save();
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "记录已提醒的特别版版本失败");
+        }
     }
 
     /// <summary>

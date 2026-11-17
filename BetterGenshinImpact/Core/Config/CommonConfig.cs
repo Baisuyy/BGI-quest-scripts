@@ -100,6 +100,13 @@ public partial class CommonConfig : ObservableObject
     private string _runForVersion = string.Empty;
 
     /// <summary>
+    ///     上次已经弹过更新提示的特别版版本号。
+    ///     <para>启动时的自动检查对每个版本只提醒一次，记在这里；空字符串表示还没提醒过。</para>
+    /// </summary>
+    [ObservableProperty]
+    private string _lastNotifiedSpecialVersion = string.Empty;
+
+    /// <summary>
     /// 一个设备只运行一次的已运行设备ID列表
     /// </summary>
     [ObservableProperty]
