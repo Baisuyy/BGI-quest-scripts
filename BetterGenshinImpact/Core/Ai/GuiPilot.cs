@@ -453,16 +453,32 @@ public sealed class GuiPilot(
             }
 
             builder.Append('\n');
+            // HUD 上永远有一堆数字（UID、血量、延迟、帧率）和单字母快捷键标记。
+            // 它们每屏都在，混在可点文字里会把模型的注意力带偏，所以分开列。
+            var noise = lines.Where(line => IsHudNoise(line.Text)).ToList();
+            var actionable = lines.Where(line => !IsHudNoise(line.Text)).ToList();
+
             builder.Append("屏幕文字：");
-            builder.Append(lines.Count == 0 ? "（没有识别到文字）" : string.Empty);
-            foreach (var line in lines.Take(MaxOcrItems))
+            if (actionable.Count == 0)
+            {
+                builder.Append(lines.Count == 0 ? "（没有识别到文字）" : "（只有数字和快捷键标记，见下）");
+            }
+
+            foreach (var line in actionable.Take(MaxOcrItems))
             {
                 builder.Append("\n· ").Append(line.Text).Append(" @ (").Append(line.X).Append(", ").Append(line.Y).Append(')');
             }
 
-            if (lines.Count > MaxOcrItems)
+            if (actionable.Count > MaxOcrItems)
             {
-                builder.Append("\n（还有 ").Append(lines.Count - MaxOcrItems).Append(" 条未列出）");
+                builder.Append("\n（还有 ").Append(actionable.Count - MaxOcrItems).Append(" 条未列出）");
+            }
+
+            if (noise.Count > 0)
+            {
+                // 数字不是没用（原石数量、剩余次数都在这），但要明确标成「通常不用点」。
+                builder.Append("\nHUD 数字与快捷键（一般不用点击）：")
+                    .Append(string.Join("、", noise.Take(10).Select(line => line.Text)));
             }
 
             // 认出「这是加载/下载界面」比给模型多十条文字更有用：
@@ -524,8 +540,35 @@ public sealed class GuiPilot(
     }
 
     /// <summary>
-    /// OCR 全屏并按 1920×1080 逻辑坐标返回文字块，自上而下、自左而右排序。
+    /// HUD 噪声：纯数字（UID、血量、延迟、剩余次数）、单双字符快捷键标记。
+    /// 它们几乎每屏都在，且永远点不动，混进可点文字里只会带偏模型。
     /// </summary>
+    private static bool IsHudNoise(string text)
+    {
+        var value = text.Trim();
+        if (value.Length == 0)
+        {
+            return true;
+        }
+
+        // 纯数字/时间/比例：5765293、14977/14977、18:00、1.5、35%
+        if (value.Any(char.IsDigit)
+            && value.All(c => char.IsDigit(c) || c is '/' or ':' or '.' or '%' or '+' or '-' or ',' or ' '))
+        {
+            return true;
+        }
+
+        // 延迟与帧率：35 ms、60fps
+        var lower = value.ToLowerInvariant();
+        if ((lower.EndsWith("ms") || lower.EndsWith("fps")) && value[..^2].Trim().All(c => char.IsDigit(c) || c == '.'))
+        {
+            return true;
+        }
+
+        // 单双字符快捷键标记：Q、E、WS、X、F1
+        return value.Length <= 2 && value.All(c => c < 128);
+    }
+
     private List<(string Text, int X, int Y)> ReadTexts(ImageRegion screen, int width, int height)
     {
         var result = new List<(string Text, int X, int Y)>();
@@ -594,15 +637,19 @@ public sealed class GuiPilot(
     private string BuildFirstMessage(string goal, AiTraceEntry? reuse)
     {
         var builder = new StringBuilder();
-        builder.Append("要做的事：").Append(goal).AppendLine();
+        builder.Append("用户说的：").Append(goal).AppendLine();
         if (reuse != null)
         {
             builder.AppendLine("以前做成过类似的事，路径如下，可以参考但不要盲信（界面可能已经不一样）：");
             builder.AppendLine(reuse.ToPlaybook());
         }
 
-        builder.AppendLine("先判断这件事有没有现成任务：不确定就调 list_tasks 看一眼（只花一步，比乱点便宜得多）。");
-        builder.AppendLine("没有对应任务再操作界面；操作界面第一步先 look。");
+        builder.AppendLine();
+        builder.AppendLine("先分清这句话是「要你动手」还是「在说你」：");
+        builder.AppendLine("· 疑问、抱怨、纠正、闲聊（「你怎么没登出」「不是这样」「你是不是…」）——不是任务。");
+        builder.AppendLine("  用 look 看一眼现状，照实回答；用户说的和画面对得上就承认，对不上就指出差在哪。不要为了「完成任务」去改游戏状态。");
+        builder.AppendLine("· 确实是操作请求（清体力、切号、领邮件、刷本、采集）——先 list_tasks 看有没有现成任务，没有才操作界面。");
+        builder.AppendLine("拿不准时按「不是任务」处理，回答完问一句要不要现在做。");
         return builder.ToString();
     }
 
@@ -617,15 +664,26 @@ public sealed class GuiPilot(
     {
         return $$"""
                  你是原神自动化工具 BetterGI 的操作中枢，正在直接控制一台真实的游戏客户端。
-                 目标：{{goal}}
+                 用户说的：{{goal}}
 
                  坐标约定：所有坐标都按 1920×1080 给出，(0,0) 是画面左上角。不要输出其他分辨率。
+
+                 ===== 第一步：这是任务还是提问 =====
+                 用户的话不一定是要你操作。先分类，再动手：
+                 · 提问 / 抱怨 / 纠正 / 闲聊（「你怎么没登出」「不是这个意思」「你是不是…」）
+                   → 不是任务。look 看一眼现状，如实回答，说明「现在是什么状态、和你说的是否一致」。
+                   不要为了让目标「成立」去改游戏状态，也不要用 done(success=true) 把抱怨包装成完成。
+                 · 操作请求（清体力、切号、领邮件、刷本、采集、跑脚本）
+                   → 按下面的能力优先级执行。
+                 分不清时按「不是任务」处理：先回答，末尾问一句「要我现在去做吗」。
+                 只有当用户明确要求「做」或「继续」时，才假设要动手。
 
                  ===== 能力与优先级 =====
                  一、下发内置任务（首选，系统自己跑得比你点得稳）
                  · list_tasks 看有哪些任务；describe_task 看参数；run_task 下发
                  · list_pathing / run_pathing：采集素材、跑地图路线
-                 · list_scripts / run_script：跑用户脚本
+                 · list_paths / read_path / path_progress：看路线点位、比对新旧路线、查断点（脚本跑到一半断了先看这里）
+                 · list_scripts / run_script：跑用户脚本；脚本源码可用 read 读，要改就用 write_file
                  · list_accounts 看账号页里配了哪些号；切号用 run_task switch_account，params 填 {"account":"账号名或UID"}
                    —— 登录界面全是图标和图片，靠点击点不出来，不要自己去试
                  · task_status 查进度，stop_task 停止
@@ -636,17 +694,25 @@ public sealed class GuiPilot(
                  · 只有图标没有文字的地方（设置齿轮、开关、图片选项）OCR 读不到，
                    look 带 image=true 要一张截图，看清位置再点
                  · 打开界面用 key：map 地图、bag 背包、character 角色、wish 祈愿、party 队伍、menu 派蒙菜单、esc 返回
+                 · look 返回里「HUD 数字与快捷键」那一行是 UID、血量、延迟之类的固定显示，通常点不动，不要拿它当目标
 
                  ===== 行动规则 =====
                  1. 每轮只调用一个工具，看返回结果再决定下一步。
                  2. 不确定有哪些能力时先 list_tasks，不要凭记忆编任务标识。
-                 3. 界面操作优先 click_text，比猜坐标稳；文字要抄画面上原样的短语。
+                 3. 界面操作优先 click_text，比猜坐标稳；文字要抄画面上原样的短语，不要自己缩写。
                  4. 看到「加载中」「准备下载资源」「过场」这类画面：用 wait 5000–30000 毫秒等，**不要连点**。
                     连点只会把界面点到别处，然后彻底迷失。
-                 5. 连续两次同样的动作、画面没有变化，必须换方法或换目标。
-                 6. 弹窗、确认框、协议、年龄提示都要先处理掉，否则点不到底下的东西。
-                 7. 做不到就如实 done(success=false)，说清楚卡在哪一步、画面当时是什么、缺什么条件。
-                 8. 最多 {{maxSteps}} 步。步数紧张时只做最有把握的那一步。
+                 5. 点击之后要核对结果：标题、面包屑、底部按钮有一个变了，才算真的进去了。
+                    「屏幕文字变了」不等于「点对了地方」——换了个页面也可能是点歪了。
+                 6. 同一个工具、同样的参数连续调用两次仍没有进展，第三次必须换方法：
+                    换点击目标、换按键路径（比如先从 esc 回主界面）、或 look 带 image=true 看图标。
+                    连着三轮原地打转就停下来说明卡在哪，不要耗光步数。
+                 7. 弹窗、确认框、协议、年龄提示都要先处理掉，否则点不到底下的东西。
+                 8. 系统提示「已达每小时上限」时，是调用额度用尽了，不是操作失败。
+                    直接 done(success=false) 说明「AI 额度用完，稍后再试或手动操作」，不要换个说法重试。
+                 9. done(success=true) 只能用于「画面能证明目标已达成」的情况。
+                    证明不了就 success=false，并在 summary 里写清楚看到了什么、缺哪一步。
+                 10. 最多 {{maxSteps}} 步。步数紧张时只做最有把握的那一步。
                  """;
     }
 

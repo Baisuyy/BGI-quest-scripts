@@ -153,7 +153,9 @@ public partial class App : Application
                                     retainedFileCountLimit: 31,
                                     retainedFileTimeLimit: TimeSpan.FromDays(21))
                                 .CreateLogger()),
-                            LogEventLevel.Debug))
+                            // 落盘级别可配：长时间只关心有没有报错的人可以设成 Error，
+                            // 一天几百万行 Debug 既占地方又让 grep 变慢。
+                            FileLogLevel(all)))
                     .WriteTo.Console(outputTemplate:
                         "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .MinimumLevel.Debug()
@@ -162,6 +164,8 @@ public partial class App : Application
                 loggerConfiguration.WriteTo.Sink(
                     new ExternalLogSink(externalLogHub, instanceIdentity),
                     LogEventLevel.Debug);
+                // 出错就自动攒一个诊断包：日志尾部 + 环境 + 脱敏配置，反馈时直接拖出去。
+                loggerConfiguration.WriteTo.Sink(new ErrorDiagnosticsSink(), LogEventLevel.Error);
                 // 日志遮罩输出：仅当“遮罩启用且日志框可见”时才真正写入，隐藏时避免不必要的 UI 开销（#3161）。
                 // 条件改为运行时每次写入时动态判断，因此启动后通过快捷键切换 ShowLogBox 也能即时恢复日志（#3357）。
                 loggerConfiguration.WriteTo.Sink(
@@ -547,6 +551,18 @@ public partial class App : Application
     /// 异常与退出阶段直接使用应用拥有的 Serilog，不向可能已释放的 DI 容器索取日志服务。
     /// </summary>
     private static readonly ExceptionLogWriter _exceptionLog = new(() => Log.ForContext<App>());
+
+    /// <summary>
+    /// 把「写入日志文件的最低级别」配置映射成 Serilog 级别。
+    /// 只影响落盘；界面日志框与外部日志分发各自按自己的级别过滤。
+    /// </summary>
+    private static LogEventLevel FileLogLevel(AllConfig all) => all.CommonConfig.LogFileLevel switch
+    {
+        LogFileLevel.Error => LogEventLevel.Error,
+        LogFileLevel.Warning => LogEventLevel.Warning,
+        LogFileLevel.Information => LogEventLevel.Information,
+        _ => LogEventLevel.Debug,
+    };
 
     public static IServiceProvider ServiceProvider => _host.Services;
 

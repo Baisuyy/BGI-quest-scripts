@@ -523,6 +523,42 @@ public partial class CommonSettingsPageViewModel : ViewModel
         Process.Start("explorer.exe", path);
     }
 
+    /// <summary>
+    /// 写入日志文件的详细程度。改完要重启才生效——Serilog 的级别在启动时就定死了。
+    /// </summary>
+    public int SelectedLogFileLevel
+    {
+        get => (int)Config.CommonConfig.LogFileLevel;
+        set
+        {
+            if (value < 0 || value > 3 || SelectedLogFileLevel == value)
+            {
+                return;
+            }
+
+            Config.CommonConfig.LogFileLevel = (LogFileLevel)value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>
+    /// 手动生成一个诊断包并打开所在目录。出错时也会自动生成，这里给的是「现在就想发一个」的入口。
+    /// </summary>
+    [RelayCommand]
+    public void OnBuildDiagnostics()
+    {
+        var path = Core.Special.SpecialDiagnostics.Build("用户手动生成");
+        if (path == null)
+        {
+            _ = ThemedMessageBox.ShowAsync("诊断包生成失败，请直接打开日志目录手动反馈。", "生成诊断包",
+                MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Error);
+            return;
+        }
+
+        // 直接打开目录比弹一个「成功了」更省事：用户下一步就是把 zip 拖出去。
+        Core.Special.SpecialDiagnostics.OpenFolder();
+    }
+
     [RelayCommand]
     private async Task ImportLocalScriptsRepoZip()
     {

@@ -72,3 +72,19 @@ dotnet msbuild BetterGenshinImpact.sln -restore -p:Configuration=Debug -nologo -
   - 上游升版时才改前缀（例如上游从 0.67.0 到 0.68.0），此时尾号继续在原序列上递增，不回退。
   - tag 与产物名一律用完整版本串：`special-v0.67.0-special.7.3`。
 - **产物三件套**：`BetterGI.Install.<版本>.exe`（Kachina 安装器）、`BetterGI_v<版本>_special-win-x64.7z`（免安装压缩包）、增量包（可选）。
+- **更新源只能指向本仓库**：`Build/kachina.config.json` 是官方那份，`source` 全指向 `babalae` / `cocogoat` / Mirror 酱。打包特别版必须用 `Build/kachina.special.config.json`，`gen` 的 `-r` 也必须是 `Baisuyy/BGI-quest-scripts`。拿错配置的后果不是报错，而是特别版用户点「检查更新」被静默拉回官方版（版本号更低、功能更少），卸载信息也指向官方。流水线里已经加了断言，别为了绕开它去改 config。
+- **7.2 及更早用的是 MicaSetup**（`BetterGI_v<版本>_Setup.exe`），那个安装器只有覆盖安装、没有任何差分更新能力；7.3 起换成 Kachina 才带 `BetterGI.update.exe`。用户反馈「覆盖安装没有热更新」，先确认他装的是哪个安装器，再谈是不是 bug。
+
+## 地图追踪断点续跑
+
+- 进度落在 `User/PathProgress.json`，键是相对 `User` 的路径，值是「第几段、段内第几点」。文件长度或修改时间变了，旧进度自动作废。
+- 粒度是**段级优先**：段是按传送点切出来的，段首一般就是传送点，重跑一段几十秒，位置确定。只有确认人物还站在断点 30m 内，才做点级续跑——否则会跳过一次没执行的传送，把人留在提瓦特另一头。
+- 记录点（`PathProgressStore.Note`）放在**每个路径点执行之前**，这样被强杀时最后落盘的位置就是要接着走的位置。
+- 开关是 `CommonConfig.PathingResumeEnabled`，默认开。关掉用于「这条路线重新录过、要完整验证一遍」。
+- 脚本执行路线时务必把文件路径传进 `AutoPathingScript.Run(json, logicalPath)`，否则进度只能按路线名记，同名或同点数的路线会串。
+
+## 日志与诊断
+
+- 落盘级别由 `CommonConfig.LogFileLevel` 控制（`Debug` / `Information` / `Warning` / `Error`），只影响文件，不影响界面日志框。改完要重启才生效，因为 Serilog 的级别在启动时定死。
+- 日志里出现 `[ERR]` 会触发一次诊断包（`log/diagnostics/BGI-diag-*.zip`，含日志尾部、环境、脱敏配置摘要），10 分钟内不重复，保留最近 5 个。只在本地生成，不自动上传。
+- **不要用 `LogError` 表达「正常的分支」**。踩过的坑：`LimitedFile.ReadPathSync` 在目录不存在时打 ERR，而首次运行的脚本那个 `records/` 目录本来就不存在，日志里于是全是假警报，真问题时反而被淹没。

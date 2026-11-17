@@ -115,12 +115,14 @@ public sealed class AiKernel(AllConfig config, ILogger<AiKernel> logger)
                     PruneHourWindow();
                     if (_hourWindow.Count >= Settings.MaxCallsPerHour)
                     {
-                        return $"已达每小时上限 {Settings.MaxCallsPerHour} 次";
+                        // 把「怎么改」写进提示里：只说「已达上限」的话，用户会以为功能坏了，
+                        // 实际上是一次自由操作十几轮就把 60 次烧完了。
+                        return $"已达每小时上限 {Settings.MaxCallsPerHour} 次（可在 AI 设置里提高额度或关闭次数限制）";
                     }
 
                     if (_runCalls >= Settings.MaxCallsPerRun)
                     {
-                        return $"已达本次运行上限 {Settings.MaxCallsPerRun} 次";
+                        return $"已达本次运行上限 {Settings.MaxCallsPerRun} 次（可在 AI 设置里调整）";
                     }
                 }
             }
