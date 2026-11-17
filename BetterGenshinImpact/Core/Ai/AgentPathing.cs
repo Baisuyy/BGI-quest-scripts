@@ -595,9 +595,11 @@ public sealed class AgentPathing
 
                 var where = $"{shortName}:{i + 1}";
 
-                if (ChineseText.IsMatch(line) && LogCall.IsMatch(line))
+                // 只挑「固定文案」：字符串里有中文长句、但整句不含 ${} 插值。
+                // 带变量的多半是进度提示，那是有用的；不带变量的才像作者的口播和梗。
+                if (LogCall.IsMatch(line) && FixedChineseText(line) is { } fixedText)
                 {
-                    noise.Add($"{where}  {Clip(line.Trim(), 60)}");
+                    noise.Add($"{where}  {Clip(fixedText, 50)}");
                 }
 
                 if (SwitchParty.IsMatch(line))
@@ -626,7 +628,7 @@ public sealed class AgentPathing
 
         builder.Append("代码行数：").AppendLine(totalLines.ToString());
 
-        AppendSection(builder, "无关输出（日志里带中文的长句）", noise);
+        AppendSection(builder, "固定文案日志（不带变量的口播/梗）", noise);
         AppendSection(builder, "写死的队伍名", hardcoded);
         AppendSection(builder, "写文件 / 建目录（可能是断点续跑记录）", fileIo);
         AppendSection(builder, "绝对路径（换机器会失效）", absolute);
@@ -667,6 +669,32 @@ public sealed class AgentPathing
     }
 
     private static string Clip(string text, int max) => text.Length <= max ? text : text[..max] + "…";
+
+    /// <summary>
+    /// 取出「没有插值的中文长句」；没有返回 null。
+    /// </summary>
+    private static string? FixedChineseText(string line)
+    {
+        foreach (System.Text.RegularExpressions.Match match in ChineseLiteral.Matches(line))
+        {
+            var literal = match.Groups[1].Value;
+            if (literal.Contains("${", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            if (ChineseText.IsMatch(literal) && literal.Length >= 6)
+            {
+                return match.Value.Trim();
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>字符串字面量：单引号、双引号、反引号都算。</summary>
+    private static readonly System.Text.RegularExpressions.Regex ChineseLiteral =
+        new("[\"'`]([^\"'`\\n]{2,200})[\"'`]", System.Text.RegularExpressions.RegexOptions.Compiled);
 
     private static readonly System.Text.RegularExpressions.Regex ChineseText =
         new(@"[\u4e00-\u9fa5]{4,}", System.Text.RegularExpressions.RegexOptions.Compiled);

@@ -157,7 +157,13 @@ public sealed class GuiPilot(
         // 任务下发这一组排在后面，但优先级最高：能跑任务就不要用键鼠模拟。
         // 之前只给界面工具，模型面对「切号」「采素材」这类事只能干瞪眼，然后开始乱点。
         .. AgentTasks.Tools,
+        // 路线与脚本体检：读路线点位、看断点、查脚本里的硬编码。
+        // 没有这组，用户问「脚本跑到一半断了怎么办」时它只能凭记忆回答。
+        .. AgentPathing.Tools,
     ];
+
+    /// <summary>路线读取与脚本体检，无状态，直接复用。</summary>
+    private static readonly AgentPathing Pathing = new();
 
     /// <summary>
     /// 语义按键到游戏动作的映射。
@@ -422,6 +428,13 @@ public sealed class GuiPilot(
                     return (false, false, content);
                 }
 
+                // 路线读取与脚本体检是纯本地只读操作，不碰游戏，直接给结果
+                if (AgentPathing.Handles(call.Name))
+                {
+                    var content = await Pathing.ExecuteAsync(call.Name, args, ct).ConfigureAwait(false);
+                    return (false, false, content);
+                }
+
                 return (false, false, $"未知工具 {call.Name}。可用工具见系统提示。");
         }
     }
@@ -683,6 +696,9 @@ public sealed class GuiPilot(
                  · list_tasks 看有哪些任务；describe_task 看参数；run_task 下发
                  · list_pathing / run_pathing：采集素材、跑地图路线
                  · list_paths / read_path / path_progress：看路线点位、比对新旧路线、查断点（脚本跑到一半断了先看这里）
+                 · review_script：只读体检脚本，列出无关输出、写死队伍名、写文件、绝对路径
+                   —— 用户说「这脚本私货太多」时先调它，别凭空评价。你没有写文件的权限，
+                   要改就说明「第几行改成什么」，让用户自己在脚本编辑器里改
                  · list_scripts / run_script：跑用户脚本；脚本源码可用 read 读，要改就用 write_file
                  · list_accounts 看账号页里配了哪些号；切号用 run_task switch_account，params 填 {"account":"账号名或UID"}
                    —— 登录界面全是图标和图片，靠点击点不出来，不要自己去试
