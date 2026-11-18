@@ -76,7 +76,7 @@ dotnet msbuild BetterGenshinImpact.sln -restore -p:Configuration=Debug -nologo -
 - **7.2 及更早用的是 MicaSetup**（`BetterGI_v<版本>_Setup.exe`），那个安装器只有覆盖安装、没有任何差分更新能力；7.3 起换成 Kachina 才带 `BetterGI.update.exe`。用户反馈「覆盖安装没有热更新」，先确认他装的是哪个安装器，再谈是不是 bug。
 - **发版说明只写这一版**：正文放 `Docs/release-notes/<完整版本号>.md`（例如 `0.67.0-special.7.6.md`），流水线把它塞进 `{{NOTES}}`；没写就按「上一个 special 标签..HEAD」的提交标题兜底。`.github/release-notes-template.md` 只保留头信息、安装、升级三段固定内容，**不要往模板里加跨版本的能力介绍**——以前每次重贴一遍「与官方版的差异」，本版改动被淹掉，用户看不到这版到底改了什么。
 - **更新只由人触发**：启动时不查、不弹窗。入口只有两个：菜单里的「检查更新」，以及 QQ 里发「更新」（下载校验）→「重启更新」（退出并替换）。别把 `CheckSpecialUpdateAfterStartupAsync` 那种开机检查加回来，它会打断启动流程。
-- **123 云盘**：主流程里那一步是 `continue-on-error` 的，跳过和失败都只写运行摘要。要补传已发布的版本，跑 `upload-123pan.yml`（填版本号即可），不要为了传盘重跑整轮构建。
+- **123 云盘**：主流程里那一步是 `continue-on-error` 的，跳过和失败都只写运行摘要。要补传已发布的版本，跑 `upload-123pan.yml`（填版本号即可），不要为了传盘重跑整轮构建。各网盘能不能给直链、限不限速，见 [发布包下载通道](Docs/design/release-channels.md)。
 - **发版只由人决定**：推 `special-v<完整版本>` 标签触发构建 + 发 Release。每日上游同步只跑 `make_release=false` 的构建验证，不自动发版——否则版本尾号会变成 `GITHUB_RUN_NUMBER`（`special.100` 这种），比人发的版本还大，发布页出现两条版本线，客户端天天弹更新。
 - **`{{BASE}}` 取主版本**：`<Version>` 写的是完整串（`0.67.0-special.7.5`），发版说明里的「基于上游 X 构建」由流水线用正则截出 `0.67.0`，别再让 `{{BASE}}` 直接吃整串。
 - **热更新只做相邻版本**：增量包名 `BetterGI_v<新>_patch-from-<旧>.zip`，流水线只拿「上一个 special 发布」当基准。客户端按 `_patch-from-` 后的版本号与当前版本精确匹配，匹配不上就明说「这一版没有可套用的增量包（只做相邻版本）」并给完整包链接，不要含糊成「没有在线更新」——那句话在 7.5 之后已经不成立。
