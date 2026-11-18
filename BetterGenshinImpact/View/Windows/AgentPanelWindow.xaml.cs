@@ -50,8 +50,20 @@ public partial class AgentPanelWindow : Window
 {
     private static readonly ILogger Logger = App.GetLogger<AgentPanelWindow>();
 
-    /// <summary>默认唤起快捷键。与 BGI 其他默认热键不冲突，且不会误触游戏按键。</summary>
+    /// <summary>默认唤起快捷键。Ctrl+Alt+A 是 QQ 的截图键，装了 QQ 必然抢不到，所以后面还排了备选。</summary>
     private const string DefaultHotkey = "Ctrl+Alt+A";
+
+    /// <summary>
+    /// 候选快捷键，按顺序尝试，第一个注册成功的生效。
+    /// <para>
+    /// Ctrl+Alt+A 被 QQ 截图占用时注册会抛 <c>Hotkey already registered</c>，
+    /// 以前只记一条日志，用户看到面板「打不开」却不知道去哪改。
+    /// </para>
+    /// </summary>
+    private static readonly string[] HotkeyCandidates = ["Ctrl+Alt+A", "Ctrl+Alt+G", "Ctrl+Shift+A"];
+
+    /// <summary>实际生效的快捷键，注册失败时为空。</summary>
+    private static string _activeHotkey = DefaultHotkey;
 
     private static AgentPanelWindow? _instance;
     private static HotkeyHook? _hotkeyHook;
@@ -135,7 +147,7 @@ public partial class AgentPanelWindow : Window
 
     /// <summary>
     /// 启动时注册一次全局快捷键，让用户不打开主界面也能唤起面板。
-    /// 失败不抛出——被别的软件占用时面板仍可从 AI 助手页打开。
+    /// 默认键被占用时自动换下一个候选键；全部失败也不抛出——面板仍可从 AI 助手页打开。
     /// </summary>
     public static bool EnsureGlobalHotkey()
     {
@@ -150,22 +162,35 @@ public partial class AgentPanelWindow : Window
         }
 
         _hotkeyAttempted = true;
-        try
+        foreach (var candidate in HotkeyCandidates)
         {
-            var hotkey = new Hotkey(DefaultHotkey);
-            var hook = new HotkeyHook();
-            hook.KeyPressed += (_, _) => Application.Current?.Dispatcher.BeginInvoke(new Action(Toggle));
-            hook.RegisterHotKey(hotkey.ModifierKey, hotkey.Key);
-            _hotkeyHook = hook;
-            _hotkeyReady = true;
-        }
-        catch (Exception e)
-        {
-            Logger.LogWarning(e, "助手面板快捷键 {Key} 注册失败，可从 AI 助手页打开", DefaultHotkey);
-            _hotkeyReady = false;
+            HotkeyHook? hook = null;
+            try
+            {
+                var hotkey = new Hotkey(candidate);
+                hook = new HotkeyHook();
+                hook.KeyPressed += (_, _) => Application.Current?.Dispatcher.BeginInvoke(new Action(Toggle));
+                hook.RegisterHotKey(hotkey.ModifierKey, hotkey.Key);
+                _hotkeyHook = hook;
+                _activeHotkey = candidate;
+                _hotkeyReady = true;
+                if (candidate != DefaultHotkey)
+                {
+                    Logger.LogInformation("助手面板快捷键 {Default} 被占用，改用 {Actual}", DefaultHotkey, candidate);
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                hook?.Dispose();
+                Logger.LogWarning(e, "助手面板快捷键 {Key} 注册失败，试下一个", candidate);
+            }
         }
 
-        return _hotkeyReady;
+        _hotkeyReady = false;
+        Logger.LogWarning("助手面板快捷键全部被占用（{Keys}），可从 AI 助手页打开", string.Join(" / ", HotkeyCandidates));
+        return false;
     }
 
     /// <summary>
@@ -174,7 +199,7 @@ public partial class AgentPanelWindow : Window
     private void EnsureHotkey()
     {
         EnsureGlobalHotkey();
-        HintText.Text = _hotkeyReady ? DefaultHotkey : DefaultHotkey + "（被占用）";
+        HintText.Text = _hotkeyReady ? _activeHotkey : "快捷键被占用，从 AI 助手页打开";
     }
 
     /// <summary>把面板放到工作区右下角，避开任务栏。</summary>
