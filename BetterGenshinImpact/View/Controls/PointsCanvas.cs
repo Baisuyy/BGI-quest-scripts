@@ -329,44 +329,44 @@ public class PointsCanvas : FrameworkElement
         var circleGeometry = new EllipseGeometry(circleCenter, radius, radius);
         dc.DrawGeometry(fillBrush, borderPen, circleGeometry);
 
+        // 图标统一由 MaskMapPointIconRenderer 画：圆内缩进、不裁切，与游戏原生地图一致
         if (_labelMap.TryGetValue(point.LabelId, out var label))
         {
             var image = MapIconImageCache.TryGet(label.IconUrl);
-            if (image != null)
-            {
-                Rect imageRect = new Rect(
-                    circleCenter.X - radius,
-                    circleCenter.Y - radius,
-                    width,
-                    height
-                );
-
-                dc.PushClip(circleGeometry);
-                dc.DrawImage(image, imageRect);
-                dc.Pop();
-            }
-            else
+            if (image == null)
             {
                 _ = MapIconImageCache.GetAsync(label.IconUrl, CancellationToken.None);
-                
-                var brush = GetColorBrush(label);
-                dc.DrawEllipse(brush, null, new Point(centerX, centerY), width / 2.0, height / 2.0);
             }
+
+            MaskMapPointIconRenderer.Draw(dc, centerX, centerY, width, image, GetColorBrush(label));
         }
         else
         {
-            // 没有标签信息，绘制默认随机颜色圆点
-            var color = GenerateRandomColor(point.Id);
-            var brush = new SolidColorBrush(color);
-            brush.Freeze();
-
-            dc.DrawEllipse(brush, null, new Point(centerX, centerY), width / 2.0, height / 2.0);
+            // 没有标签信息，用按 ID 固定的随机色代替图标
+            MaskMapPointIconRenderer.Draw(dc, centerX, centerY, width, null, GetStableBrush(point.Id));
         }
 
         if (point.IsHidden)
         {
             dc.Pop();
         }
+    }
+
+    /// <summary>
+    /// 按ID取稳定的随机色画刷：同一条点位每次重绘颜色一致，不会闪。
+    /// </summary>
+    private Brush GetStableBrush(string id)
+    {
+        var key = "id:" + id;
+        if (_colorBrushCache.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        var brush = new SolidColorBrush(GenerateRandomColor(id));
+        brush.Freeze();
+        _colorBrushCache[key] = brush;
+        return brush;
     }
 
     /// <summary>
