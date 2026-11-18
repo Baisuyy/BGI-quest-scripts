@@ -165,6 +165,50 @@ public sealed class AiTraceStore
     }
 
     /// <summary>
+    /// 找一条同类的失败轨迹，提炼成一句「上次卡在哪」的教训。
+    /// <para>
+    /// 没有成功样本时才知道该避开什么：失败轨迹的最后两步通常就是死循环，
+    /// 原样喂给模型比让它从零摸索省几步。有成功样本时不返回，免得把错的做法教过去。
+    /// </para>
+    /// </summary>
+    /// <param name="goal">本次目标描述。</param>
+    /// <returns>一句话教训；没有可用样本时返回 null。</returns>
+    public string? FindFailedLesson(string goal)
+    {
+        if (string.IsNullOrWhiteSpace(goal))
+        {
+            return null;
+        }
+
+        var sample = Recent(80)
+            .Where(entry => !entry.Success && entry.Trace.Count >= 2)
+            .Select(entry => (Entry: entry, Score: Similarity(goal, entry.Goal)))
+            .Where(pair => pair.Score >= 0.6)
+            .OrderByDescending(pair => pair.Score)
+            .Select(pair => pair.Entry)
+            .FirstOrDefault();
+
+        if (sample == null)
+        {
+            return null;
+        }
+
+        var last = sample.Trace[^1];
+        var before = sample.Trace[^2];
+        var lesson = $"上次做同类的事，{sample.Steps} 步没成（{sample.Summary}）。" +
+                     $"最后卡在 {before.Tool}({before.Args}) → {last.Tool}({last.Args})，这两个别按原样再来一遍。";
+
+        // 后两步完全相同时，说明是原地打转，单独点出来
+        if (string.Equals(before.Tool, last.Tool, StringComparison.Ordinal)
+            && string.Equals(before.Args, last.Args, StringComparison.Ordinal))
+        {
+            lesson += "注意是同参数重复，等于没动。";
+        }
+
+        return lesson;
+    }
+
+    /// <summary>
     /// 清掉超出上限的旧文件，避免目录无限膨胀。
     /// </summary>
     private static void Prune()

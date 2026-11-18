@@ -89,6 +89,33 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 ["required"] = new JsonArray("dx"),
             }),
         new("jump", "跳跃。用于跨越矮障碍或脱离卡住的地形。", EmptySchema()),
+        new("sprint", "冲刺奔跑一小段。赶路、跨过开阔地形时用，比连续 move 快。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["ms"] = new JsonObject { ["type"] = "integer", ["description"] = "持续毫秒，500–3000，默认 1200" },
+                },
+            }),
+        new("glide", "跳起后展开风之翼滑翔。从高处下去、跨越沟壑时用，落地前会自动收伞。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["ms"] = new JsonObject { ["type"] = "integer", ["description"] = "滑翔毫秒，800–5000，默认 2000" },
+                },
+            }),
+        new("climb", "贴住面前的墙向上爬。被山壁挡住、目标点在正上方时用；爬不上去说明角度不对，先转身。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["ms"] = new JsonObject { ["type"] = "integer", ["description"] = "攀爬毫秒，500–3000，默认 1500" },
+                },
+            }),
         new("attack", "普通攻击。可打碎挡路的物件或触发交互。", EmptySchema()),
         new("interact", "交互/拾取（F 键）。靠近机关、宝箱、NPC 时使用。", EmptySchema()),
         new("quest", "重新读左上角任务面板，返回任务标题、当前步骤、目标动作与计数进度。对话/交付/开启之后可以调用，确认任务是否已推进。", EmptySchema()),
@@ -293,6 +320,9 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
         {
             "move" => $"move {GetString(args, "direction", "forward")} {Math.Clamp(GetInt(args, "ms", 600), 100, 2000)}ms",
             "turn" => $"turn {GetInt(args, "dx", 0):+#;-#;0}",
+            "sprint" => $"sprint {Math.Clamp(GetInt(args, "ms", 1200), 500, 3000)}ms",
+            "glide" => $"glide {Math.Clamp(GetInt(args, "ms", 2000), 800, 5000)}ms",
+            "climb" => $"climb {Math.Clamp(GetInt(args, "ms", 1500), 500, 3000)}ms",
             "quest" => "quest（读任务面板）",
             "toggle_feature" => $"toggle {GetString(args, "feature", "?")}={(GetBool(args, "enabled", true) ? "on" : "off")}",
             "finish" => $"finish({(GetBool(args, "success", false) ? "success" : "fail")})",
@@ -309,6 +339,9 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 行动规则：
                 1. 每轮只调用一个工具，看返回的状态再决定下一步。
                 2. 卡住（距离不变）通常是被地形、墙、空气墙挡住：先 backward 200–500ms，再 left/right 换个角度前进，或 jump 越过矮障碍。
+                   · 开阔地赶路用 sprint，比连续 move 快；
+                   · 目标在正上方、面前是山壁用 climb；从高处下去或跨越沟壑用 glide；
+                   · climb 之后距离没变说明没贴到墙，先 turn 换个角度再试，不要连续 climb。
                 3. 不要连续两次用完全相同的动作；同一方向超过两次没进展就立刻换方向。
                 4. 距离小于 {goal.ReachDistance:F0} 米即视为到达，调用 finish(success=true)。
                 5. 最多 {maxSteps} 步，超时会强制交还；步数紧张时优先做最有把握的动作。
@@ -384,6 +417,42 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 var next = await ObserveAsync(goal, "跳跃");
                 return new ExecutionResult(false, false, next.ToJson() + budget, next);
             }
+            case "sprint":
+            {
+                var ms = Math.Clamp(GetInt(args, "ms", 1200), 500, 3000);
+                InputHub.Foreground.SimulateAction(GIActions.SprintKeyboard, KeyType.KeyDown);
+                InputHub.Foreground.SimulateAction(GIActions.MoveForward, KeyType.KeyDown);
+                await Task.Delay(ms, ct);
+                InputHub.Foreground.SimulateAction(GIActions.MoveForward, KeyType.KeyUp);
+                InputHub.Foreground.SimulateAction(GIActions.SprintKeyboard, KeyType.KeyUp);
+                await Task.Delay(200, ct);
+                var next = await ObserveAsync(goal, $"冲刺 {ms}ms");
+                return new ExecutionResult(false, false, next.ToJson() + budget, next);
+            }
+            case "glide":
+            {
+                var ms = Math.Clamp(GetInt(args, "ms", 2000), 800, 5000);
+                // 先起跳，再在空中按住跳跃键展开风之翼；直接长按是原地小跳
+                InputHub.Foreground.SimulateAction(GIActions.Jump, KeyType.KeyPress);
+                await Task.Delay(350, ct);
+                InputHub.Foreground.SimulateAction(GIActions.Jump, KeyType.KeyDown);
+                await Task.Delay(ms, ct);
+                InputHub.Foreground.SimulateAction(GIActions.Jump, KeyType.KeyUp);
+                await Task.Delay(500, ct);
+                var next = await ObserveAsync(goal, $"滑翔 {ms}ms");
+                return new ExecutionResult(false, false, next.ToJson() + budget, next);
+            }
+            case "climb":
+            {
+                var ms = Math.Clamp(GetInt(args, "ms", 1500), 500, 3000);
+                // 原神的攀爬是贴着墙持续前推，不需要额外按键
+                InputHub.Foreground.SimulateAction(GIActions.MoveForward, KeyType.KeyDown);
+                await Task.Delay(ms, ct);
+                InputHub.Foreground.SimulateAction(GIActions.MoveForward, KeyType.KeyUp);
+                await Task.Delay(250, ct);
+                var next = await ObserveAsync(goal, $"攀爬 {ms}ms");
+                return new ExecutionResult(false, false, next.ToJson() + budget, next);
+            }
             case "attack":
             {
                 InputHub.Foreground.SimulateAction(GIActions.NormalAttack, KeyType.KeyPress);
@@ -444,7 +513,7 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 return new ExecutionResult(true, success, reason, state);
             }
             default:
-                return new ExecutionResult(false, false, $"未知工具 {call.Name}，可用：move/turn/jump/attack/interact/quest/tp/toggle_feature/finish", state);
+                return new ExecutionResult(false, false, $"未知工具 {call.Name}，可用：move/turn/jump/sprint/glide/climb/attack/interact/quest/tp/toggle_feature/finish", state);
         }
     }
 

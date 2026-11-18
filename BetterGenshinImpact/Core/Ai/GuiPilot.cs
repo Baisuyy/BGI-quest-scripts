@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -141,6 +142,44 @@ public sealed class GuiPilot(
                 },
                 ["required"] = new JsonArray("ms"),
             }),
+        new("drag", "按住左键从一点拖到另一点。拖动地图、拉滑块、转视角都用它；纯点击用 click。坐标按 1920×1080 给出。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["x1"] = new JsonObject { ["type"] = "integer", ["description"] = "起点 x，0–1919" },
+                    ["y1"] = new JsonObject { ["type"] = "integer", ["description"] = "起点 y，0–1079" },
+                    ["x2"] = new JsonObject { ["type"] = "integer", ["description"] = "终点 x，0–1919" },
+                    ["y2"] = new JsonObject { ["type"] = "integer", ["description"] = "终点 y，0–1079" },
+                    ["ms"] = new JsonObject { ["type"] = "integer", ["description"] = "拖动时长，150–2000，默认 400" },
+                },
+                ["required"] = new JsonArray("x1", "y1", "x2", "y2"),
+            }),
+        new("scroll", "滚动滚轮。列表翻页、地图缩放、选择数量都用它；正数向上、负数向下。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["clicks"] = new JsonObject { ["type"] = "integer", ["description"] = "-10–10，正数向上" },
+                    ["x"] = new JsonObject { ["type"] = "integer", ["description"] = "可选，先移到这个位置再滚" },
+                    ["y"] = new JsonObject { ["type"] = "integer", ["description"] = "可选，先移到这个位置再滚" },
+                },
+                ["required"] = new JsonArray("clicks"),
+            }),
+        new("hold", "按住某个键一段时间。走路/冲刺/滑翔/长按技能用它：w/a/s/d 移动，shift 冲刺，space 滑翔，e/q 技能。",
+            new JsonObject
+            {
+                ["type"] = "object",
+                ["properties"] = new JsonObject
+                {
+                    ["name"] = new JsonObject { ["type"] = "string", ["description"] = "按键名，如 w、shift、space、e、q" },
+                    ["ms"] = new JsonObject { ["type"] = "integer", ["description"] = "按住多久，100–5000" },
+                },
+                ["required"] = new JsonArray("name", "ms"),
+            }),
+        new("shot", "把当前画面存成图片文件（失败留证、给用户看现场）。只截图不识别文字。", EmptySchema()),
         new("resin", "读取当前树脂数量（会先用米游社接口，失败再识别画面）。", EmptySchema()),
         new("done", "结束操作。做到或确认做不到时调用。",
             new JsonObject
@@ -193,6 +232,10 @@ public sealed class GuiPilot(
         ["space"] = User32.VK.VK_SPACE,
         ["f"] = User32.VK.VK_F,
         ["tab"] = User32.VK.VK_TAB,
+        ["shift"] = User32.VK.VK_SHIFT,
+        ["ctrl"] = User32.VK.VK_CONTROL,
+        ["e"] = User32.VK.VK_E,
+        ["q"] = User32.VK.VK_Q,
         ["1"] = User32.VK.VK_1,
         ["2"] = User32.VK.VK_2,
         ["3"] = User32.VK.VK_3,
@@ -222,10 +265,22 @@ public sealed class GuiPilot(
         var summary = "未完成";
         var success = false;
 
-        // 历史成功路径：有就直接写进提示词，模型照抄比重新摸索稳
+        // 游戏没开时第一次截图就会抛 NormalEndException，冒到机器人层只剩一条「处理远程指令失败」。
+        // 在这里拦下来直接说人话，也省掉一次模型请求。
+        if (runtime.IsStopping)
+        {
+            var empty = new AiTraceEntry(AiTraceStore.NewId(), startedAt, goal, false,
+                "游戏没在运行", 0, 0, []);
+            await traces.SaveAsync(empty).ConfigureAwait(false);
+            return new PilotOutcome(false, "游戏没在运行（或画面采集已停），先开游戏再叫我", 0, 0, empty);
+        }
+
+        // 历史成功路径：有就直接写进提示词，模型照抄比重新摸索稳。
+        // 没有成功样本时退一步，把同类失败的最后两步当作「别这么干」的提醒。
         var reuse = traces.FindReusable(goal);
+        var lesson = reuse == null ? traces.FindFailedLesson(goal) : null;
         var conversation = new LlmConversation();
-        conversation.AddUser(BuildFirstMessage(goal, reuse), null);
+        conversation.AddUser(BuildFirstMessage(goal, reuse, lesson), null);
 
         InputHub.Foreground.ReleaseAll();
         var stopwatch = Stopwatch.StartNew();
@@ -405,6 +460,101 @@ public sealed class GuiPilot(
                 return (false, false, $"已等待 {ms} 毫秒。");
             }
 
+            case "drag":
+            {
+                var x1 = Math.Clamp(GetInt(args, "x1", -1), 0, LogicalWidth - 1);
+                var y1 = Math.Clamp(GetInt(args, "y1", -1), 0, LogicalHeight - 1);
+                var x2 = Math.Clamp(GetInt(args, "x2", -1), 0, LogicalWidth - 1);
+                var y2 = Math.Clamp(GetInt(args, "y2", -1), 0, LogicalHeight - 1);
+                if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0)
+                {
+                    return (false, false, "四个坐标都要给，范围 0–1919 / 0–1079。");
+                }
+
+                var ms = Math.Clamp(GetInt(args, "ms", 400), 150, 2000);
+                ops.EnsureForeground();
+
+                int ax, ay, bx, by;
+                using (var screen = runtime.CaptureToRectArea())
+                {
+                    (ax, ay) = screen.ConvertPositionToDesktopRegion(x1, y1);
+                    (bx, by) = screen.ConvertPositionToDesktopRegion(x2, y2);
+                }
+
+                // 分步移动而不是瞬移：游戏按帧读鼠标位置，一步跳过去会被当成没动
+                DesktopRegion.DesktopRegionMove(ax, ay);
+                InputHub.Foreground.Mouse.LeftButtonDown();
+                var segments = Math.Clamp(ms / 16, 8, 60);
+                for (var i = 1; i <= segments; i++)
+                {
+                    var t = (double)i / segments;
+                    DesktopRegion.DesktopRegionMove(ax + (bx - ax) * t, ay + (by - ay) * t);
+                    await Task.Delay(Math.Max(8, ms / segments), ct).ConfigureAwait(false);
+                }
+
+                InputHub.Foreground.Mouse.LeftButtonUp();
+                await Task.Delay(500, ct).ConfigureAwait(false);
+                return (false, false, await SnapshotAsync($"已从 ({x1}, {y1}) 拖到 ({x2}, {y2})", ct).ConfigureAwait(false));
+            }
+
+            case "scroll":
+            {
+                var clicks = Math.Clamp(GetInt(args, "clicks", 0), -10, 10);
+                if (clicks == 0)
+                {
+                    return (false, false, "clicks 不能为 0；正数向上滚、负数向下滚。");
+                }
+
+                ops.EnsureForeground();
+                if (GetInt(args, "x", -1) >= 0 && GetInt(args, "y", -1) >= 0)
+                {
+                    using var screen = runtime.CaptureToRectArea();
+                    var (mx, my) = screen.ConvertPositionToDesktopRegion(
+                        Math.Clamp(GetInt(args, "x", 0), 0, LogicalWidth - 1),
+                        Math.Clamp(GetInt(args, "y", 0), 0, LogicalHeight - 1));
+                    DesktopRegion.DesktopRegionMove(mx, my);
+                    await Task.Delay(120, ct).ConfigureAwait(false);
+                }
+
+                InputHub.Foreground.Mouse.VerticalScroll(clicks);
+                await Task.Delay(500, ct).ConfigureAwait(false);
+                return (false, false, await SnapshotAsync($"已滚动 {clicks} 格", ct).ConfigureAwait(false));
+            }
+
+            case "hold":
+            {
+                var name = GetString(args, "name", string.Empty);
+                var ms = Math.Clamp(GetInt(args, "ms", 600), 100, 5000);
+                ops.EnsureForeground();
+
+                if (Keys.TryGetValue(name, out var holdAction))
+                {
+                    InputHub.Foreground.SimulateAction(holdAction, KeyType.KeyDown);
+                    await Task.Delay(ms, ct).ConfigureAwait(false);
+                    InputHub.Foreground.SimulateAction(holdAction, KeyType.KeyUp);
+                }
+                else if (RawKeys.TryGetValue(name, out var holdKey))
+                {
+                    InputHub.Foreground.Keyboard.KeyDown(holdKey);
+                    await Task.Delay(ms, ct).ConfigureAwait(false);
+                    InputHub.Foreground.Keyboard.KeyUp(holdKey);
+                }
+                else
+                {
+                    return (false, false, $"不认识的按键「{name}」，可用：{string.Join("/", Keys.Keys.Concat(RawKeys.Keys).Take(20))}");
+                }
+
+                await Task.Delay(250, ct).ConfigureAwait(false);
+                return (false, false, await SnapshotAsync($"已按住 {name} {ms} 毫秒", ct).ConfigureAwait(false));
+            }
+
+            case "shot":
+            {
+                ops.EnsureForeground();
+                var path = SaveShot();
+                return (false, false, path == null ? "截图失败，画面可能还没准备好。" : $"已保存：{path}");
+            }
+
             case "resin":
             {
                 var snapshot = await ops.ReadResinAsync(ct).ConfigureAwait(false);
@@ -436,6 +586,32 @@ public sealed class GuiPilot(
                 }
 
                 return (false, false, $"未知工具 {call.Name}。可用工具见系统提示。");
+        }
+    }
+
+    /// <summary>
+    /// 把当前画面存成 JPEG，返回文件路径；失败返回 null。
+    /// <para>
+    /// 失败现场比「任务已完成」的截图有用：出问题时用户能看到卡在哪个界面、哪句提示上。
+    /// 200 张一轮，数量涨得太快时人工清一次 <c>log/ai-shot</c> 即可。
+    /// </para>
+    /// </summary>
+    private string? SaveShot()
+    {
+        try
+        {
+            var folder = Path.Combine(AppContext.BaseDirectory, "log", "ai-shot");
+            Directory.CreateDirectory(folder);
+            using var screen = runtime.CaptureToRectArea();
+            var path = Path.Combine(folder, $"{DateTime.Now:yyyyMMdd-HHmmss}-{AiTraceStore.NewId()}.jpg");
+            Cv2.ImWrite(path, screen.SrcMat);
+            Logger.LogInformation("[自由操作] 现场截图已保存 {Path}", path);
+            return path;
+        }
+        catch (Exception e)
+        {
+            Logger.LogDebug(e, "保存现场截图失败");
+            return null;
         }
     }
 
@@ -647,7 +823,7 @@ public sealed class GuiPilot(
     /// <summary>
     /// 第一条用户消息：目标 + 历史成功路径 + 起步提示。
     /// </summary>
-    private string BuildFirstMessage(string goal, AiTraceEntry? reuse)
+    private string BuildFirstMessage(string goal, AiTraceEntry? reuse, string? lesson)
     {
         var builder = new StringBuilder();
         builder.Append("用户说的：").Append(goal).AppendLine();
@@ -655,6 +831,11 @@ public sealed class GuiPilot(
         {
             builder.AppendLine("以前做成过类似的事，路径如下，可以参考但不要盲信（界面可能已经不一样）：");
             builder.AppendLine(reuse.ToPlaybook());
+        }
+
+        if (!string.IsNullOrWhiteSpace(lesson))
+        {
+            builder.AppendLine("教训：" + lesson);
         }
 
         builder.AppendLine();
@@ -707,6 +888,9 @@ public sealed class GuiPilot(
 
                  二、操作界面（内置任务做不到时）
                  · look 看画面文字与坐标；click_text 点文字；click 点坐标；key 按键
+                 · drag 拖动（地图、滑块、视角）；scroll 滚轮（列表翻页、地图缩放）
+                 · hold 按住键走路/冲刺/滑翔：w+a/s/d 走位，shift 冲刺，space 滑翔，e/q 放技能
+                 · shot 存一张现场图：连续几轮没进展、或要留失败证据时用，路径会写进日志
                  · 只有图标没有文字的地方（设置齿轮、开关、图片选项）OCR 读不到，
                    look 带 image=true 要一张截图，看清位置再点
                  · 打开界面用 key：map 地图、bag 背包、character 角色、wish 祈愿、party 队伍、menu 派蒙菜单、esc 返回
