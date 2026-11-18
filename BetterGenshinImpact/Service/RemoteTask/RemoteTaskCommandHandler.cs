@@ -438,8 +438,8 @@ public sealed class RemoteTaskCommandHandler(
             var reason = ops.LastResinError is { Length: > 0 } detail ? $"\n原因：{detail}" : string.Empty;
             return new RemoteTaskReply(
                 $"{command.Say}\n读不到树脂。{reason}\n\n两个办法：\n" +
-                "· 游戏开在主界面/战斗界面时再问我一次（我识别画面顶栏）\n"
-                + "· 私聊发「绑定米游社」扫一次码，之后不开游戏也能查");
+                "· 私聊发「绑定米游社」扫一次码，之后不开游戏也能查\n"
+                + "· 或者把游戏开在主界面/战斗界面再问我一次（我识别画面顶栏）");
         }
 
         var threshold = configService.Get().RemoteTaskConfig.ResinAlertThreshold;

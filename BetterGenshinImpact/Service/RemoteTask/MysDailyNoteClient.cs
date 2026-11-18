@@ -30,8 +30,9 @@ public sealed record MysDailyNote(
 /// <summary>
 /// 米游社「实时便笺」客户端：不用开游戏就能知道树脂、委托、洞天宝钱的状态。
 /// <para>
-/// 走的是米游社网页端同一个接口，需要用户自己贴 Cookie（含 ltoken 与 ltuid），
-/// 以及原神 UID。接口失败时返回 null，由调用方退回截图识别，不会因为 Cookie 过期就让整条指令失败。
+/// 走的是米游社网页端同一个接口。登录态一般来自扫码绑定（<see cref="MysBindingService"/>），
+/// 设置页手填 Cookie 的老路也还留着。接口失败时返回 null，由调用方退回截图识别，
+/// 不会因为登录态过期就让整条指令失败。
 /// </para>
 /// </summary>
 public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNoteClient> logger)
@@ -75,14 +76,14 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
         roleId = StripToDigits(roleId);
         if (string.IsNullOrWhiteSpace(roleId))
         {
-            LastError = "没配置原神 UID（设置 → 远程任务 → 米游社 UID），从 Cookie 里也推不出来。";
+            LastError = "还不知道你的原神 UID。发一句「绑定米游社」扫码，绑完会自动带上 UID。";
             logger.LogInformation("米游社查询跳过：未配置原神 UID");
             return null;
         }
 
         if (!normalized.Contains("ltoken", StringComparison.OrdinalIgnoreCase))
         {
-            LastError = "Cookie 里没有 ltoken，粘的是不是不完整？需要带 ltoken_v2 与 ltuid_v2 的完整 Cookie。";
+            LastError = "登录态不完整（缺 ltoken）。发一句「绑定米游社」重新扫一次即可，比手抄 Cookie 稳。";
             logger.LogWarning("米游社查询跳过：Cookie 缺少 ltoken");
             return null;
         }
@@ -104,7 +105,7 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
             var text = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
             if (response.StatusCode is HttpStatusCode.Forbidden or HttpStatusCode.Unauthorized)
             {
-                LastError = "Cookie 已失效，重新登录米游社再复制一次。";
+                LastError = "米游社说登录态已经失效。发一句「绑定米游社」重新扫一次。";
                 logger.LogWarning("米游社查询失败：Cookie 已失效");
                 return null;
             }
@@ -123,8 +124,9 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
                 LastError = retcode switch
                 {
                     // 米游社对「登录态不完整」和「登录态过期」都给 5003，区分不了就都提示到
-                    5003 => "米游社判为未登录（retcode 5003）。Cookie 多半缺 cookie_token 或已过期："
-                            + "重新登录米游社网页版，F12 → Network 里复制完整的 Cookie 请求头。",
+                    5003 => "米游社判为未登录（retcode 5003），登录态多半缺字段或已过期。"
+                            + "发一句「绑定米游社」重新扫码最省事；要在设置里手填的话，"
+                            + "得带 ltoken_v2 / ltuid_v2 / cookie_token，少一个都会是 5003。",
                     10001 => "米游社参数不对（retcode 10001），检查 UID 是否填成了米游社账号 ID。",
                     _ => $"米游社拒绝请求（retcode {retcode}）。",
                 };

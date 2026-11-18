@@ -26,11 +26,19 @@ namespace BetterGenshinImpact.Core.Special;
 ///         安装分两步：先解压到 <c>update/staging</c> 并逐文件校验，再让一个独立脚本在
 ///         BetterGI 退出后覆盖文件并重启。运行中的 exe/dll 被系统锁住，进程自己换不了自己。
 ///     </para>
+///     <para>
+///         <c>User</c> 目录永远不参与：配置、脚本、截图、地图缓存都在里面，热更新只替换
+///         程序自己的文件。构建端不把 User 放进增量包，客户端解析清单时再剔除一次，
+///         脚本覆盖前还会挡一次——三道都留着，是因为一旦漏了就是把用户配置换回默认值。
+///     </para>
 /// </summary>
 public static class SpecialPatch
 {
     /// <summary>增量包文件名里夹带的标记，后面跟起始版本。</summary>
     public const string FromMarker = "_patch-from-";
+
+    /// <summary>用户数据目录，热更新从不触碰。</summary>
+    private const string UserFolder = "User";
 
     private const string ManifestName = "manifest.json";
     private const string PendingName = "pending.json";
@@ -208,21 +216,40 @@ public static class SpecialPatch
 
         foreach (var token in AsArray(root["files"]))
         {
-            if (token.ToObject<SpecialPatchFile>() is { Path.Length: > 0 } file)
+            if (token.ToObject<SpecialPatchFile>() is not { Path.Length: > 0 } file)
             {
-                manifest.Files.Add(file);
+                continue;
             }
+
+            // 老流水线生成的清单里可能夹着 User，这里直接丢掉，不参与校验也不参与覆盖
+            if (IsUserPath(file.Path))
+            {
+                continue;
+            }
+
+            manifest.Files.Add(file);
         }
 
         foreach (var token in AsArray(root["removed"]))
         {
-            if (token.Type == JTokenType.String && token.Value<string>() is { Length: > 0 } path)
+            if (token.Type == JTokenType.String && token.Value<string>() is { Length: > 0 } path && !IsUserPath(path))
             {
                 manifest.Removed.Add(path);
             }
         }
 
         return manifest;
+    }
+
+    /// <summary>
+    ///     是否是用户数据目录下的路径。反斜杠、前导斜杠、大小写都要兼容：
+    ///     清单由 PowerShell 生成，路径分隔符与客户端不一致。
+    /// </summary>
+    private static bool IsUserPath(string relative)
+    {
+        string normalized = (relative ?? string.Empty).Replace('\\', '/').TrimStart('/');
+        return normalized.Equals(UserFolder, StringComparison.OrdinalIgnoreCase)
+               || normalized.StartsWith(UserFolder + "/", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>把「数组或单个值」统一成可枚举的集合。</summary>
@@ -313,6 +340,13 @@ public static class SpecialPatch
                      } catch { }
                  }
 
+                 # User 是用户数据（配置、脚本、截图、地图缓存），热更新绝不碰。
+                 # 清单里已经不含它，这里再挡一次：老版本流水线生成的包可能带着。
+                 function Test-UserPath([string]$path) {
+                     $p = $path.Replace('/', '\').TrimStart('\')
+                     return $p -eq 'User' -or $p -like 'User\*'
+                 }
+
                  try {
                      Write-Log '等待 BetterGI 退出'
                      # 分身实例也同名，等全部退出才不会撞上文件锁
@@ -330,6 +364,7 @@ public static class SpecialPatch
                      if (Test-Path $backup) { Remove-Item $backup -Recurse -Force -ErrorAction SilentlyContinue }
                      New-Item -ItemType Directory $backup -Force | Out-Null
                      foreach ($f in $manifest.files) {
+                         if (Test-UserPath $f.path) { continue }
                          $target = Join-Path $app $f.path
                          if (Test-Path $target) {
                              $save = Join-Path $backup $f.path
@@ -340,6 +375,7 @@ public static class SpecialPatch
 
                      Write-Log ("开始覆盖 {0} 个文件" -f $manifest.files.Count)
                      foreach ($f in $manifest.files) {
+                         if (Test-UserPath $f.path) { Write-Log ("跳过用户数据：" + $f.path); continue }
                          $source = Join-Path $stage ("files/" + $f.path)
                          $target = Join-Path $app $f.path
                          New-Item -ItemType Directory (Split-Path $target -Parent) -Force | Out-Null
@@ -347,6 +383,7 @@ public static class SpecialPatch
                      }
 
                      foreach ($rel in $manifest.removed) {
+                         if (Test-UserPath $rel) { continue }
                          $target = Join-Path $app $rel
                          if (Test-Path $target) { Remove-Item $target -Force -ErrorAction SilentlyContinue }
                      }

@@ -24,8 +24,11 @@ namespace BetterGenshinImpact.Core.Special;
 ///     <para>
 ///         官方的三条更新路径都指向官方包：稳定版读官方 OSS 的 notice.json、Alpha 读 Mirror 酱、
 ///         点「更新」拉起的是 Kachina 生成的 BetterGI.update.exe。特别版一旦走这些路径，
-///         就会被整体覆盖回官方版，内置 AI 也随之消失。所以这里只读自己的 Release，
-///         手动检查、给出提示、跳转下载页，不做任何自动替换。
+///         就会被整体覆盖回官方版，内置 AI 也随之消失。所以这里只读自己的 Release。
+///     </para>
+///     <para>
+///         升级有两条路：有「上一版 → 这一版」的增量包时走热更新（只下变化的文件，退出后替换并重启），
+///         没有站得住的增量包时才退回完整安装包覆盖。两条路都不会碰 <c>User</c> 目录。
 ///     </para>
 ///     <para>
 ///         GitHub 在国内经常连不上，所以 API 走「直连 → 代理镜像 → releases.atom」三级降级，
@@ -167,12 +170,16 @@ public static class SpecialUpdater
 
         // 增量包优先：完整包 546 MB，走镜像常只有几百 KB/s，一次升级要等十几分钟；
         // 而一次发版真正变的通常只有主程序 DLL 与前端产物，增量包往往只有几十 MB。
+        // 这一段就是用户口中的「热更新」：下载完由脚本在进程退出后替换文件再拉起新版。
+        bool offeredPatch = false;
         if (FindPatch(latest, current) is { } patch)
         {
+            offeredPatch = true;
             string sizeText = patch.Size > 0 ? $"（约 {patch.Size / 1024d / 1024d:0.0} MB）" : "";
             var go = await ThemedMessageBox.QuestionAsync(
                 $"特别版最新发布：{latestVersion}\n当前版本：{current}\n\n" +
-                $"可以只下载变化的文件增量更新{sizeText}，装完自动重启，不用重新下 546 MB 的完整包。\n\n" +
+                $"可以热更新：只下载变化的文件{sizeText}，退出后自动替换并重启，不用重新下 546 MB 完整包。\n" +
+                "替换的是程序自己的文件，User 目录（配置、脚本、截图）原样保留。\n\n" +
                 "现在更新？（选「否」则给出完整包链接，自行覆盖安装）" + onceHint,
                 "发现新版本", MessageBoxButton.YesNo);
 
@@ -190,9 +197,16 @@ public static class SpecialUpdater
             ? "安装包地址（任选一条，打不开就换下一条）：\n" + string.Join("\n", urls)
             : "现在打开下载页？\n\n" + string.Join("\n", DownloadPageMirrors);
 
+        // 走到这里有两种情况：没有对应增量包，或者用户不想热更新。
+        // 原文案写「特别版没有在线自动更新」，在支持增量以后已经不准确，
+        // 也容易让人以为每次升级都得重新下 546 MB。
+        string reason = offeredPatch
+            ? "也可以按老办法，下载完整安装包覆盖安装。"
+            : $"这一版没有放出「{current} → {latestVersion}」的增量包（增量包只做相邻版本），只能下载完整安装包覆盖安装。";
+
         var open = await ThemedMessageBox.QuestionAsync(
             $"特别版最新发布：{latestVersion}\n当前版本：{current}\n\n" +
-            "特别版没有在线自动更新（官方更新通道会把客户端覆盖回官方版），需要下载安装包覆盖安装。\n\n" + hint + onceHint,
+            reason + "\n覆盖安装不会动 User 目录，配置、脚本、截图都保留。\n\n" + hint + onceHint,
             "发现新版本", MessageBoxButton.YesNo);
 
         if (open == MessageBoxResult.Yes)
@@ -335,7 +349,7 @@ public static class SpecialUpdater
             }
 
             await ThemedMessageBox.InformationAsync(
-                "更新已下载并校验完成，下次启动 BetterGI 时会自动应用。", "更新已就绪");
+                "更新已下载并校验完成，下次启动 BetterGI 时会自动应用（只换程序文件，User 目录里的配置与脚本不动）。", "更新已就绪");
             return true;
         }
         catch (Exception e)

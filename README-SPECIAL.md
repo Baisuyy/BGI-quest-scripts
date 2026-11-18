@@ -79,23 +79,27 @@ BGI 自己调用大模型，不是脚本、不是外挂：
 
 ## 构建
 
-Actions 页运行 **Build BGI Special**（仅手动触发），可选分支、版本号、是否发 Release。产物挂到 Releases（prerelease），一次构建出三样：
+Actions 页运行 **Build BGI Special**（手动触发，或推 `special-v*` 标签），可选分支、版本号、是否发 Release。产物挂到 Releases（prerelease）：
 
 | 文件 | 说明 |
 |---|---|
-| `BetterGI_v<版本>_Setup.exe` | 自解压安装包（7z.sfx），双击选目录、解压完直接启动 |
-| `BetterGI_v<版本>_special-win-x64.7z` | 完整目录，手动解压 |
+| `BetterGI.Install.<版本>.exe` | Kachina 安装包，双击选目录、自带卸载项，`User` 列为保留目录 |
+| `BetterGI_v<版本>_special-win-x64.7z` | 完整目录，手动解压覆盖（绿色版） |
+| `BetterGI_v<版本>_patch-from-<上一版>.zip` | 增量包，只含与上一个 special 版本不同的文件 |
 | `BetterGI.exe` | 单文件主程序，只用于替换已有目录里的旧 exe |
 
-## 更新检查
+## 更新检查（热更新）
 
 特别版**不接官方更新通道**。官方的稳定版更新读 `notice.json`、Alpha 读 Mirror 酱、点更新拉起 Kachina 的 `BetterGI.update.exe`，三条路都会把客户端整体替换成官方版——内置 AI 随之消失。
 
-所以 `UpdateService` 里加了一个前置钩子（`Core/Special/SpecialUpdater.cs`）：
+所以 `UpdateService` 里加了一个前置钩子（`Core/Special/SpecialUpdater.cs`），只读本仓库的 Release：
 
-- 启动时的自动检查直接跳过，不弹版本提醒
-- 手动「检查更新」只读本仓库的 Release，比较 `special-v` 标签上的版本号
-- 有新版本时提示并打开 GitHub 下载页，不做任何静默替换
+- **启动自动查**：启动 8 秒后后台查一次，连不上就静默跳过，只在真有新版本时弹窗，同一版本只提醒一次
+- **增量优先**：有 `patch-from-<当前版本>` 的包就问要不要热更新，弹窗里给出真实包体大小；下载走直连 + 镜像 + 断点续传
+- **装前校验**：解压后逐文件核对 SHA256，对不上不装
+- **退出即换**：独立脚本等进程退出 → 备份 → 覆盖 → 删除新版已移除的文件 → 拉起新版，中途失败回滚
+- **`User` 永不动**：构建端不打包、客户端解析清单时剔除、覆盖脚本动手前再挡一次
+- **只做相邻版本**：停在更早版本时没有可套用的包，弹窗直说原因并给完整包链接
 
 ## 与上游的关系
 

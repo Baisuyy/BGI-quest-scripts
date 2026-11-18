@@ -300,6 +300,9 @@ jobs:
 
           foreach ($f in Get-ChildItem $newRoot -Recurse -File) {
               $rel = $f.FullName.Substring($newRoot.Length).TrimStart('\')
+              # User 是用户数据（配置、脚本、截图、地图缓存），既不该进增量包，
+              # 也不该被当成「这一版新增的文件」铺到用户目录里。
+              if ($rel -like 'User\*') { continue }
               $old = Join-Path $oldRoot $rel
               $hash = $null
               if (Test-Path $old) {
@@ -317,6 +320,7 @@ jobs:
 
           foreach ($f in Get-ChildItem $oldRoot -Recurse -File) {
               $rel = $f.FullName.Substring($oldRoot.Length).TrimStart('\')
+              if ($rel -like 'User\*') { continue }
               if (-not (Test-Path (Join-Path $newRoot $rel))) { $removed.Add($rel) }
           }
 
