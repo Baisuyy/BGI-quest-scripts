@@ -265,19 +265,26 @@ jobs:
           $cur = '${{ steps.ver.outputs.version }}'
           $repo = '${{ github.repository }}'
 
-          # 本轮 Release 还没创建，列表里第一条 special 就是上一个版本
-          # 排除本次自己的 tag：重跑失败任务时上一次可能已经建过同名 Release
-          $listRaw = gh release list --repo $repo --limit 30 --json tagName,createdAt
-          if ($LASTEXITCODE -ne 0) { throw "gh release list 失败，退出码 $LASTEXITCODE" }
-          Write-Host "release 列表：$listRaw"
-
-          $prevTag = ($listRaw | ConvertFrom-Json |
-              Where-Object { $_.tagName -like 'special-v*' -and $_.tagName -ne "special-v$cur" } |
-              Sort-Object createdAt -Descending |
-              Select-Object -First 1).tagName
-          if (-not $prevTag) { Write-Host '没有可对比的历史版本，跳过增量包'; exit 0 }
+          # 本轮 Release 还没创建，列表里最新的 special 就是上一个版本；
+          # 重跑时上一次可能已经建过同名 Release，用 tag 名把自己排除掉。
+          #
+          # 以前这里是 `gh release list --json ... | ConvertFrom-Json`：gh 输出的 JSON 是多行文本，
+          # PowerShell 会把它拆成 string[] 逐行交给 ConvertFrom-Json，第一行 "[" 直接抛异常，
+          # 整个步骤 exit 1。又因为设了 continue-on-error，失败只是让增量包凭空消失
+          # （7.2 / 7.3 / 7.4 全都没出过包），所以一直没人发现。
+          # 现在让 gh 自己用 jq 取一个纯文本 tag 名，PowerShell 不再解析 JSON。
+          $jq = '[.[] | select(.tag_name | startswith("special-v"))'
+          $jq += ' | select(.tag_name != "special-v' + $cur + '")]'
+          $jq += ' | sort_by(.created_at) | reverse | .[0].tag_name'
+          $prevTag = gh api "repos/$repo/releases?per_page=30" --jq $jq
+          if ($LASTEXITCODE -ne 0) { throw "查询历史 Release 失败，退出码 $LASTEXITCODE" }
+          $prevTag = "$prevTag".Trim().Trim('"')
+          if ([string]::IsNullOrWhiteSpace($prevTag) -or $prevTag -eq 'null') {
+              Write-Host '没有可对比的历史版本，跳过增量包'
+              exit 0
+          }
           $prevVer = $prevTag.Substring('special-v'.Length)
-          Write-Host "对比基准：$prevTag"
+          Write-Host "对比基准：$prevTag（$prevVer）"
 
           gh release download $prevTag --repo $repo --pattern '*special-win-x64.7z' --dir dist/prev --clobber
           if ($LASTEXITCODE -ne 0) { throw "下载 $prevTag 失败，退出码 $LASTEXITCODE" }
@@ -350,6 +357,16 @@ jobs:
           Write-Host "增量包：$patchName（$patchMB MB，变更 $($files.Count) 个、删除 $($removed.Count) 个）"
           Write-Host "资产文件名：$patchName"
 
+      - name: 增量包缺失提示
+        # 增量包失败不该拦住发版，但必须留痕：7.2～7.4 就是静默丢掉的，
+        # 等到用户问「覆盖安装怎么没有热更新」才发现从来没生成过。
+        if: ${{ always() && steps.patch.outputs.patch == '' }}
+        shell: pwsh
+        run: |
+          $msg = '本次没有生成增量包，从上一个版本升级的用户只能下完整包。原因见「生成增量包」步骤的日志。'
+          Write-Host "::warning::$msg"
+          "### ⚠️ 增量包未生成`n`n$msg" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
         with:
@@ -385,6 +402,10 @@ jobs:
           $notes = $notes.Replace('{{BASE}}', $env:BASE)
           $notes = $notes.Replace('{{REF}}', $env:REF)
           $notes = $notes.Replace('{{SHA}}', $env:SHA)
+          # 没有增量包时说清楚，别让读者照着「可以直接热更新」的说明去找一个不存在的包
+          if ([string]::IsNullOrWhiteSpace($env:PATCH)) {
+              $notes = "> **本次没有附带增量包**：从上一个版本升级请下载完整包（安装器或 7z 均可，User 目录照样不会被覆盖），下次发版会恢复热更新。`n`n" + $notes
+          }
           $notes | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
 
           # 先建空壳再逐个上传：一次带上 1.3GB 资产容易在中途断流，
