@@ -1,15 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
+using BetterGenshinImpact.Core.Mys;
 using Microsoft.Extensions.Logging;
 
 namespace BetterGenshinImpact.Service.RemoteTask;
@@ -53,11 +51,6 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
     private const string Endpoint = "https://api-takumi-record.mihoyo.com/game_record/app/genshin/api/dailyNote";
 
     /// <summary>
-    /// 米游社网页端 DS 签名固定盐值（v2）。
-    /// </summary>
-    private const string DsSalt = "xV8v4Qu54lUKrEYFZkJhB8cuOh9Asafs";
-
-    /// <summary>
     /// 国服官服的服务器标识。
     /// </summary>
     private const string ServerOfficial = "cn_gf01";
@@ -98,14 +91,12 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
         var query = $"role_id={roleId}&server={server}";
         using var request = new HttpRequestMessage(HttpMethod.Get, $"{Endpoint}?{query}");
         request.Headers.TryAddWithoutValidation("Cookie", normalized);
-        request.Headers.TryAddWithoutValidation("DS", BuildDs(query));
-        request.Headers.TryAddWithoutValidation("x-rpc-app_version", "2.11.1");
+        request.Headers.TryAddWithoutValidation("DS", MysSign.BuildDs(query));
+        request.Headers.TryAddWithoutValidation("x-rpc-app_version", MysSign.AppVersion);
         request.Headers.TryAddWithoutValidation("x-rpc-client_type", "5");
         request.Headers.TryAddWithoutValidation("x-rpc-language", "zh-cn");
         request.Headers.TryAddWithoutValidation("Referer", "https://webstatic.mihoyo.com/");
-        request.Headers.TryAddWithoutValidation(
-            "User-Agent",
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 miHoYoBBS/2.11.1");
+        request.Headers.TryAddWithoutValidation("User-Agent", MysSign.AppUserAgent);
 
         try
         {
@@ -165,19 +156,6 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
             logger.LogWarning(e, "米游社查询异常");
             return null;
         }
-    }
-
-    /// <summary>
-    /// 生成 DS 签名：<c>时间戳,随机串,md5(salt&amp;t&amp;r&amp;b&amp;q)</c>。
-    /// </summary>
-    /// <param name="query">不含问号的查询串。</param>
-    private static string BuildDs(string query)
-    {
-        var t = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var r = Random.Shared.Next(100000, 1000000).ToString(CultureInfo.InvariantCulture);
-        var raw = $"salt={DsSalt}&t={t}&r={r}&b=&q={query}";
-        var hash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(raw))).ToLowerInvariant();
-        return $"{t},{r},{hash}";
     }
 
     /// <summary>

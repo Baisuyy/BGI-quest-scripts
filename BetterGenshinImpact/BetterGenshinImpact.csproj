@@ -97,6 +97,8 @@
 		<PackageReference Include="SkiaSharp" Version="3.119.4" />
 		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="OpenccNetLib" Version="1.7.0" />
+		<!-- 米游社扫码绑定：只用到纯托管的 PngByteQRCode，不依赖 System.Drawing -->
+		<PackageReference Include="QRCoder" Version="1.6.0" />
 		<PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.11.0.20250507" />
 		<PackageReference Include="OpenCvSharp4.Extensions" Version="4.11.0.20250507" />
 		<PackageReference Include="OpenCvSharp4.Windows" Version="4.11.0.20250507" />

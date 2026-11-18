@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
+using BetterGenshinImpact.Core.Mys;
 using BetterGenshinImpact.GameTask.AutoPathing;
 using BetterGenshinImpact.GameTask.Common;
 using BetterGenshinImpact.GameTask.Runtime;
@@ -48,6 +49,7 @@ public sealed class RemoteTaskCommandHandler(
     AiTraceStore traces,
     RemoteTaskPlanRunner planRunner,
     GenshinWikiClient wiki,
+    MysBindingService mysBinding,
     ILogger<RemoteTaskCommandHandler> logger)
 {
     /// <summary>
@@ -128,6 +130,8 @@ public sealed class RemoteTaskCommandHandler(
             RemoteTaskCommandKind.Script => await ScriptAsync(command, cancellationToken).ConfigureAwait(false),
             RemoteTaskCommandKind.Schedule => new RemoteTaskReply(Schedule(command)),
             RemoteTaskCommandKind.Login => await LoginAsync(command, cancellationToken).ConfigureAwait(false),
+            RemoteTaskCommandKind.BindMys => await BindMysAsync(command, message, cancellationToken)
+                .ConfigureAwait(false),
             RemoteTaskCommandKind.Path => await PathingAsync(command, onRunStarted, cancellationToken)
                 .ConfigureAwait(false),
             RemoteTaskCommandKind.Pilot => await PilotAsync(
@@ -434,8 +438,8 @@ public sealed class RemoteTaskCommandHandler(
             var reason = ops.LastResinError is { Length: > 0 } detail ? $"\n原因：{detail}" : string.Empty;
             return new RemoteTaskReply(
                 $"{command.Say}\n读不到树脂。{reason}\n\n两个办法：\n" +
-                "· 游戏开在主界面/战斗界面时再问我一次（我识别画面顶栏）\n" +
-                "· 在设置里填米游社 Cookie 与原神 UID，不开游戏也能查");
+                "· 游戏开在主界面/战斗界面时再问我一次（我识别画面顶栏）\n"
+                + "· 私聊发「绑定米游社」扫一次码，之后不开游戏也能查");
         }
 
         var threshold = configService.Get().RemoteTaskConfig.ResinAlertThreshold;
@@ -575,6 +579,51 @@ public sealed class RemoteTaskCommandHandler(
         return new RemoteTaskReply(
             "这是当前画面。如果上面是登录二维码，用手机米游社扫一下就能换号；如果已经在游戏里，先「关游戏」再重新启动才会回到登录界面。",
             image);
+    }
+
+    /// <summary>
+    /// 扫码绑定米游社：第一次发二维码，扫完再发一次就落库。
+    /// <para>
+    /// 只在私聊里做：二维码谁扫到都算数，发在群里等于把账号递给别人；
+    /// 而且登录态是全局配置，群里的第二个人再绑一次会把前一个人的覆盖掉。
+    /// </para>
+    /// </summary>
+    private async Task<RemoteTaskReply> BindMysAsync(
+        RemoteTaskCommand command,
+        QqBotIncomingMessage message,
+        CancellationToken cancellationToken)
+    {
+        if (message.Scope != QqBotMessageScope.C2C)
+        {
+            return new RemoteTaskReply(
+                "绑定米游社要在私聊里做——二维码谁扫到都算数，发在群里就等于把账号交给别人。\n私聊我发一句「绑定米游社」就行。");
+        }
+
+        var key = message.SenderOpenId;
+        if (ParseIndex(command.Args) is { } index)
+        {
+            // 多角色时回「绑定米游社 2」：这一步只是选角色，不再去轮询
+            return new RemoteTaskReply(mysBinding.TrySelectRole(key, index, out var chosen)
+                ? chosen
+                : "现在没有待选的角色。先发「绑定米游社」扫码，扫完我再把角色列出来。");
+        }
+
+        if (mysBinding.HasPending(key))
+        {
+            var outcome = await mysBinding.PollAsync(key, cancellationToken).ConfigureAwait(false);
+            return new RemoteTaskReply(outcome.Text);
+        }
+
+        try
+        {
+            var start = await mysBinding.StartAsync(key, cancellationToken).ConfigureAwait(false);
+            return new RemoteTaskReply(start.Text, start.QrImage);
+        }
+        catch (MysLoginException e)
+        {
+            logger.LogWarning("米游社扫码登录发起失败：{Message}", e.Message);
+            return new RemoteTaskReply($"米游社扫码没能发起：{e.Message}\n过一会儿再发「绑定米游社」试试。");
+        }
     }
 
     /// <summary>
@@ -1173,6 +1222,7 @@ public sealed class RemoteTaskCommandHandler(
                能做的事：
                · 跑任务：一条龙、清体力、秘境、打幽境危战、领邮件……
                · 查体力 —— 树脂还剩多少、多久回满
+               · 绑定米游社 —— 私聊扫码，之后不开游戏也能查
                · 包 / 抽卡 —— 打开界面截图给你
                · 截图 / 全屏截图
                · 切人2 —— 切到队伍第 2 位

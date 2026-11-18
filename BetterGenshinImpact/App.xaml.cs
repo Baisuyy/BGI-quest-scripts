@@ -10,6 +10,7 @@ using System.Windows.Threading;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Core.Mask;
+using BetterGenshinImpact.Core.Mys;
 using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.ONNX;
 using BetterGenshinImpact.Core.Monitor;
@@ -422,6 +423,11 @@ public partial class App : Application
                 services.AddSingleton<GenshinWikiClient>(sp => new GenshinWikiClient(
                     sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
                     sp.GetRequiredService<ILogger<GenshinWikiClient>>()));
+                // 米游社扫码绑定：网页端扫码通道拿登录态，不需要用户抄 Cookie
+                services.AddSingleton<MysPassportClient>(sp => new MysPassportClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
+                    sp.GetRequiredService<ILogger<MysPassportClient>>()));
+                services.AddSingleton<MysBindingService>();
                 services.AddSingleton<GameOps>();
                 services.AddSingleton<AgentTasks>();
                 services.AddSingleton<RemoteTaskPlanRunner>();

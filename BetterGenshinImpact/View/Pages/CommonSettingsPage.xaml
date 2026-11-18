@@ -519,7 +519,7 @@
                     <StackPanel Grid.Column="0">
                         <ui:TextBlock FontTypography="Body" Text="米游社 Cookie / UID" />
                         <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                                      Text="填了就能不开游戏查树脂；留空时改为截图识别"
+                                      Text="扫一次码就能不开游戏查树脂；留空时改为截图识别"
                                       TextWrapping="Wrap" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="0,0,36,0">
@@ -532,6 +532,10 @@
                         <ui:TextBox Margin="0,8,0,0"
                                     PlaceholderText="原神 UID，例如 100000000"
                                     Text="{Binding Config.RemoteTaskConfig.MysUid, Mode=TwoWay}" />
+                        <ui:Button Margin="0,10,0,0"
+                                   HorizontalAlignment="Left"
+                                   Click="OnMysLoginClick"
+                                   Content="扫码绑定米游社" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

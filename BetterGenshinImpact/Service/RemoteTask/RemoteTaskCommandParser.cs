@@ -91,6 +91,11 @@ public enum RemoteTaskCommandKind
     Login,
 
     /// <summary>
+    /// 扫码绑定米游社账号：不开游戏也能查树脂，顺带把 UID 记下来。
+    /// </summary>
+    BindMys,
+
+    /// <summary>
     /// 跑一条地图追踪路线，通常用于采集素材。
     /// </summary>
     Path,
@@ -528,6 +533,8 @@ public static class RemoteTaskCommandParser
     /// </summary>
     private static readonly (RemoteTaskCommandKind Kind, string[] Prefixes)[] ArgCommands =
     [
+        // 放在最前：多角色时用户要回「绑定米游社 2」，这里把序号当成参数交给上层
+        (RemoteTaskCommandKind.BindMys, ["绑定米游社", "米游社登录"]),
         (RemoteTaskCommandKind.SwitchCharacter, ["切换角色", "切角色", "换角色", "切换人物", "切人", "换人", "切到", "换到"]),
         (RemoteTaskCommandKind.Script, ["运行脚本", "执行脚本", "跑脚本", "运行配置组"]),
         (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时"]),
@@ -579,6 +586,9 @@ public static class RemoteTaskCommandParser
         (RemoteTaskCommandKind.Inventory, ["背包", "看背包", "查看背包", "打开背包", "包里有什么", "查看物品"]),
         (RemoteTaskCommandKind.Wish, ["抽卡", "祈愿", "看抽卡", "抽卡记录", "祈愿记录"]),
         (RemoteTaskCommandKind.Login, ["切号", "换号", "换账号", "扫码登录", "登录二维码", "登录界面"]),
+        // 「绑定米游社」只在这里出现一次就会和「扫码登录」撞车，所以写全一点，避免误抢换号指令
+        (RemoteTaskCommandKind.BindMys, ["绑定米游社", "米游社绑定", "绑定mys", "米游社登录", "登录米游社",
+            "绑定米游社账号", "扫码绑定米游社", "绑定一下米游社"]),
         (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时", "有哪些定时"]),
         (RemoteTaskCommandKind.Screenshot, ["screenshot", "截图", "画面", "看看"]),
         (RemoteTaskCommandKind.Stop, ["stop", "cancel", "停止", "取消", "打断", "停"]),

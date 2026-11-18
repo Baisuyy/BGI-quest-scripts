@@ -150,7 +150,7 @@ public sealed class RemoteTaskIntentResolver(
                    兑换码要把码本身带上：{"intent":"run","task_id":"redeem_code","code":"8HZH86K6E2PW","say":"一句中文"}
                    采集素材要把采集物名带上：{"intent":"run","task_id":"auto_pathing","material":"霓裳花","say":"一句中文"}
                 2. 这些日常操作不用跑任务，直接说要做哪个：
-                   {"intent":"control","action":"status|screenshot|stop|help|list|resin|inventory|wish|close_game","say":"一句中文"}
+                   {"intent":"control","action":"status|screenshot|stop|help|list|resin|inventory|wish|close_game|bind_mys","say":"一句中文"}
                 3. 清单里没有对应任务，但可以在游戏界面上点出来（查看背包、翻菜单、点某个按钮）：
                    {"intent":"pilot","goal":"一句话说清要做什么","say":"一句中文"}
                 4. 与游戏操作无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
@@ -168,6 +168,10 @@ public sealed class RemoteTaskIntentResolver(
                   新角色你不认识时不要硬编：从清单里挑 1–3 个最可能的候选，用 chat 问一句「是这三个里的哪个」，
                   并把候选名字写全。
                 - 问「还有多少树脂/体力」用 control + resin；「清体力」「把体力刷完」才用 run + resin_plan。
+                - 想绑定米游社（「绑定米游社」「米游社怎么绑」）用 control + bind_mys，由程序发二维码。
+                  用户只是问「为什么要绑」「绑了有什么用」时用 chat，一句话说清：绑了不用开游戏就能查树脂，
+                  发「绑定米游社」扫个码即可，绑定必须在私聊里做。
+                - 不知道米游社怎么绑就照上面这条说，不要编开发者工具、Cookie、F12 之类的步骤。
                 - say 用上面人设的语气，说人话，不超过 40 字，不要复述 JSON。
                 """;
     }
@@ -264,6 +268,7 @@ public sealed class RemoteTaskIntentResolver(
             "inventory" or "bag" => new RemoteTaskCommand(RemoteTaskCommandKind.Inventory, Say: say),
             "wish" or "gacha" => new RemoteTaskCommand(RemoteTaskCommandKind.Wish, Say: say),
             "close_game" or "closegame" => new RemoteTaskCommand(RemoteTaskCommandKind.CloseGame, Say: say),
+            "bind_mys" or "bindmys" => new RemoteTaskCommand(RemoteTaskCommandKind.BindMys, Say: say),
             _ => null
         };
     }
