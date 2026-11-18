@@ -79,10 +79,17 @@ def main() -> int:
             print(f"[!] {tag}：缺 {notes_file.name}，跳过（不拿旧正文凑数）")
             continue
 
+        # 旧正文里「基于上游」曾被写成特别版完整版本号（0.67.0-special.7.5），
+        # 「源码」也曾写成本次的 tag 名；照抄会把错误越传越远，这里一并纠正。
+        base = re.sub(r"[-+]special.*$", "", m.group("base").strip())
+        ref = m.group("ref")
+        if ref.startswith("special-v"):
+            ref = "bgi-special"
+
         body = (template
                 .replace("{{VERSION}}", version)
-                .replace("{{BASE}}", m.group("base").strip())
-                .replace("{{REF}}", m.group("ref"))
+                .replace("{{BASE}}", base)
+                .replace("{{REF}}", ref)
                 .replace("{{SHA}}", m.group("sha"))
                 .replace("{{NOTES}}", notes_file.read_text(encoding="utf-8").strip()))
         if body.strip() == (rel.get("body") or "").strip():
