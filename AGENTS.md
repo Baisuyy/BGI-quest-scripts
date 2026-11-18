@@ -74,6 +74,8 @@ dotnet msbuild BetterGenshinImpact.sln -restore -p:Configuration=Debug -nologo -
 - **产物三件套**：`BetterGI.Install.<版本>.exe`（Kachina 安装器）、`BetterGI_v<版本>_special-win-x64.7z`（免安装压缩包）、`BetterGI_v<版本>_patch-from-<上一版>.zip`（增量包，只要存在上一个 special 发布就必须生成）。
 - **更新源只能指向本仓库**：`Build/kachina.config.json` 是官方那份，`source` 全指向 `babalae` / `cocogoat` / Mirror 酱。打包特别版必须用 `Build/kachina.special.config.json`，`gen` 的 `-r` 也必须是 `Baisuyy/BGI-quest-scripts`。拿错配置的后果不是报错，而是特别版用户点「检查更新」被静默拉回官方版（版本号更低、功能更少），卸载信息也指向官方。流水线里已经加了断言，别为了绕开它去改 config。
 - **7.2 及更早用的是 MicaSetup**（`BetterGI_v<版本>_Setup.exe`），那个安装器只有覆盖安装、没有任何差分更新能力；7.3 起换成 Kachina 才带 `BetterGI.update.exe`。用户反馈「覆盖安装没有热更新」，先确认他装的是哪个安装器，再谈是不是 bug。
+- **发版只由人决定**：推 `special-v<完整版本>` 标签触发构建 + 发 Release。每日上游同步只跑 `make_release=false` 的构建验证，不自动发版——否则版本尾号会变成 `GITHUB_RUN_NUMBER`（`special.100` 这种），比人发的版本还大，发布页出现两条版本线，客户端天天弹更新。
+- **`{{BASE}}` 取主版本**：`<Version>` 写的是完整串（`0.67.0-special.7.5`），发版说明里的「基于上游 X 构建」由流水线用正则截出 `0.67.0`，别再让 `{{BASE}}` 直接吃整串。
 - **热更新只做相邻版本**：增量包名 `BetterGI_v<新>_patch-from-<旧>.zip`，流水线只拿「上一个 special 发布」当基准。客户端按 `_patch-from-` 后的版本号与当前版本精确匹配，匹配不上就明说「这一版没有可套用的增量包（只做相邻版本）」并给完整包链接，不要含糊成「没有在线更新」——那句话在 7.5 之后已经不成立。
 - **`User` 目录是硬边界**：增量包不打包 `User/**`（构建端 `-like 'User\*'` 跳过），客户端 `ParseManifest` 再剔除一次，覆盖脚本动手前还挡一次。三层都留着——漏一层就是把用户改过的配置换回默认值，而用户根本看不出发生过什么。
 - **升级路径的默认答案是热更新**：发版说明、弹窗、帮助文案一律先讲增量包（几 MB、退出即换、`User` 不动），完整包作为「跨版本 / 增量包缺失」的退路。别再写「需要下载安装包覆盖安装」了事。

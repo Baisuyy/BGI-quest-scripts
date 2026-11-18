@@ -127,7 +127,13 @@ jobs:
           $csproj = 'BetterGenshinImpact/BetterGenshinImpact.csproj'
           $m = Select-String -Path $csproj -Pattern '<Version>([^<]+)</Version>'
           if (-not $m) { throw '未能从 csproj 读取 <Version>' }
-          $base = $m.Matches[0].Groups[1].Value
+          $declared = $m.Matches[0].Groups[1].Value
+
+          # <Version> 现在写的是完整版本串（0.67.0-special.7.5），但发版说明里「基于上游 X 构建」
+          # 要的是上游主版本，直接拿整串会写成「基于上游 0.67.0-special.7.5 构建」。
+          $baseMatch = [regex]::Match($declared, '^\d+\.\d+\.\d+')
+          if (-not $baseMatch.Success) { throw "无法从 <Version>$declared</Version> 解析主版本" }
+          $base = $baseMatch.Value
 
           $override = $env:INPUT_VERSION
           # 推标签触发时没有 inputs，版本号直接取标签名：special-v0.67.0-special.7 → 0.67.0-special.7
@@ -138,7 +144,11 @@ jobs:
           }
 
           if ([string]::IsNullOrWhiteSpace($override)) {
+              # 只该出现在「不填版本、只想验证能编译」的手动构建里：GITHUB_RUN_NUMBER 与
+              # 人发的版本号没有关系，会得到 special.100 这种跳号，而且比正式版本更大，
+              # 客户端会一直提示更新。要发版就填 version 或推 special-v* 标签。
               $version = "$base-special.$env:GITHUB_RUN_NUMBER"
+              Write-Host "未指定版本，按运行号生成：$version（仅用于验证构建）"
           } else {
               $version = $override.Trim()
           }

@@ -101,8 +101,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh workflow run build-special.yml --ref main -f ref=bgi-special -f make_release=true
-          echo "已触发构建"
+          # 只构建、不发版：不填 version 时 build-special 会用 `$GITHUB_RUN_NUMBER` 当尾号，
+          # 同步一次就凭空多出 special.100 这种号，还比人发的版本大；发布页于是同时有
+          # 0.67.0-special.7.3 与 0.67.1-special.7.2 两条线，客户端每次同步都弹更新。
+          # 发版改由推 special-v* 标签决定，这里只验证「同步完还能编译」。
+          gh workflow run build-special.yml --ref main -f ref=bgi-special -f make_release=false
+          echo "已触发构建（不发 Release）"
 
       - name: 同步失败时开 issue
         if: ${{ failure() }}
