@@ -218,6 +218,121 @@ public static class SpecialUpdater
     }
 
     /// <summary>
+    ///     一次不带界面的更新检查结果，给远程指令用。
+    /// </summary>
+    /// <param name="Reachable">是否成功读到发布列表；false 时 <paramref name="Message"/> 就是失败原因。</param>
+    /// <param name="Message">可以直接发给用户的一句话。</param>
+    /// <param name="CurrentVersion">本机当前版本。</param>
+    /// <param name="LatestVersion">远端最新版本；没有比本机更新的版本时为 null。</param>
+    /// <param name="Patch">可套用的增量包；这一版没放出时为 null。</param>
+    internal sealed record SpecialUpdateCheck(
+        bool Reachable,
+        string Message,
+        string CurrentVersion,
+        string? LatestVersion,
+        SpecialAsset? Patch);
+
+    /// <summary>
+    ///     不带界面的更新检查，供 QQ 那边复用。
+    ///     <para>
+    ///         菜单里的「检查更新」会弹窗、会开进度窗口；远程指令没有人守着桌面，
+    ///         所以另走一条只吐文本的路径：这里只判断，不下载、不弹窗、不写已提醒版本。
+    ///     </para>
+    /// </summary>
+    internal static async Task<SpecialUpdateCheck> CheckAsync(IHttpClientFactory httpClientFactory, ILogger logger)
+    {
+        string current = CurrentVersion();
+        var (releases, error) = await FetchReleasesAsync(httpClientFactory, logger).ConfigureAwait(false);
+        if (releases == null)
+        {
+            return new SpecialUpdateCheck(false, $"连不上 GitHub，也没通镜像：{error}", current, null, null);
+        }
+
+        var latest = releases
+            .Where(r => !string.IsNullOrWhiteSpace(r.TagName)
+                        && r.TagName.StartsWith(TagPrefix, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(r => ParseVersion(r.TagName), StringComparer.Ordinal)
+            .FirstOrDefault();
+        if (latest == null)
+        {
+            return new SpecialUpdateCheck(false, "GitHub 上没有找到特别版发布。", current, null, null);
+        }
+
+        string latestVersion = latest.TagName[TagPrefix.Length..];
+        if (CompareVersion(latestVersion, current) <= 0)
+        {
+            return new SpecialUpdateCheck(true, $"已经是最新的特别版（{current}）。", current, null, null);
+        }
+
+        var patch = FindPatch(latest, current);
+        string size = patch is { Size: > 0 } asset ? $"（{asset.Size / 1024d / 1024d:0.0} MB）" : string.Empty;
+        string message = patch == null
+            ? $"有新版 {latestVersion}（当前 {current}），但这一版没有放出 {current} → {latestVersion} 的增量包。"
+            : $"有新版 {latestVersion}（当前 {current}），可以热更新{size}。";
+
+        return new SpecialUpdateCheck(true, message, current, latestVersion, patch);
+    }
+
+    /// <summary>
+    ///     下载增量包并解压校验，全程不弹窗——远程指令的调用方自己把结果说给用户听。
+    ///     <para>成功后由 <see cref="SpecialPatch.StartApplyAndRestart"/> 在进程退出时替换文件。</para>
+    /// </summary>
+    internal static async Task<(bool Ok, string Message)> DownloadPatchAsync(
+        SpecialAsset patch, string version, ILogger logger)
+    {
+        var download = App.GetService<IDownloadService>();
+        if (download is null)
+        {
+            return (false, "下载服务不可用，没法热更新。");
+        }
+
+        string target = Path.Combine(SpecialPatch.Root, "patch.zip");
+        try
+        {
+            Directory.CreateDirectory(SpecialPatch.Root);
+
+            // 上一次同样大小的包还在，就不重复下载：断线重连后重发指令很常见
+            if (File.Exists(target) && patch.Size > 0 && new FileInfo(target).Length == patch.Size)
+            {
+                logger.LogInformation("复用已下载的增量包");
+            }
+            else
+            {
+                var mirrors = DownloadMirrors
+                    .Select(m => new Uri(m + patch.Url))
+                    .Where(u => u.IsAbsoluteUri)
+                    .ToList();
+
+                var task = download.Start(new DownloadRequest(
+                    new Uri(patch.Url), $"特别版 {version} 增量包", DownloadCategories.SpecialUpdate)
+                {
+                    DestinationPath = target,
+                    ExpectedSize = patch.Size > 0 ? patch.Size : null,
+                    MaxBytes = 2L * 1024 * 1024 * 1024,
+                    Mirrors = mirrors,
+                    Origin = "远程更新",
+                });
+
+                target = await task.Completion.ConfigureAwait(false);
+            }
+
+            var (ok, message) = await SpecialPatch.StageAsync(target, logger).ConfigureAwait(false);
+            if (!ok)
+            {
+                logger.LogWarning("远程增量更新准备失败：{Message}", message);
+                return (false, message);
+            }
+
+            return (true, message);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "下载特别版增量包失败");
+            return (false, $"下载失败：{e.Message}");
+        }
+    }
+
+    /// <summary>
     ///     记下已经提醒过的版本，避免每次启动都弹同一个版本。
     ///     <para>弹窗前就写盘：即使用户直接关掉对话框，下次也不再重复打扰。</para>
     /// </summary>
@@ -534,14 +649,15 @@ public static class SpecialUpdater
         }
     }
 
-    private sealed class SpecialRelease
+    // 这两个类型原来只在弹窗路径里用，远程指令要拿到增量包信息，所以放到 internal
+    internal sealed class SpecialRelease
     {
         [JsonProperty("tag_name")] public string TagName { get; set; } = "";
 
         [JsonProperty("assets")] public List<SpecialAsset>? Assets { get; set; }
     }
 
-    private sealed class SpecialAsset
+    internal sealed class SpecialAsset
     {
         [JsonProperty("name")] public string Name { get; set; } = "";
 

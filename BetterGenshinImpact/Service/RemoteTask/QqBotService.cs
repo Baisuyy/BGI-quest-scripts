@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Config;
+using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
 using BetterGenshinImpact.Infrastructure.Network;
@@ -248,6 +249,36 @@ public sealed class QqBotService : IHostedService
         }
 
         await ReplyAsync(message.Target, reply.Text, reply.Image, message.MessageId).ConfigureAwait(false);
+
+        // 更新脚本要等进程退出才动文件，所以先把这句话发出去，再让程序自己退出
+        if (reply.RestartAfterSend)
+        {
+            RestartForUpdate();
+        }
+    }
+
+    /// <summary>
+    /// 给更新脚本让路：留两秒把上一条回复发完，然后保存配置并退出。
+    /// <para>退出由脚本之后的动作接管——替换文件、删掉新版已移除的文件、拉起新版。</para>
+    /// </summary>
+    private void RestartForUpdate()
+    {
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(false);
+            try
+            {
+                System.Windows.Application.Current?.Dispatcher.Invoke(() =>
+                {
+                    _configService.Save();
+                    System.Windows.Application.Current.Shutdown();
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "退出以应用更新失败，下次启动会再应用");
+            }
+        });
     }
 
     /// <summary>
@@ -306,22 +337,17 @@ public sealed class QqBotService : IHostedService
     {
         try
         {
-            var config = _configService.Get().RemoteTaskConfig;
-            byte[]? image = null;
-            if (config.ScreenshotOnFinish)
-            {
-                image = await _handler.CaptureAsync(CancellationToken.None, allowStartCapture: false).ConfigureAwait(false);
-            }
-
+            // 计划结束时画面同样是「角色站在终点」，没有信息量，不发图。
+            // 每一步的结果都进了 summary，比一张空镜更能说明跑成没跑成。
             var text = "计划跑完了：\n" + summary;
             try
             {
-                await ReplyAsync(chat.Target, text, image, chat.MessageId).ConfigureAwait(false);
+                await ReplyAsync(chat.Target, text, null, chat.MessageId).ConfigureAwait(false);
             }
             catch (QqBotApiException exception)
             {
                 _logger.LogInformation("被动回复计划汇总失败，改用主动消息：{Message}", exception.Message);
-                await ReplyAsync(chat.Target, text, image, null).ConfigureAwait(false);
+                await ReplyAsync(chat.Target, text, null, null).ConfigureAwait(false);
             }
         }
         catch (Exception exception)
@@ -356,10 +382,20 @@ public sealed class QqBotService : IHostedService
             var detail = e.Result.TaskResult?.Message;
             var text = string.IsNullOrWhiteSpace(detail) ? headline : $"{headline}\n{detail}";
 
+            // 只在没跑成的时候截：成功时的画面就是角色站在终点，看不出任何东西，
+            // 发过去只多占一次带宽。真正有用的是失败现场——卡在哪、弹了什么窗。
             byte[]? image = null;
-            if (config.ScreenshotOnFinish && e.Result.Outcome != SoloTaskRunOutcome.Rejected)
+            if (config.ScreenshotOnFinish
+                && e.Result.Outcome is SoloTaskRunOutcome.Faulted or SoloTaskRunOutcome.Cancelled)
             {
                 image = await _handler.CaptureAsync(CancellationToken.None, allowStartCapture: false).ConfigureAwait(false);
+            }
+
+            // 过程中出过的告警一并附上：不用让用户自己去翻日志猜哪里不对
+            var problems = SpecialDiagnostics.ProblemsSince(pending.StartedAt.LocalDateTime);
+            if (problems.Count > 0)
+            {
+                text += "\n\n过程中出现的问题：\n" + string.Join("\n", problems);
             }
 
             // 结束时间可能已超出被动回复窗口，先试被动回复，失败再退回主动消息。

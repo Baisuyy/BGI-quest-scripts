@@ -802,10 +802,10 @@ public partial class MainWindowViewModel : ObservableObject, IViewModel, IDispos
 
         OnceRun();
 
-        // 检查更新：只排队，不在这里等。GitHub 直连常要好几秒，卡在启动流程里会让主界面迟迟不出；
-        // 特别版只在新版本出现时弹一次窗，同一版本不会反复提醒。
-        _ = CheckSpecialUpdateAfterStartupAsync();
-        
+        // 更新改成只由人触发：启动时不查、不弹窗。想升级就去菜单点「检查更新」，
+        // 或者在 QQ 里发一句「更新」让机器人下载、发「重启更新」让它自己换。
+        // 原来那套「启动 8 秒后自动查并弹窗」会打断开机流程，也违背「我说了才更新」。
+
         // 检查兑换码更新
         await CheckRedeemCodeFeedsUpdateAsync();
 
@@ -827,23 +827,6 @@ public partial class MainWindowViewModel : ObservableObject, IViewModel, IDispos
         ScriptRepoUpdater.Instance.StartAutoUpdate();
 
         // 临时目录由 ITempFileService 在退出时清理，异常结束留下的目录在启动时回收
-    }
-
-    /// <summary>
-    ///     启动后延迟检查特别版更新。失败静默，不阻塞启动；有新版本才弹窗，同一版本只提醒一次。
-    /// </summary>
-    private async Task CheckSpecialUpdateAfterStartupAsync()
-    {
-        try
-        {
-            // 等主窗口与托盘就绪，弹窗才有正确的 Owner，也不会和启动动画抢焦点
-            await Task.Delay(TimeSpan.FromSeconds(8));
-            await App.GetService<IUpdateService>()!.CheckUpdateAsync(new UpdateOption { Trigger = UpdateTrigger.Auto });
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "启动检查特别版更新失败");
-        }
     }
 
     /// <summary>

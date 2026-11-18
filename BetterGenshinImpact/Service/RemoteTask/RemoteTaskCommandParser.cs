@@ -111,6 +111,16 @@ public enum RemoteTaskCommandKind
     Plan,
 
     /// <summary>
+    /// 检查并下载特别版更新。由人发一句话触发，机器人只负责执行。
+    /// </summary>
+    Update,
+
+    /// <summary>
+    /// 应用已经下载好的更新并重启（重启期间机器人会短暂离线）。
+    /// </summary>
+    ApplyUpdate,
+
+    /// <summary>
     /// 与下发任务无关的话，由大模型直接回答。
     /// </summary>
     Chat
@@ -552,6 +562,20 @@ public static class RemoteTaskCommandParser
     private static RemoteTaskCommandKind? TryMatchBuiltin(string text, bool exactOnly)
     {
         var compact = Compact(text);
+
+        // 「更新」这类词太短：允许作前缀就会把「更新脚本」抢成更新软件。
+        // 只认整句，其余说法交给更具体的关键词或模型。
+        if (exactOnly)
+        {
+            foreach (var (kind, keywords) in ExactOnlyKeywords)
+            {
+                if (keywords.Any(keyword => string.Equals(compact, keyword, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return kind;
+                }
+            }
+        }
+
         foreach (var (kind, keywords) in BuiltinKeywords)
         {
             foreach (var keyword in keywords)
@@ -570,6 +594,17 @@ public static class RemoteTaskCommandParser
     }
 
     /// <summary>
+    /// 只认整句的关键词。整句匹配不会误伤「更新脚本」「升级武器」这类别的话。
+    /// </summary>
+    private static readonly (RemoteTaskCommandKind Kind, string[] Keywords)[] ExactOnlyKeywords =
+    [
+        (RemoteTaskCommandKind.Update, ["更新", "升级", "更新一下", "升级一下", "更新软件", "更新程序",
+            "更新bgi", "更新bettergi", "更新特别版"]),
+        // 第二步必须单独一句：重启会杀掉机器人自己，得让上一条回复先发出去
+        (RemoteTaskCommandKind.ApplyUpdate, ["重启更新", "应用更新", "安装更新", "重启并更新", "重启以完成更新"])
+    ];
+
+    /// <summary>
     /// 内置指令关键词，按优先级排列；「任务」类放最后，避免抢占任务名。
     /// <para>
     /// 查询类指令只做整句匹配：一旦允许「以…开头」，用户说「体力不够了帮我清一下」就会被当成查询。
@@ -586,6 +621,10 @@ public static class RemoteTaskCommandParser
         (RemoteTaskCommandKind.Inventory, ["背包", "看背包", "查看背包", "打开背包", "包里有什么", "查看物品"]),
         (RemoteTaskCommandKind.Wish, ["抽卡", "祈愿", "看抽卡", "抽卡记录", "祈愿记录"]),
         (RemoteTaskCommandKind.Login, ["切号", "换号", "换账号", "扫码登录", "登录二维码", "登录界面"]),
+        // 更新只收带前缀的说法：单独一个「更新」交给 ExactOnlyKeywords，
+        // 否则「更新脚本」会被这里的 StartsWith 抢走。
+        (RemoteTaskCommandKind.Update, ["检查更新", "查更新", "更新软件", "更新程序", "更新bgi",
+            "更新bettergi", "更新特别版", "升级软件", "有没有新版", "有新版本吗"]),
         // 「绑定米游社」只在这里出现一次就会和「扫码登录」撞车，所以写全一点，避免误抢换号指令
         (RemoteTaskCommandKind.BindMys, ["绑定米游社", "米游社绑定", "绑定mys", "米游社登录", "登录米游社",
             "绑定米游社账号", "扫码绑定米游社", "绑定一下米游社"]),

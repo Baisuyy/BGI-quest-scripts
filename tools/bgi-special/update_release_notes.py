@@ -20,10 +20,16 @@ import pathlib
 API = "https://api.github.com"
 REPO = os.environ.get("REPO", "Baisuyy/BGI-quest-scripts")
 TOKEN = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
-TEMPLATE = pathlib.Path(__file__).resolve().parents[2] / ".github" / "release-notes-template.md"
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+TEMPLATE = ROOT / ".github" / "release-notes-template.md"
+NOTES_DIR = ROOT / "Docs" / "release-notes"
 
 # BetterGI 特别版，基于上游 **0.66.3-alpha.3** 构建，源码 bgi-special @ 532f400。
-HEADER = re.compile(r"基于上游\s*\*\*(?P<base>[^*]+)\*\*\s*构建，源码\s*(?P<ref>\S+)\s*@\s*(?P<sha>[0-9a-fA-F]{4,40})")
+# 两种写法都要认：旧正文是「基于上游 **0.66.3-alpha.3** 构建，源码 x @ y」，
+# 新模板是「0.67.0-special.7.5　基于上游 0.67.0，源码 x @ y」。
+HEADER = re.compile(
+    r"基于上游\s*\*{0,2}(?P<base>[0-9][\w.\-]*)\*{0,2}\s*[，,]?\s*(?:构建)?\s*[，,]?\s*源码\s*(?P<ref>\S+)\s*@\s*(?P<sha>[0-9a-fA-F]{4,40})"
+)
 
 
 def request(method: str, path: str, payload=None):
@@ -59,17 +65,26 @@ def main() -> int:
     changed = 0
     for rel in targets:
         tag = rel["tag_name"]
+        version = tag.removeprefix("special-v")
         head = (rel.get("body") or "").strip().splitlines()
         m = HEADER.search(head[0]) if head else None
         if not m:
             print(f"[!] {tag}：正文里没有版本/源码信息，跳过（避免写空）")
             continue
 
+        # 本版特性单独存在 Docs/release-notes/<版本>.md：说明只讲这一版改了什么，
+        # 不再把「与官方版的差异」整段复制进每个 Release。
+        notes_file = NOTES_DIR / f"{version}.md"
+        if not notes_file.is_file():
+            print(f"[!] {tag}：缺 {notes_file.name}，跳过（不拿旧正文凑数）")
+            continue
+
         body = (template
-                .replace("{{VERSION}}", tag.removeprefix("special-v"))
+                .replace("{{VERSION}}", version)
                 .replace("{{BASE}}", m.group("base").strip())
                 .replace("{{REF}}", m.group("ref"))
-                .replace("{{SHA}}", m.group("sha")))
+                .replace("{{SHA}}", m.group("sha"))
+                .replace("{{NOTES}}", notes_file.read_text(encoding="utf-8").strip()))
         if body.strip() == (rel.get("body") or "").strip():
             print(f"[=] {tag}：已是新说明")
             continue

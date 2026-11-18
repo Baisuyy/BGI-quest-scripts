@@ -411,10 +411,10 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <ui:TextBlock Grid.Row="0" FontTypography="Body" Text="任务结束后回传截图" />
+                    <ui:TextBlock Grid.Row="0" FontTypography="Body" Text="没跑成时回传画面" />
                     <ui:TextBlock Grid.Row="1"
                                   Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                                  Text="回传失败时自动降级为纯文本"
+                                  Text="失败或取消才截，成功时只发结果与告警（跑完站那的截图没信息量）"
                                   TextWrapping="Wrap" />
                     <ui:ToggleSwitch Grid.Row="0"
                                      Grid.RowSpan="2"

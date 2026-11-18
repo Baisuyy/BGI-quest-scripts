@@ -150,7 +150,7 @@ public sealed class RemoteTaskIntentResolver(
                    兑换码要把码本身带上：{"intent":"run","task_id":"redeem_code","code":"8HZH86K6E2PW","say":"一句中文"}
                    采集素材要把采集物名带上：{"intent":"run","task_id":"auto_pathing","material":"霓裳花","say":"一句中文"}
                 2. 这些日常操作不用跑任务，直接说要做哪个：
-                   {"intent":"control","action":"status|screenshot|stop|help|list|resin|inventory|wish|close_game|bind_mys","say":"一句中文"}
+                   {"intent":"control","action":"status|screenshot|stop|help|list|resin|inventory|wish|close_game|bind_mys|update|apply_update","say":"一句中文"}
                 3. 清单里没有对应任务，但可以在游戏界面上点出来（查看背包、翻菜单、点某个按钮）：
                    {"intent":"pilot","goal":"一句话说清要做什么","say":"一句中文"}
                 4. 与游戏操作无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
@@ -172,6 +172,8 @@ public sealed class RemoteTaskIntentResolver(
                   用户只是问「为什么要绑」「绑了有什么用」时用 chat，一句话说清：绑了不用开游戏就能查树脂，
                   发「绑定米游社」扫个码即可，绑定必须在私聊里做。
                 - 不知道米游社怎么绑就照上面这条说，不要编开发者工具、Cookie、F12 之类的步骤。
+                - 说「更新」「升级」「有没有新版」用 control + update，只负责检查并下载；
+                  「重启更新」「装更新」用 control + apply_update。更新只能由人开口，绝不主动提。
                 - say 用上面人设的语气，说人话，不超过 40 字，不要复述 JSON。
                 """;
     }
@@ -269,6 +271,9 @@ public sealed class RemoteTaskIntentResolver(
             "wish" or "gacha" => new RemoteTaskCommand(RemoteTaskCommandKind.Wish, Say: say),
             "close_game" or "closegame" => new RemoteTaskCommand(RemoteTaskCommandKind.CloseGame, Say: say),
             "bind_mys" or "bindmys" => new RemoteTaskCommand(RemoteTaskCommandKind.BindMys, Say: say),
+            // 更新只由人触发：模型可以把它解析成动作，但不该自己决定「顺便升个级」
+            "update" or "check_update" => new RemoteTaskCommand(RemoteTaskCommandKind.Update, Say: say),
+            "apply_update" or "restart_update" => new RemoteTaskCommand(RemoteTaskCommandKind.ApplyUpdate, Say: say),
             _ => null
         };
     }

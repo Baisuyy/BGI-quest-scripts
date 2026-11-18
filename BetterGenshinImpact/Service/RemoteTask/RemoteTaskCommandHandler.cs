@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -10,6 +11,7 @@ using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Core.Mys;
+using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask.AutoPathing;
 using BetterGenshinImpact.GameTask.Common;
 using BetterGenshinImpact.GameTask.Runtime;
@@ -28,7 +30,12 @@ namespace BetterGenshinImpact.Service.RemoteTask;
 /// <param name="Text">回复正文。</param>
 /// <param name="Image">要一并回传的 JPEG 截图。</param>
 /// <param name="RunId">本次指令启动的独立任务运行标识，未启动任务时为 null。</param>
-public sealed record RemoteTaskReply(string Text, byte[]? Image = null, Guid? RunId = null);
+/// <param name="RestartAfterSend">发送这条回复后保存配置并退出进程，让更新脚本接手替换文件。</param>
+public sealed record RemoteTaskReply(
+    string Text,
+    byte[]? Image = null,
+    Guid? RunId = null,
+    bool RestartAfterSend = false);
 
 /// <summary>
 /// 把远程指令映射到游戏内操作：启动/停止独立任务、查树脂、开界面、关游戏、自由操作。
@@ -50,6 +57,7 @@ public sealed class RemoteTaskCommandHandler(
     RemoteTaskPlanRunner planRunner,
     GenshinWikiClient wiki,
     MysBindingService mysBinding,
+    IHttpClientFactory httpClientFactory,
     ILogger<RemoteTaskCommandHandler> logger)
 {
     /// <summary>
@@ -130,6 +138,8 @@ public sealed class RemoteTaskCommandHandler(
             RemoteTaskCommandKind.Script => await ScriptAsync(command, cancellationToken).ConfigureAwait(false),
             RemoteTaskCommandKind.Schedule => new RemoteTaskReply(Schedule(command)),
             RemoteTaskCommandKind.Login => await LoginAsync(command, cancellationToken).ConfigureAwait(false),
+            RemoteTaskCommandKind.Update => await UpdateAsync(command).ConfigureAwait(false),
+            RemoteTaskCommandKind.ApplyUpdate => ApplyUpdate(command),
             RemoteTaskCommandKind.BindMys => await BindMysAsync(command, message, cancellationToken)
                 .ConfigureAwait(false),
             RemoteTaskCommandKind.Path => await PathingAsync(command, onRunStarted, cancellationToken)
@@ -250,7 +260,7 @@ public sealed class RemoteTaskCommandHandler(
         }
 
         return new RemoteTaskReply(
-            $"{head}\n发送「状态」查看进度，发送「停止」可中断，跑完会自动回传截图。",
+            $"{head}\n发送「状态」查看进度，发送「停止」可中断，跑完会把结果发回来，出问题才附画面。",
             RunId: request.RunId);
     }
 
@@ -492,6 +502,75 @@ public sealed class RemoteTaskCommandHandler(
         return image == null
             ? new RemoteTaskReply("全屏截图失败，可能没有桌面访问权限。")
             : new RemoteTaskReply((command.Say ?? "整个屏幕如下。").Trim(), image);
+    }
+
+    /// <summary>
+    /// 检查并下载特别版更新。人发一句话触发，机器人只负责执行。
+    /// <para>
+    /// 不在这里直接重启：重启会把机器人自己一起关掉，这条回复还没发出去用户就断线了。
+    /// 所以拆成两句话——这一句只报结果，用户回「重启更新」再动手。
+    /// </para>
+    /// </summary>
+    private async Task<RemoteTaskReply> UpdateAsync(RemoteTaskCommand command)
+    {
+        string Body(string text) => string.IsNullOrWhiteSpace(command.Say) ? text : $"{command.Say}\n{text}";
+
+        var check = await SpecialUpdater.CheckAsync(httpClientFactory, logger).ConfigureAwait(false);
+        if (!check.Reachable || check.LatestVersion is null)
+        {
+            return new RemoteTaskReply(Body(check.Message));
+        }
+
+        // 没有增量包时只说清楚原因，不替用户打开浏览器：机器人看不见那边的屏幕
+        if (check.Patch is null)
+        {
+            return new RemoteTaskReply(Body(
+                check.Message + "\n\n" +
+                "只能下载完整包覆盖安装（不会动 User 目录）：\n" +
+                $"https://github.com/{SpecialUpdater.Repo}/releases\n\n" +
+                "装好之后再发「更新」，以后就能走增量。"));
+        }
+
+        logger.LogInformation("远程更新：开始下载 {Version} 的增量包", check.LatestVersion);
+        var (ok, message) = await SpecialUpdater.DownloadPatchAsync(check.Patch, check.LatestVersion, logger)
+            .ConfigureAwait(false);
+        if (!ok)
+        {
+            return new RemoteTaskReply(Body(
+                $"下载或校验没通过：{message}\n\n" +
+                "可以直接下完整包覆盖安装：\n" +
+                $"https://github.com/{SpecialUpdater.Repo}/releases"));
+        }
+
+        return new RemoteTaskReply(Body(
+            $"{check.Message}\n{message}\n\n" +
+            "文件已经备好，回「重启更新」就开始替换。重启期间我会离线十几秒，不用管我。"));
+    }
+
+    /// <summary>
+    /// 应用已经备好的更新：启动独立脚本、退出进程，由脚本在进程结束后替换文件并拉起新版。
+    /// </summary>
+    private RemoteTaskReply ApplyUpdate(RemoteTaskCommand command)
+    {
+        if (!SpecialPatch.IsPending)
+        {
+            return new RemoteTaskReply(
+                "还没有下载好的更新。先发一句「更新」，等我下完、校验过，再发「重启更新」。");
+        }
+
+        var pending = SpecialPatch.ReadPending();
+        if (!SpecialPatch.StartApplyAndRestart(logger))
+        {
+            return new RemoteTaskReply(
+                "没能启动更新脚本，多半被安全软件拦了。\n" +
+                "更新文件已经解压在 update\\staging，可以手动覆盖，或者直接下完整包。");
+        }
+
+        string range = pending is null ? string.Empty : $"（{pending.From} → {pending.To}）";
+        return new RemoteTaskReply(
+            $"开始替换文件并重启{range}。\n" +
+            "重启期间机器人会离线十几秒，之后自己回来，不用管。",
+            RestartAfterSend: true);
     }
 
     /// <summary>
@@ -1230,6 +1309,7 @@ public sealed class RemoteTaskCommandHandler(
                · 脚本 —— 列出或运行用户脚本
                · 定时 —— 定时任务管理
                · 状态 / 停止 / 任务
+               · 更新 —— 检查并下载新版，再发「重启更新」换上
                采素材走地图追踪路线：「采清心」「采胡桃」都行，角色名我会自己换成突破材料。
                没有专门任务的活（翻某个界面、点某个按钮），说「自由操作」加要做什么，我自己看着画面点。
                换号：先「关游戏」，在电脑上重开原神，停在登录界面时发「切号」，我把二维码截给你。

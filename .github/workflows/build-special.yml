@@ -407,14 +407,34 @@ jobs:
         run: |
           $tag = "special-v$env:VERSION"
 
+          # 说明只写这一版改了什么，不再整段复制「与官方版的差异」——
+          # 那部分属于 README，发版页每次重复一遍只会把本版改动淹掉。
+          # 有 Docs/release-notes/<版本>.md 就用它；没写就按上一个 special 标签到本次的提交标题兜底。
+          $bodyFile = "Docs/release-notes/$env:VERSION.md"
+          if (Test-Path $bodyFile) {
+              $body = (Get-Content $bodyFile -Raw).Trim()
+              Write-Host "本版说明来自 $bodyFile"
+          } else {
+              $prev = (git describe --tags --abbrev=0 --match 'special-v*' 'HEAD^' 2>$null)
+              $range = if ([string]::IsNullOrWhiteSpace($prev)) { 'HEAD' } else { "$prev..HEAD" }
+              Write-Host "没有 $bodyFile，按 $range 的提交标题生成"
+              $lines = @(git log $range --no-merges --pretty=format:'- %s' -- . `
+                  ':(exclude)Docs/**' ':(exclude).github/**' 2>$null |
+                  ForEach-Object { $_ -replace '^\w+(\([^)]*\))?:\s*', '' } |
+                  Where-Object { $_ -and $_ -notmatch '^(release|chore|docs|ci)' })
+              if ($lines.Count -eq 0) { $lines = @('- 维护性更新，没有单独的用户可见改动。') }
+              $body = "## 本版改动`n`n" + ($lines -join "`n")
+          }
+
           $notes = Get-Content '.github/release-notes-template.md' -Raw
           $notes = $notes.Replace('{{VERSION}}', $env:VERSION)
           $notes = $notes.Replace('{{BASE}}', $env:BASE)
           $notes = $notes.Replace('{{REF}}', $env:REF)
           $notes = $notes.Replace('{{SHA}}', $env:SHA)
+          $notes = $notes.Replace('{{NOTES}}', $body)
           # 没有增量包时说清楚，别让读者照着「可以直接热更新」的说明去找一个不存在的包
           if ([string]::IsNullOrWhiteSpace($env:PATCH)) {
-              $notes = "> **本次没有附带增量包**：从上一个版本升级请下载完整包（安装器或 7z 均可，User 目录照样不会被覆盖），下次发版会恢复热更新。`n`n" + $notes
+              $notes = "> **本次没有附带增量包**：从上一个版本升级请下载完整包（安装器或 7z 均可，User 目录照样不会被覆盖）。`n`n" + $notes
           }
           $notes | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
 
@@ -472,51 +492,70 @@ jobs:
           ARCHIVE: ${{ steps.pack.outputs.archive }}
           SETUP: ${{ steps.sfx.outputs.setup }}
         run: |
-          # 两条通道：WebDAV（需历史会员权益）优先，没有就退回开放平台应用密钥
+          # 两条通道：WebDAV（需历史会员权益）优先，没有就退回开放平台应用密钥。
+          # 这一段以前只在没配时打一行 ::notice::，配了但传失败也只留一条绿色步骤，
+          # 结果就是「123 盘上传呢」——都在日志深处，页面上看不出来。
+          # 现在无论跳过、成功还是失败，都往运行摘要里写一行结论。
+          function Write-Result([string]$state, [string]$detail) {
+              "### 123 云盘：$state`n`n$detail" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
           $hasWebdav = (-not [string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_USER)) -and
                        (-not [string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_PASS))
           $hasOpen = (-not [string]::IsNullOrWhiteSpace($env:PAN123_CLIENT_ID)) -and
                      (-not [string]::IsNullOrWhiteSpace($env:PAN123_CLIENT_SECRET))
 
           if (-not $hasWebdav -and -not $hasOpen) {
-              Write-Host "::notice::未配置 123 云盘凭据（PAN123_WEBDAV_* 或 PAN123_CLIENT_ID/SECRET），跳过上传"
+              $msg = "未配置凭据，本次没有上传。要开启：仓库 Secrets 里加 PAN123_CLIENT_ID / PAN123_CLIENT_SECRET（开放平台应用），或 PAN123_WEBDAV_USER / PAN123_WEBDAV_PASS（历史会员的 WebDAV）。"
+              Write-Host "::warning::$msg"
+              Write-Result "跳过（未配置凭据）" $msg
               exit 0
           }
 
           python -m pip install --quiet --disable-pip-version-check requests
 
           $files = @()
+          $names = @()
           foreach ($path in @($env:ARCHIVE, $env:SETUP)) {
               if (-not [string]::IsNullOrWhiteSpace($path) -and (Test-Path $path)) {
                   $files += @("--file", (Split-Path $path -Leaf))
+                  $names += (Split-Path $path -Leaf)
               }
           }
-          if ($files.Count -eq 0) { Write-Host "没有找到要上传的产物"; exit 0 }
+          if ($files.Count -eq 0) {
+              Write-Host "::warning::没有找到要上传的产物"
+              Write-Result "跳过（找不到产物）" "dist 下没有安装包或压缩包，检查打包步骤。"
+              exit 0
+          }
 
-          if ($hasWebdav) {
-              # WebDAV：MKCOL 逐级建目录 + 流式 PUT，内存占用与包体大小无关
-              # 云盘侧固定落在 BGI.special 目录下，按版本再分一层，避免和历史版本混在根目录
-              $root = if ([string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_ROOT)) { "/BGI.special" } else { $env:PAN123_WEBDAV_ROOT.Trim() }
-              $root = $root.TrimEnd("/")
-              $remote = "$root/$($env:VERSION)"
-              Write-Host "走 WebDAV，远端目录：$remote"
-              $arguments = @("tools/bgi-special/upload_123pan_webdav.py", "--dir", "dist", "--remote", $remote) + $files
-              Write-Host "执行：python $($arguments -join ' ')"
-              python @arguments
-              if ($LASTEXITCODE -ne 0) { throw "123 云盘 WebDAV 上传失败，退出码 $LASTEXITCODE" }
-          }
-          else {
-              # 开放平台：clientID/clientSecret 换 token 后分片上传
-              # 目录默认按名字在根目录找 BGI.special；要指定别处就配 PAN123_PARENT_ID
-              $parentArgs = @("--parent-name", "BGI.special")
-              if (-not [string]::IsNullOrWhiteSpace($env:PAN123_PARENT_ID)) {
-                  $parentArgs = @("--parent-id", $env:PAN123_PARENT_ID.Trim())
+          try {
+              if ($hasWebdav) {
+                  # WebDAV：MKCOL 逐级建目录 + 流式 PUT，内存占用与包体大小无关
+                  $root = if ([string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_ROOT)) { "/BGI.special" } else { $env:PAN123_WEBDAV_ROOT.Trim() }
+                  $root = $root.TrimEnd("/")
+                  $remote = "$root/$($env:VERSION)"
+                  Write-Host "走 WebDAV，远端目录：$remote"
+                  $arguments = @("tools/bgi-special/upload_123pan_webdav.py", "--dir", "dist", "--remote", $remote) + $files
+                  python @arguments
+                  if ($LASTEXITCODE -ne 0) { throw "WebDAV 上传失败，退出码 $LASTEXITCODE" }
+                  Write-Result "已上传" "版本 $($env:VERSION)，走 WebDAV，目录 ``$remote``：`n`n$($names -join "`n")"
               }
-              Write-Host "走开放平台 API，目标目录：$($parentArgs -join ' ')"
-              $arguments = @("tools/bgi-special/upload_123pan.py", "--dir", "dist") + $parentArgs + $files
-              Write-Host "执行：python $($arguments -join ' ')"
-              python @arguments
-              if ($LASTEXITCODE -ne 0) { throw "123 云盘开放平台上传失败，退出码 $LASTEXITCODE" }
+              else {
+                  # 开放平台：clientID/clientSecret 换 token 后分片上传
+                  $parentArgs = @("--parent-name", "BGI.special")
+                  if (-not [string]::IsNullOrWhiteSpace($env:PAN123_PARENT_ID)) {
+                      $parentArgs = @("--parent-id", $env:PAN123_PARENT_ID.Trim())
+                  }
+                  Write-Host "走开放平台 API，目标目录：$($parentArgs -join ' ')"
+                  $arguments = @("tools/bgi-special/upload_123pan.py", "--dir", "dist") + $parentArgs + $files
+                  python @arguments
+                  if ($LASTEXITCODE -ne 0) { throw "开放平台上传失败，退出码 $LASTEXITCODE" }
+                  Write-Result "已上传" "版本 $($env:VERSION)，走开放平台，目录 ``BGI.special``：`n`n$($names -join "`n")"
+              }
+          }
+          catch {
+              Write-Result "失败" ($_.Exception.Message + "`n`nGitHub 侧的发布已经完成，不影响下载。可以修好凭据后在 Actions 里单独跑「补传 123 云盘」，不用重跑整轮构建。")
+              throw
           }
 
       - name: 写入运行摘要

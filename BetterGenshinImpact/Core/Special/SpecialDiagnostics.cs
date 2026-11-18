@@ -5,6 +5,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Config;
@@ -188,6 +189,75 @@ public static class SpecialDiagnostics
             }
         }
     }
+
+    /// <summary>
+    ///     取某一时刻之后的告警与错误，用来在任务结束时说明「过程中出过什么事」。
+    ///     <para>
+    ///         日志行只有时分秒、没有日期（按天滚动文件），所以跨午夜时退化为「不看时间、只取最后几条」——
+    ///         宁可多带一条无关行，也别把午夜之后的报错漏掉。
+    ///     </para>
+    /// </summary>
+    /// <param name="since">起点，通常是任务开始时间。</param>
+    /// <param name="maxLines">最多返回几条。</param>
+    public static IReadOnlyList<string> ProblemsSince(DateTime since, int maxLines = 5)
+    {
+        var logFolder = Path.Combine(AppContext.BaseDirectory, "log");
+        if (!Directory.Exists(logFolder))
+        {
+            return Array.Empty<string>();
+        }
+
+        var latest = new DirectoryInfo(logFolder)
+            .EnumerateFiles("*.log", SearchOption.TopDirectoryOnly)
+            .OrderByDescending(f => f.LastWriteTime)
+            .FirstOrDefault();
+        if (latest == null)
+        {
+            return Array.Empty<string>();
+        }
+
+        try
+        {
+            bool sameDay = since.Date == DateTime.Today;
+            var problems = new List<string>();
+            foreach (string line in File.ReadLines(latest.FullName))
+            {
+                var m = ProblemLine.Match(line);
+                if (!m.Success)
+                {
+                    continue;
+                }
+
+                if (sameDay
+                    && TimeSpan.TryParse(m.Groups["time"].Value, out var at)
+                    && at < since.TimeOfDay)
+                {
+                    continue;
+                }
+
+                string message = m.Groups["message"].Value.Trim();
+                if (message.Length > 160)
+                {
+                    message = message[..157] + "…";
+                }
+
+                problems.Add($"[{m.Groups["level"].Value}] {message}");
+            }
+
+            return problems.Count == 0 ? Array.Empty<string>() : problems.TakeLast(maxLines).ToList();
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    /// <summary>
+    ///     日志行：<c>[12:34:56.789] [WRN] [实例] 来源 | 消息</c>。实例与来源都可能有空格，只靠竖线切。
+    /// </summary>
+    private static readonly Regex ProblemLine = new(
+        @"^\[(?<time>\d{2}:\d{2}:\d{2})\.\d+\]\s+\[(?<level>WRN|ERR|FTL)\]\s+(?:\[[^\]]*\]\s+)?[^|]*\|\s*(?<message>.*)$",
+        RegexOptions.Compiled);
 
     private static string ReadRecentErrors(int maxLines)
     {

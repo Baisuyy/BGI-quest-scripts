@@ -49,7 +49,11 @@ public partial class RemoteTaskConfig : ObservableValidator
     private string _qqBotAllowedOpenIds = string.Empty;
 
     /// <summary>
-    /// 任务结束后是否自动回传一张游戏截图。
+    /// 任务没有正常结束时回传一张游戏截图。
+    /// <para>
+    /// 只在失败或取消时截：成功后的画面就是角色站在终点，看不出任何东西。
+    /// 成功时的回传改成「结果 + 过程中出现的告警」，比一张空镜有用。
+    /// </para>
     /// </summary>
     [ObservableProperty]
     private bool _screenshotOnFinish = true;
