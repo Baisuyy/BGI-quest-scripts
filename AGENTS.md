@@ -41,12 +41,6 @@
 - 键鼠操作后再识图，必须适当延时：游戏响应通常有 30～60 ms 延迟，截图来源也有延迟。
 - 键鼠操作之间也需合理间隔，避免在 30 fps 游戏中因操作过快而丢失输入。
 
-## 任务模式与实时触发器
-
-- 任务（`TaskRunner` / `SoloTask`）一开始就进入任务模式：调度器只运行任务用 `AddTrigger` 租用的触发器，用户配置里开的自动拾取、自动剧情、自动吃药在任务期间一律停用。
-- 所以凡是依赖实时触发器的任务，必须在自己的 `RunAsync` 里显式租用，并用 `using` 覆盖执行期间。踩过的坑：`auto_pathing`（机器人下发的采集）包成 SoloTask 时漏了 `AddTrigger("AutoPick")`，整条路线走完什么都没捡。
-- 同一条路线手动跑正常、远程跑不拾取，就是这个原因——手动的入口是 `ScriptGroupProject`，那里已经租用了 `AutoPick`。排查时看日志：任务期间若只有「实时触发器 自动拾取 停用」而没有对应的启用，就是没租用。
-
 ## 编译验证
 
 禁止直接运行主程序进行测试或截图（包括启动 exe、`dotnet run` 或通过 IDE 启动）。主程序要求管理员权限，harness 无法通过启动 exe 完成模拟测试和截图感知，因此不要将启动主程序作为验证步骤。
@@ -60,39 +54,3 @@ dotnet msbuild BetterGenshinImpact.sln -restore -p:Configuration=Debug -nologo -
 ## 代码审查
 
 仅在执行代码审查时，读取并遵循 [.agents/code-review.md](.agents/code-review.md)。
-
-## 特别版发布约定
-
-以下几条是维护者定下的固定做法，改流水线或写发布脚本时按这里的约定来，不要临时另起一套。
-
-- **安装包用 Kachina**：安装器由 `YuehaiTeam/kachina-installer` 的 `kachina-builder.exe` 生成，配置在 `Build/kachina.special.config.json`，产物名 `BetterGI.Install.<版本>.exe`。旧的 `7z.sfx` 自解压包不再使用。
-- **123 云盘默认落在 `BGI.special`**：上传目标目录固定为云盘根下的 `BGI.special`，按版本再分一层（`/BGI.special/<版本>`）。脚本的 `--parent-name` / `PAN123_WEBDAV_ROOT` 默认值都是它，不要再传根目录。
-- **版本号**：`0.67.0-special.7.3` 这种形式。前缀 `<上游版本>` 跟随上游，**只有 `special.N` 这个尾号属于特别版自己的版本线**，更新检查也按尾号比较。
-  - 用户说"版本号 +0.1"= 尾号 +0.1（`special.7.2` → `special.7.3`），**前缀不动**。
-  - 上游升版时才改前缀（例如上游从 0.67.0 到 0.68.0），此时尾号继续在原序列上递增，不回退。
-  - tag 与产物名一律用完整版本串：`special-v0.67.0-special.7.3`。
-- **产物三件套**：`BetterGI.Install.<版本>.exe`（Kachina 安装器）、`BetterGI_v<版本>_special-win-x64.7z`（免安装压缩包）、`BetterGI_v<版本>_patch-from-<上一版>.zip`（增量包，只要存在上一个 special 发布就必须生成）。
-- **更新源只能指向本仓库**：`Build/kachina.config.json` 是官方那份，`source` 全指向 `babalae` / `cocogoat` / Mirror 酱。打包特别版必须用 `Build/kachina.special.config.json`，`gen` 的 `-r` 也必须是 `Baisuyy/BGI-quest-scripts`。拿错配置的后果不是报错，而是特别版用户点「检查更新」被静默拉回官方版（版本号更低、功能更少），卸载信息也指向官方。流水线里已经加了断言，别为了绕开它去改 config。
-- **7.2 及更早用的是 MicaSetup**（`BetterGI_v<版本>_Setup.exe`），那个安装器只有覆盖安装、没有任何差分更新能力；7.3 起换成 Kachina 才带 `BetterGI.update.exe`。用户反馈「覆盖安装没有热更新」，先确认他装的是哪个安装器，再谈是不是 bug。
-- **发版说明只写这一版**：正文放 `Docs/release-notes/<完整版本号>.md`（例如 `0.67.0-special.7.6.md`），流水线把它塞进 `{{NOTES}}`；没写就按「上一个 special 标签..HEAD」的提交标题兜底。`.github/release-notes-template.md` 只保留头信息、安装、升级三段固定内容，**不要往模板里加跨版本的能力介绍**——以前每次重贴一遍「与官方版的差异」，本版改动被淹掉，用户看不到这版到底改了什么。
-- **更新只由人触发**：启动时不查、不弹窗。入口只有两个：菜单里的「检查更新」，以及 QQ 里发「更新」（下载校验）→「重启更新」（退出并替换）。别把 `CheckSpecialUpdateAfterStartupAsync` 那种开机检查加回来，它会打断启动流程。
-- **123 云盘**：主流程里那一步是 `continue-on-error` 的，跳过和失败都只写运行摘要。要补传已发布的版本，跑 `upload-123pan.yml`（填版本号即可），不要为了传盘重跑整轮构建。各网盘能不能给直链、限不限速，见 [发布包下载通道](Docs/design/release-channels.md)。
-- **发版只由人决定**：推 `special-v<完整版本>` 标签触发构建 + 发 Release。每日上游同步只跑 `make_release=false` 的构建验证，不自动发版——否则版本尾号会变成 `GITHUB_RUN_NUMBER`（`special.100` 这种），比人发的版本还大，发布页出现两条版本线，客户端天天弹更新。
-- **`{{BASE}}` 取主版本**：`<Version>` 写的是完整串（`0.67.0-special.7.5`），发版说明里的「基于上游 X 构建」由流水线用正则截出 `0.67.0`，别再让 `{{BASE}}` 直接吃整串。
-- **热更新只做相邻版本**：增量包名 `BetterGI_v<新>_patch-from-<旧>.zip`，流水线只拿「上一个 special 发布」当基准。客户端按 `_patch-from-` 后的版本号与当前版本精确匹配，匹配不上就明说「这一版没有可套用的增量包（只做相邻版本）」并给完整包链接，不要含糊成「没有在线更新」——那句话在 7.5 之后已经不成立。
-- **`User` 目录是硬边界**：增量包不打包 `User/**`（构建端 `-like 'User\*'` 跳过），客户端 `ParseManifest` 再剔除一次，覆盖脚本动手前还挡一次。三层都留着——漏一层就是把用户改过的配置换回默认值，而用户根本看不出发生过什么。
-- **升级路径的默认答案是热更新**：发版说明、弹窗、帮助文案一律先讲增量包（几 MB、退出即换、`User` 不动），完整包作为「跨版本 / 增量包缺失」的退路。别再写「需要下载安装包覆盖安装」了事。
-
-## 地图追踪断点续跑
-
-- 进度落在 `User/PathProgress.json`，键是相对 `User` 的路径，值是「第几段、段内第几点」。文件长度或修改时间变了，旧进度自动作废。
-- 粒度是**段级优先**：段是按传送点切出来的，段首一般就是传送点，重跑一段几十秒，位置确定。只有确认人物还站在断点 30m 内，才做点级续跑——否则会跳过一次没执行的传送，把人留在提瓦特另一头。
-- 记录点（`PathProgressStore.Note`）放在**每个路径点执行之前**，这样被强杀时最后落盘的位置就是要接着走的位置。
-- 开关是 `CommonConfig.PathingResumeEnabled`，默认开。关掉用于「这条路线重新录过、要完整验证一遍」。
-- 脚本执行路线时务必把文件路径传进 `AutoPathingScript.Run(json, logicalPath)`，否则进度只能按路线名记，同名或同点数的路线会串。
-
-## 日志与诊断
-
-- 落盘级别由 `CommonConfig.LogFileLevel` 控制（`Debug` / `Information` / `Warning` / `Error`），只影响文件，不影响界面日志框。改完要重启才生效，因为 Serilog 的级别在启动时定死。
-- 日志里出现 `[ERR]` 会触发一次诊断包（`log/diagnostics/BGI-diag-*.zip`，含日志尾部、环境、脱敏配置摘要），10 分钟内不重复，保留最近 5 个。只在本地生成，不自动上传。
-- **不要用 `LogError` 表达「正常的分支」**。踩过的坑：`LimitedFile.ReadPathSync` 在目录不存在时打 ERR，而首次运行的脚本那个 `records/` 目录本来就不存在，日志里于是全是假警报，真问题时反而被淹没。

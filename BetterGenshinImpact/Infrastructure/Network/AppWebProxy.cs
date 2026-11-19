@@ -67,12 +67,6 @@ public sealed class AppWebProxy : IWebProxy
     }
 
     /// <summary>
-    /// 无论代理怎么配都直连的主机。腾讯的机器人接口在国内直连最稳，
-    /// 走代理常被中间人换成自签证书，表现为「证书校验未通过」后无限重连。
-    /// </summary>
-    private static readonly string[] AlwaysDirectHosts = ["api.sgroup.qq.com", "bots.qq.com"];
-
-    /// <summary>
     /// 当前代理模式
     /// </summary>
     public NetworkProxyMode Mode => _config.ProxyMode;
@@ -83,11 +77,6 @@ public sealed class AppWebProxy : IWebProxy
     /// <inheritdoc />
     public Uri? GetProxy(Uri destination)
     {
-        if (IsAlwaysDirect(destination))
-        {
-            return null;
-        }
-
         switch (_config.ProxyMode)
         {
             case NetworkProxyMode.None:
@@ -97,22 +86,6 @@ public sealed class AppWebProxy : IWebProxy
             default:
                 return _systemProxy?.IsBypassed(destination) == false ? _systemProxy.GetProxy(destination) : null;
         }
-    }
-
-    /// <summary>
-    /// 是否是必须直连的主机
-    /// </summary>
-    private static bool IsAlwaysDirect(Uri destination)
-    {
-        foreach (var host in AlwaysDirectHosts)
-        {
-            if (string.Equals(destination.Host, host, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /// <inheritdoc />

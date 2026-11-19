@@ -364,16 +364,6 @@ public partial class AllConfig : ObservableObject
     public ExternalAccessConfig ExternalAccessConfig { get; set; } = new();
 
     /// <summary>
-    /// 远程任务配置（QQ 机器人下发任务与截图回传）
-    /// </summary>
-    public RemoteTaskConfig RemoteTaskConfig { get; set; } = new();
-
-    /// <summary>
-    /// 定时任务配置（按时间点或树脂阈值自动触发任务）
-    /// </summary>
-    public RemoteScheduleConfig RemoteScheduleConfig { get; set; } = new();
-
-    /// <summary>
     /// 网络与代理设置
     /// </summary>
     public NetworkConfig NetworkConfig { get; set; } = new();

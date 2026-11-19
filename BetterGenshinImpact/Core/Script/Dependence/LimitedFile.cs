@@ -28,9 +28,7 @@ public class LimitedFile(string rootPath)
 
             if (!Directory.Exists(fullPath))
             {
-                // 脚本首次运行时 records/ 这类目录还没建，是正常路径，不是错误。
-                // 按 ERR 记会让日志里全是假警报，真出问题时反而被淹没。
-                TaskControl.Logger.LogDebug("ReadPathSync 目录不存在，返回空列表: {Path}", fullPath);
+                TaskControl.Logger.LogError("ReadPathSync 目录不存在: {Path}", fullPath);
                 return Array.Empty<string>();
             }
 

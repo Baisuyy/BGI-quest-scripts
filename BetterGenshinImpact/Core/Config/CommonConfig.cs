@@ -100,13 +100,6 @@ public partial class CommonConfig : ObservableObject
     private string _runForVersion = string.Empty;
 
     /// <summary>
-    ///     上次已经弹过更新提示的特别版版本号。
-    ///     <para>启动时的自动检查对每个版本只提醒一次，记在这里；空字符串表示还没提醒过。</para>
-    /// </summary>
-    [ObservableProperty]
-    private string _lastNotifiedSpecialVersion = string.Empty;
-
-    /// <summary>
     /// 一个设备只运行一次的已运行设备ID列表
     /// </summary>
     [ObservableProperty]
@@ -136,42 +129,4 @@ public partial class CommonConfig : ObservableObject
     /// </summary>
     [ObservableProperty]
     private string _redeemCodeGlobalFeedsUpdateVersion = string.Empty;
-
-    /// <summary>
-    ///     写入日志文件的最低级别。
-    ///     <para>
-    ///         默认 Debug，排查问题方便，但一天能写出几十 MB、上百万行。
-    ///         设成 Error 之后只留错误，长时间挂机、只关心「有没有出事」时用这个。
-    ///         界面日志框不受影响（它自己按级别过滤），这里只管落盘。
-    ///     </para>
-    /// </summary>
-    [ObservableProperty]
-    private LogFileLevel _logFileLevel = LogFileLevel.Debug;
-
-    /// <summary>
-    ///     出错时自动打包诊断信息（日志 + 环境），方便反馈问题时直接发出去。
-    ///     <para>只在本机生成 zip，不会自动上传；上传需要用户自己点。</para>
-    /// </summary>
-    [ObservableProperty]
-    private bool _diagnosticsOnErrorEnabled = true;
-
-    /// <summary>
-    ///     地图追踪断点续跑。
-    ///     <para>
-    ///         开启后，一条路线被中断（停止、崩溃、断电）时记下走到第几段，
-    ///         下次执行同一条路线会接着走，不用从头再来。脚本跑几十条路线时差别很大。
-    ///         关掉则每次都从第一个点开始，适合「这条路线我重新录过、要完整验证一遍」的场景。
-    ///     </para>
-    /// </summary>
-    [ObservableProperty]
-    private bool _pathingResumeEnabled = true;
-}
-
-/// <summary>日志文件保留级别。</summary>
-public enum LogFileLevel
-{
-    Debug = 0,
-    Information = 1,
-    Warning = 2,
-    Error = 3,
 }

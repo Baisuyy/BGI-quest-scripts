@@ -256,43 +256,35 @@ public sealed class MiniMapPointsCanvas : FrameworkElement
         var circleGeometry = new EllipseGeometry(circleCenter, radius, radius);
         dc.DrawGeometry(fillBrush, borderPen, circleGeometry);
 
-        // 与大地图共用同一套画法：圆底固定，图标内缩不裁切
         if (_labelMap.TryGetValue(point.LabelId, out var label))
         {
             var image = MapIconImageCache.TryGet(label.IconUrl);
-            if (image == null)
+            if (image != null)
+            {
+                var imageRect = new Rect(circleCenter.X - radius, circleCenter.Y - radius, width, height);
+                dc.PushClip(circleGeometry);
+                dc.DrawImage(image, imageRect);
+                dc.Pop();
+            }
+            else
             {
                 _ = MapIconImageCache.GetAsync(label.IconUrl, CancellationToken.None);
-            }
 
-            MaskMapPointIconRenderer.Draw(dc, centerX, centerY, width, image, GetColorBrush(label));
+                var brush = GetColorBrush(label);
+                dc.DrawEllipse(brush, null, new Point(centerX, centerY), width / 2.0, height / 2.0);
+            }
         }
         else
         {
-            MaskMapPointIconRenderer.Draw(dc, centerX, centerY, width, null, GetStableBrush(point.Id));
+            var brush = new SolidColorBrush(GenerateRandomColor(point.Id));
+            brush.Freeze();
+            dc.DrawEllipse(brush, null, new Point(centerX, centerY), width / 2.0, height / 2.0);
         }
 
         if (point.IsHidden)
         {
             dc.Pop();
         }
-    }
-
-    /// <summary>
-    /// 按 ID 取稳定的随机色画刷，避免每帧颜色乱跳。
-    /// </summary>
-    private Brush GetStableBrush(string id)
-    {
-        var key = "id:" + id;
-        if (_colorBrushCache.TryGetValue(key, out var cached))
-        {
-            return cached;
-        }
-
-        var brush = new SolidColorBrush(GenerateRandomColor(id));
-        brush.Freeze();
-        _colorBrushCache[key] = brush;
-        return brush;
     }
 
     private Brush GetColorBrush(MaskMapPointLabel label)
