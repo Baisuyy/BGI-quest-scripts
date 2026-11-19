@@ -78,8 +78,21 @@ KEEP = (
 )
 
 
+# 上游有、但特别版明确不要的文件。同步时既不从上游拷贝进来，本地残存的也照删。
+# 与 KEEP 相反：KEEP 是「上游没有也要留着」，DROP 是「上游有也不许进来」。
+DROP = (
+    # 只有官方仓库（owner == babalae）才会跑，在 fork 里每次发 Release 都留一条
+    # 灰色的 skipped 记录，纯噪音
+    ".github/workflows/mirrorchyan_release_note.yml",
+)
+
+
 def kept(rel: str) -> bool:
     return any(rel == k or (k.endswith("/") and rel.startswith(k)) for k in KEEP)
+
+
+def dropped(rel: str) -> bool:
+    return any(rel == d or (d.endswith("/") and rel.startswith(d)) for d in DROP)
 
 
 # 只属于特别版、上游永远没有的目录。它们本来该在 KEEP 里，但 KEEP 是手写清单，
@@ -137,9 +150,14 @@ def main() -> int:
         print("    处理办法：确认后加进 sync_source.py 的 KEEP 清单再重跑。", file=sys.stderr)
         return 3
 
+    # 上游有也不许进来的文件：本地若还残留，一并清掉
+    for rel in sorted(f for f in local_files if dropped(f) and f in up_files):
+        (local / rel).unlink(missing_ok=True)
+        removed += 1
+
     copied = 0
     for rel in sorted(up_files):
-        if kept(rel):
+        if kept(rel) or dropped(rel):
             continue
         dst = local / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
