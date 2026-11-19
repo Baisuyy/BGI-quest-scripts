@@ -19,6 +19,7 @@ using BetterGenshinImpact.Core.Recognition;
 using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.OCR.Paddle;
 using BetterGenshinImpact.Core.Script;
+using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.AutoTrackPath;
 using BetterGenshinImpact.GameTask.Common.Element.Assets;
@@ -542,11 +543,73 @@ public partial class CommonSettingsPageViewModel : ViewModel
     }
 
     /// <summary>
+    /// 日志上传方式。0 关闭 / 1 仅手动 / 2 自动。
+    /// </summary>
+    public int SelectedLogUploadMode
+    {
+        get => (int)Config.CommonConfig.LogUploadMode;
+        set
+        {
+            if (value < 0 || value > 2 || SelectedLogUploadMode == value)
+            {
+                return;
+            }
+
+            Config.CommonConfig.LogUploadMode = (LogUploadMode)value;
+            OnPropertyChanged();
+        }
+    }
+
+    /// <summary>上传进行中：按钮置灰，避免连点发两份。</summary>
+    [ObservableProperty]
+    private bool _isLogUploading;
+
+    /// <summary>
+    /// 上传当前日志。走的是和自动模式同一条链路：脱敏 → 压缩 → 签名 → POST。
+    /// </summary>
+    [RelayCommand]
+    public async Task OnUploadLog()
+    {
+        if (IsLogUploading)
+        {
+            return;
+        }
+
+        if (Config.CommonConfig.LogUploadMode == LogUploadMode.Off)
+        {
+            _ = ThemedMessageBox.ShowAsync("日志上传已关闭。要上传请先把上面的选项改成「仅手动」或「自动」。",
+                "日志上传", MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Information);
+            return;
+        }
+
+        IsLogUploading = true;
+        try
+        {
+            var r = await LogUploader.UploadLatestAsync("manual");
+            if (r.Ok)
+            {
+                _ = ThemedMessageBox.ShowAsync(
+                    $"日志已上传（编号 {r.Id}）。服务端已经收到，不用再发一次。",
+                    "日志上传", MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Success);
+            }
+            else
+            {
+                _ = ThemedMessageBox.ShowAsync(
+                    $"没传上去：{r.Message}\n\n网络不通的时候不影响游戏和任务，日志仍在本地 log 目录里。",
+                    "日志上传", MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Warning);
+            }
+        }
+        finally
+        {
+            IsLogUploading = false;
+        }
+    }
+
+    /// <summary>
     /// 手动生成一个诊断包并打开所在目录。出错时也会自动生成，这里给的是「现在就想发一个」的入口。
     /// </summary>
     [RelayCommand]
-    public void OnBuildDiagnostics()
-    {
+    public void OnBuildDiagnostics()    {
         var path = Core.Special.SpecialDiagnostics.Build("用户手动生成");
         if (path == null)
         {

@@ -1,4 +1,5 @@
 using BetterGenshinImpact.Helpers;
+using BetterGenshinImpact.Core.Special;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
@@ -154,6 +155,23 @@ public partial class CommonConfig : ObservableObject
     /// </summary>
     [ObservableProperty]
     private bool _diagnosticsOnErrorEnabled = true;
+
+    /// <summary>
+    ///     日志上传方式：<see cref="LogUploadMode.Off" /> / Manual / Auto。
+    ///     <para>
+    ///         默认 Manual——打包好了放在本地，用户点了才发。选 Auto 之后，
+    ///         出错和正常退出时会自动把当前日志（已脱敏、已压缩）发到自建接收端。
+    ///         不想有任何出站请求就选 Off。
+    ///     </para>
+    /// </summary>
+    [ObservableProperty]
+    private LogUploadMode _logUploadMode = LogUploadMode.Manual;
+
+    /// <summary>
+    ///     日志接收地址，默认指向自建服务。留空则回落到内置默认值。
+    /// </summary>
+    [ObservableProperty]
+    private string _logUploadUrl = LogUploader.DefaultEndpoint;
 
     /// <summary>
     ///     地图追踪断点续跑。

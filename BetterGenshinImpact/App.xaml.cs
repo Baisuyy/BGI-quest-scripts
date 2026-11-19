@@ -815,6 +815,17 @@ public partial class App : Application
             Debug.WriteLine(ex);
         }
 
+        // 自动上传模式下，退出前把这次运行的日志发出去。最多等 8 秒：
+        // 用户按「退出」是希望它真的退，不是在这里挂半分钟。
+        try
+        {
+            await Core.Special.LogUploader.UploadBeforeExitAsync(TimeSpan.FromSeconds(8));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+
         // 临时文件由 TempFileService 在宿主停止时删除
 
         try

@@ -1089,6 +1089,8 @@
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -1142,6 +1144,35 @@
                                                    VerticalAlignment="Top"
                                                    Command="{Binding DataContext.BuildDiagnosticsCommand, RelativeSource={RelativeSource AncestorType=Page}}"
                                                    Content="生成诊断包" />
+                                        <ui:TextBlock Grid.Row="4"
+                                                      Grid.Column="0"
+                                                      Margin="0,12,16,0"
+                                                      FontTypography="Body"
+                                                      Text="把日志发送给开发者"
+                                                      TextWrapping="Wrap" />
+                                        <ComboBox Grid.Row="4"
+                                                  Grid.Column="1"
+                                                  Margin="0,12,36,0"
+                                                  HorizontalAlignment="Right"
+                                                  MinWidth="150"
+                                                  SelectedIndex="{Binding SelectedLogUploadMode, Mode=TwoWay}">
+                                            <ComboBoxItem Content="不上传" />
+                                            <ComboBoxItem Content="仅手动上传" />
+                                            <ComboBoxItem Content="自动上传" />
+                                        </ComboBox>
+                                        <ui:TextBlock Grid.Row="5"
+                                                      Grid.Column="0"
+                                                      Margin="0,6,16,0"
+                                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                                      Text="上传前会去掉账号、Cookie、令牌、邮箱和本机用户名，只发日志正文。选「自动上传」后，出错和退出时各发一次；不想联网就选「不上传」。"
+                                                      TextWrapping="Wrap" />
+                                        <ui:Button Grid.Row="5"
+                                                   Grid.Column="1"
+                                                   Margin="0,6,36,0"
+                                                   HorizontalAlignment="Right"
+                                                   VerticalAlignment="Top"
+                                                   Command="{Binding DataContext.UploadLogCommand, RelativeSource={RelativeSource AncestorType=Page}}"
+                                                   Content="上传当前日志" />
                                     </Grid>
                                     <Grid Margin="16"
                                           Visibility="{Binding IsCustomHtmlGroup, Converter={StaticResource BooleanToVisibilityConverter}}">

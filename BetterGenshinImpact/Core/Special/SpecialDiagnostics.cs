@@ -375,5 +375,9 @@ public sealed class ErrorDiagnosticsSink : ILogEventSink
         var message = logEvent.RenderMessage();
         SpecialDiagnostics.CaptureOnError(
             logEvent.Exception != null ? $"{message}（{logEvent.Exception.GetType().Name}）" : message);
+
+        // 自动模式下顺手把日志发出去。它在自己的线程里跑，出错只写 WRN，
+        // 不会拖住正在报错的这条链路。
+        LogUploader.TryAutoUpload("error");
     }
 }
