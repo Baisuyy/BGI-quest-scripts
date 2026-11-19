@@ -257,6 +257,113 @@
             </StackPanel>
         </ui:CardExpander>
 
+        <!-- 日志：查看目录、落盘级别、诊断包、上传。这几项原来塞在「启用遮罩窗口 → 日志遮罩」
+             卡片底部，和日志区域背景色、字号混在一起，没人找得到，所以单独拎成一张卡。 -->
+        <ui:CardExpander Margin="0,0,0,12"
+                         ContentPadding="0"
+                         Icon="{ui:SymbolIcon Document24}">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ui:TextBlock Grid.Row="0"
+                                  Grid.Column="0"
+                                  FontTypography="Body"
+                                  Text="日志"
+                                  TextWrapping="Wrap" />
+                    <ui:TextBlock Grid.Row="1"
+                                  Grid.Column="0"
+                                  Margin="0,4,0,0"
+                                  Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                  Text="查看日志文件、调整落盘详细程度、生成诊断包，或把日志发给开发者排查问题。"
+                                  TextWrapping="Wrap" />
+                    <ui:Button Grid.Row="0"
+                               Grid.RowSpan="2"
+                               Grid.Column="1"
+                               Margin="0,0,36,0"
+                               VerticalAlignment="Center"
+                               Command="{Binding GoToLogFolderCommand}"
+                               Content="打开日志目录" />
+                </Grid>
+            </ui:CardExpander.Header>
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="218" />
+                </Grid.ColumnDefinitions>
+                <ui:TextBlock Grid.Row="0"
+                              Grid.Column="0"
+                              FontTypography="Body"
+                              Text="写入日志文件的详细程度"
+                              TextWrapping="Wrap" />
+                <ComboBox Grid.Row="0"
+                          Grid.Column="1"
+                          Margin="0,0,36,0"
+                          HorizontalAlignment="Right"
+                          MinWidth="150"
+                          SelectedIndex="{Binding SelectedLogFileLevel, Mode=TwoWay}">
+                    <ComboBoxItem Content="全部（Debug）" />
+                    <ComboBoxItem Content="常规（Info）" />
+                    <ComboBoxItem Content="仅警告与错误" />
+                    <ComboBoxItem Content="仅错误" />
+                </ComboBox>
+                <ui:TextBlock Grid.Row="1"
+                              Grid.Column="0"
+                              Margin="0,6,16,0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              Text="只关心有没有报错就选「仅错误」，日志文件会小很多。改完需重启生效。出错时会自动生成诊断包。"
+                              TextWrapping="Wrap" />
+                <ui:Button Grid.Row="1"
+                           Grid.Column="1"
+                           Margin="0,6,36,0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Top"
+                           Command="{Binding BuildDiagnosticsCommand}"
+                           Content="生成诊断包" />
+                <ui:TextBlock Grid.Row="2"
+                              Grid.Column="0"
+                              Margin="0,12,16,0"
+                              FontTypography="Body"
+                              Text="把日志发送给开发者"
+                              TextWrapping="Wrap" />
+                <ComboBox Grid.Row="2"
+                          Grid.Column="1"
+                          Margin="0,12,36,0"
+                          HorizontalAlignment="Right"
+                          MinWidth="150"
+                          SelectedIndex="{Binding SelectedLogUploadMode, Mode=TwoWay}">
+                    <ComboBoxItem Content="不上传" />
+                    <ComboBoxItem Content="仅手动上传" />
+                    <ComboBoxItem Content="自动上传" />
+                </ComboBox>
+                <ui:TextBlock Grid.Row="3"
+                              Grid.Column="0"
+                              Margin="0,6,16,0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              Text="上传前会去掉账号、Cookie、令牌、邮箱和本机用户名，只发日志正文。选「自动上传」后，出错和退出时各发一次；不想联网就选「不上传」。"
+                              TextWrapping="Wrap" />
+                <ui:Button Grid.Row="3"
+                           Grid.Column="1"
+                           Margin="0,6,36,0"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Top"
+                           Command="{Binding UploadLogCommand}"
+                           Content="上传当前日志" />
+            </Grid>
+        </ui:CardExpander>
+
         <!-- 远程任务：QQ 机器人下发任务与截图回传；凭证留空时复用通知设置里的 QQ 凭证 -->
         <ui:CardExpander Margin="0,0,0,12"
                          ContentPadding="0"
@@ -1082,98 +1189,9 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                    <Grid Margin="16"
-                                          Visibility="{Binding IsLogGroup, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="218" />
-                                        </Grid.ColumnDefinitions>
-                                        <ui:TextBlock Grid.Row="0"
-                                                      Grid.Column="0"
-                                                      FontTypography="Body"
-                                                      Text="{i18n:T 日志文件}"
-                                                      TextWrapping="Wrap" />
-                                        <ui:TextBlock Grid.Row="1"
-                                                      Grid.Column="0"
-                                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                                                      Text="{i18n:T 需要排查问题时，可以打开日志目录查看完整记录。}"
-                                                      TextWrapping="Wrap" />
-                                        <ui:Button Grid.Row="0"
-                                                   Grid.RowSpan="2"
-                                                   Grid.Column="1"
-                                                   Margin="0,0,36,0"
-                                                   HorizontalAlignment="Right"
-                                                   VerticalAlignment="Center"
-                                                   Command="{Binding DataContext.GoToLogFolderCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                   Content="{i18n:T 打开日志目录}" />
-                                        <ui:TextBlock Grid.Row="2"
-                                                      Grid.Column="0"
-                                                      Margin="0,12,16,0"
-                                                      FontTypography="Body"
-                                                      Text="写入日志文件的详细程度"
-                                                      TextWrapping="Wrap" />
-                                        <ComboBox Grid.Row="2"
-                                                  Grid.Column="1"
-                                                  Margin="0,12,36,0"
-                                                  HorizontalAlignment="Right"
-                                                  MinWidth="150"
-                                                  SelectedIndex="{Binding SelectedLogFileLevel, Mode=TwoWay}">
-                                            <ComboBoxItem Content="全部（Debug）" />
-                                            <ComboBoxItem Content="常规（Info）" />
-                                            <ComboBoxItem Content="仅警告与错误" />
-                                            <ComboBoxItem Content="仅错误" />
-                                        </ComboBox>
-                                        <ui:TextBlock Grid.Row="3"
-                                                      Grid.Column="0"
-                                                      Margin="0,6,16,0"
-                                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                                                      Text="只关心有没有报错就选「仅错误」，日志文件会小很多。改完需重启生效。出错时会自动生成诊断包。"
-                                                      TextWrapping="Wrap" />
-                                        <ui:Button Grid.Row="3"
-                                                   Grid.Column="1"
-                                                   Margin="0,6,36,0"
-                                                   HorizontalAlignment="Right"
-                                                   VerticalAlignment="Top"
-                                                   Command="{Binding DataContext.BuildDiagnosticsCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                   Content="生成诊断包" />
-                                        <ui:TextBlock Grid.Row="4"
-                                                      Grid.Column="0"
-                                                      Margin="0,12,16,0"
-                                                      FontTypography="Body"
-                                                      Text="把日志发送给开发者"
-                                                      TextWrapping="Wrap" />
-                                        <ComboBox Grid.Row="4"
-                                                  Grid.Column="1"
-                                                  Margin="0,12,36,0"
-                                                  HorizontalAlignment="Right"
-                                                  MinWidth="150"
-                                                  SelectedIndex="{Binding SelectedLogUploadMode, Mode=TwoWay}">
-                                            <ComboBoxItem Content="不上传" />
-                                            <ComboBoxItem Content="仅手动上传" />
-                                            <ComboBoxItem Content="自动上传" />
-                                        </ComboBox>
-                                        <ui:TextBlock Grid.Row="5"
-                                                      Grid.Column="0"
-                                                      Margin="0,6,16,0"
-                                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                                                      Text="上传前会去掉账号、Cookie、令牌、邮箱和本机用户名，只发日志正文。选「自动上传」后，出错和退出时各发一次；不想联网就选「不上传」。"
-                                                      TextWrapping="Wrap" />
-                                        <ui:Button Grid.Row="5"
-                                                   Grid.Column="1"
-                                                   Margin="0,6,36,0"
-                                                   HorizontalAlignment="Right"
-                                                   VerticalAlignment="Top"
-                                                   Command="{Binding DataContext.UploadLogCommand, RelativeSource={RelativeSource AncestorType=Page}}"
-                                                   Content="上传当前日志" />
-                                    </Grid>
+                                    <!-- 日志设置已移到页面上方的「日志」卡片。
+                                         这里留一个空壳，不动分组布局。 -->
+                                    <Grid Visibility="Collapsed" />
                                     <Grid Margin="16"
                                           Visibility="{Binding IsCustomHtmlGroup, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <Grid.RowDefinitions>
