@@ -125,14 +125,24 @@ public static class LogUploader
                 return new LogUploadResult(false, "没找到日志文件");
             }
 
-            string text = ReadTail(file, MaxTailBytes);
-            if (string.IsNullOrWhiteSpace(text))
+            // 读 8MB、跑七条正则、再压缩，全是同步 CPU 活。放进线程池，
+            // 否则手动上传时界面会僵住一两秒。
+            byte[]? payload = await Task.Run<byte[]?>(() =>
+            {
+                string text = ReadTail(file, MaxTailBytes);
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    return null;
+                }
+
+                return Gzip(Encoding.UTF8.GetBytes(Redact(text)));
+            }, ct).ConfigureAwait(false);
+
+            if (payload == null)
             {
                 return new LogUploadResult(false, "日志是空的");
             }
 
-            string redacted = Redact(text);
-            byte[] payload = Gzip(Encoding.UTF8.GetBytes(redacted));
             return await PostAsync(payload, file.Name, reason, ct).ConfigureAwait(false);
         }
         catch (Exception e)
