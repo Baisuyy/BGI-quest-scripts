@@ -193,8 +193,8 @@ public static class SpecialDiagnostics
     /// <summary>
     ///     取某一时刻之后的告警与错误，用来在任务结束时说明「过程中出过什么事」。
     ///     <para>
-    ///         日志行只有时分秒、没有日期（按天滚动文件），所以跨午夜时退化为「不看时间、只取最后几条」——
-    ///         宁可多带一条无关行，也别把午夜之后的报错漏掉。
+    ///         新日志行自带日期，能直接和任务开始时间比；只有时分秒的旧行退化为按当天时刻比，
+    ///         跨午夜时宁可多带一条无关行，也别把午夜之后的报错漏掉。
     ///     </para>
     /// </summary>
     /// <param name="since">起点，通常是任务开始时间。</param>
@@ -228,9 +228,19 @@ public static class SpecialDiagnostics
                     continue;
                 }
 
-                if (sameDay
-                    && TimeSpan.TryParse(m.Groups["time"].Value, out var at)
-                    && at < since.TimeOfDay)
+                // 新格式带日期，能精确到「任务开始前 / 后」；只有时分秒的旧行退回按当天时刻比，
+                // 跨午夜时会多带几条，但不会漏掉午夜之后的报错。
+                if (m.Groups["date"].Success)
+                {
+                    if (DateTime.TryParse($"{m.Groups["date"].Value} {m.Groups["time"].Value}", out var at)
+                        && at < since)
+                    {
+                        continue;
+                    }
+                }
+                else if (sameDay
+                         && TimeSpan.TryParse(m.Groups["time"].Value, out var clock)
+                         && clock < since.TimeOfDay)
                 {
                     continue;
                 }
@@ -253,10 +263,11 @@ public static class SpecialDiagnostics
     }
 
     /// <summary>
-    ///     日志行：<c>[12:34:56.789] [WRN] [实例] 来源 | 消息</c>。实例与来源都可能有空格，只靠竖线切。
+    ///     日志行：<c>[2026-11-18 12:34:56.789] [WRN] [实例] 来源 | 消息</c>。实例与来源都可能有空格，只靠竖线切。
+    ///     旧版本的行没有日期，所以日期段可选——升级前后混在一个目录里也能读。
     /// </summary>
     private static readonly Regex ProblemLine = new(
-        @"^\[(?<time>\d{2}:\d{2}:\d{2})\.\d+\]\s+\[(?<level>WRN|ERR|FTL)\]\s+(?:\[[^\]]*\]\s+)?[^|]*\|\s*(?<message>.*)$",
+        @"^\[(?:(?<date>\d{4}-\d{2}-\d{2})\s+)?(?<time>\d{2}:\d{2}:\d{2})\.\d+\]\s+\[(?<level>WRN|ERR|FTL)\]\s+(?:\[[^\]]*\]\s+)?[^|]*\|\s*(?<message>.*)$",
         RegexOptions.Compiled);
 
     private static string ReadRecentErrors(int maxLines)

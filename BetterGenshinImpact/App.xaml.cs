@@ -140,13 +140,27 @@ public partial class App : Application
                         // 原始诊断独立留档；不再在文件额外复制仅供悬浮显示的OCR摘要。
                         .Filter.ByExcluding(QuestVoiceLog.IsSummary)
                         .Enrich.WithProperty("BgiInstance", instanceIdentity)
-                        .WriteTo.File(logFile,
-                            outputTemplate:
-                            "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}",
-                            rollingInterval: RollingInterval.Day,
-                            shared: true,
-                            retainedFileCountLimit: 31,
-                            retainedFileTimeLimit: TimeSpan.FromDays(21)))
+                        .WriteTo.Sink(new RepeatSuppressorSink(
+                            new LoggerConfiguration()
+                                .WriteTo.File(
+                                    // 一行一条：时间 / 级别 / 实例 / 来源 → 消息；异常另起，方便按行 grep。
+                                    // 行首带日期：按天滚动的文件如果只有时分秒，跨午夜后既排不出先后，
+                                    // 也没法把「任务开始后发生过什么」算准。
+                                    // 异常栈由格式器去重：同一条错误反复重试时只展开一次，见 ExceptionDedupTextFormatter。
+                                    new ExceptionDedupTextFormatter(
+                                        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext} | {Message:lj}{NewLine}"),
+                                    logFile,
+                                    rollingInterval: RollingInterval.Day,
+                                    // 一天几百万行的极端情况不至于长成一个几百 MB 打不开的文件
+                                    fileSizeLimitBytes: 64L * 1024 * 1024,
+                                    rollOnFileSizeLimit: true,
+                                    shared: true,
+                                    retainedFileCountLimit: 31,
+                                    retainedFileTimeLimit: TimeSpan.FromDays(21))
+                                .CreateLogger()),
+                            // 落盘级别可配：长时间只关心有没有报错的人可以设成 Error，
+                            // 一天几百万行 Debug 既占地方又让 grep 变慢。
+                            FileLogLevel(all)))
                     .WriteTo.Console(outputTemplate:
                         "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .MinimumLevel.Debug()
