@@ -123,6 +123,9 @@ public partial class App : Application
                 var logFolder = Path.Combine(AppContext.BaseDirectory, "log");
                 Directory.CreateDirectory(logFolder);
                 var logFile = Path.Combine(logFolder, "better-genshin-impact.log");
+                // 老版本的行首只有时分秒，新版带日期。升级后两者被写进同一个按天滚动的文件，
+                // 光看行首分不清哪段是哪个版本写的，跨午夜还会把顺序读反。
+                ArchiveLegacyLog(logFolder);
                 var instanceContext = InstanceBootstrap.Current.Context;
                 // 网页版实例带上实例名，例如 WebView(小号A):S1:P1234:T…
                 var instanceTypeLabel = instanceContext.InstanceName is { } instanceName
@@ -576,6 +579,48 @@ public partial class App : Application
         LogFileLevel.Information => LogEventLevel.Information,
         _ => LogEventLevel.Debug,
     };
+
+    /// <summary>
+    /// 把旧版本写下的当天日志改名归档，让新日志从干净文件开始。
+    /// <para>
+    /// 旧版行首是 <c>[HH:mm:ss.fff]</c>，新版是 <c>[yyyy-MM-dd HH:mm:ss.fff]</c>。
+    /// 升级当天两者会落进同一个按天滚动的文件，行首对不齐，也没法判断某段是哪个版本写的。
+    /// 只在首行确实是旧格式时动手，读不出或改名失败（多实例并发写）就原样留着，不影响日志功能。
+    /// </para>
+    /// </summary>
+    private static void ArchiveLegacyLog(string logFolder)
+    {
+        try
+        {
+            var todayFile = Path.Combine(logFolder, $"better-genshin-impact{DateTime.Now:yyyyMMdd}.log");
+            if (!File.Exists(todayFile))
+            {
+                return;
+            }
+
+            string? firstLine;
+            using (var stream = new FileStream(todayFile, FileMode.Open, FileAccess.Read,
+                       FileShare.ReadWrite | FileShare.Delete))
+            using (var reader = new StreamReader(stream))
+            {
+                firstLine = reader.ReadLine();
+            }
+
+            // 空文件或已经是带日期的格式，不用管
+            if (string.IsNullOrWhiteSpace(firstLine) || firstLine.StartsWith("[20", StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var stamp = DateTime.Now.ToString("HHmmss");
+            File.Move(todayFile,
+                Path.Combine(logFolder, $"better-genshin-impact{DateTime.Now:yyyyMMdd}.legacy-{stamp}.log"));
+        }
+        catch (Exception)
+        {
+            // 归档只是让日志更好读，失败不该挡住启动
+        }
+    }
 
     public static IServiceProvider ServiceProvider => _host.Services;
 

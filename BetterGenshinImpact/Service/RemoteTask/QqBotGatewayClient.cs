@@ -34,6 +34,17 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
     private const int MaxAuthFailures = 3;
 
     /// <summary>
+    /// 网络类失败的重试间隔上限。代理配置不对时连接永远不会成功，如果一直按 60 秒重试，
+    /// 一天就是 1440 条同文日志，真正的故障反而被淹掉。
+    /// </summary>
+    private static readonly TimeSpan MaxBackoff = TimeSpan.FromMinutes(10);
+
+    /// <summary>
+    /// 连续失败超过这个次数后不再逐次记录，只在 2 的幂次上汇总一条。
+    /// </summary>
+    private const int QuietAfterFailures = 3;
+
+    /// <summary>
     /// REST 客户端，用于取令牌和网关地址。
     /// </summary>
     private readonly QqBotApiClient _api;
@@ -138,8 +149,9 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
     {
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(outerToken, _stopCts.Token);
         var token = linked.Token;
-        var delay = TimeSpan.FromSeconds(2);
+        var backoff = TimeSpan.FromSeconds(2);
         var authFailures = 0;
+        var connectFailures = 0;
 
         while (!token.IsCancellationRequested)
         {
@@ -147,7 +159,13 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             {
                 await RunSessionAsync(token).ConfigureAwait(false);
                 authFailures = 0;
-                delay = TimeSpan.FromSeconds(2);
+                if (connectFailures > 0)
+                {
+                    _logger.LogInformation("QQ 机器人网关已恢复，此前连续失败 {Count} 次", connectFailures);
+                }
+
+                connectFailures = 0;
+                backoff = TimeSpan.FromSeconds(2);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
             {
@@ -165,18 +183,12 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             }
             catch (Exception exception)
             {
-                // 证书校验失败几乎都是代理/抓包工具劫持了 api.sgroup.qq.com，堆栈看不懂，
-                // 这里直接把可操作的话说出来，省得以为是机器人坏了
-                if (IsCertificateInterception(exception))
+                connectFailures++;
+                // 前几次把原因说清楚，之后按 2 的幂汇总：一次代理配错能刷出上千行同文，
+                // 用户去翻日志时反而找不到真正的报错。
+                if (connectFailures <= QuietAfterFailures || IsPowerOfTwo(connectFailures))
                 {
-                    _logger.LogWarning(
-                        "QQ 机器人网关连不上：api.sgroup.qq.com 的证书校验未通过，通常是开了代理或抓包工具。" +
-                        "把 api.sgroup.qq.com 加入直连后会自动恢复，{Delay} 秒后重试",
-                        delay.TotalSeconds);
-                }
-                else
-                {
-                    _logger.LogWarning(exception, "QQ 机器人网关连接中断，{Delay} 秒后重连", delay.TotalSeconds);
+                    LogConnectFailure(exception, connectFailures, backoff);
                 }
             }
             finally
@@ -186,38 +198,118 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
 
             try
             {
-                await Task.Delay(delay, token).ConfigureAwait(false);
+                await Task.Delay(backoff, token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
                 break;
             }
 
-            delay = TimeSpan.FromSeconds(Math.Min(60, delay.TotalSeconds * 2));
+            backoff = TimeSpan.FromSeconds(Math.Min(MaxBackoff.TotalSeconds, backoff.TotalSeconds * 2));
         }
 
         _logger.LogInformation("QQ 机器人网关已停止");
     }
 
     /// <summary>
-    /// 是否是证书被中间人替换导致的连接失败。
+    /// 是否 2 的幂：用来把「第 8 次、第 16 次、第 32 次……」挑出来做汇总。
     /// </summary>
-    private static bool IsCertificateInterception(Exception exception)
+    private static bool IsPowerOfTwo(int value)
     {
+        return value > 0 && (value & (value - 1)) == 0;
+    }
+
+    /// <summary>
+    /// 记录一次网络类失败。不输出堆栈——这里的调用链对用户没有意义，
+    /// 需要堆栈时把日志级别调到 Debug，BgiHttpDefaultsHandler 会带异常另记一条。
+    /// </summary>
+    private void LogConnectFailure(Exception exception, int failures, TimeSpan retry)
+    {
+        var (summary, hint) = DescribeFailure(exception);
+        var retryText = retry >= TimeSpan.FromMinutes(1)
+            ? $"{retry.TotalMinutes:0.#} 分钟后重试"
+            : $"{retry.TotalSeconds:0} 秒后重试";
+
+        if (failures == 1)
+        {
+            _logger.LogWarning("QQ 机器人网关连不上：{Summary}{Hint}，{Retry}", summary, hint, retryText);
+        }
+        else
+        {
+            _logger.LogWarning("QQ 机器人网关仍连不上（已连续失败 {Count} 次）：{Summary}，{Retry}",
+                failures, summary, retryText);
+        }
+    }
+
+    /// <summary>
+    /// 把异常翻译成一句人话。TLS 握手失败有几种完全不同的成因，笼统说「证书校验未通过」
+    /// 会把「代理规则 REJECT」误导成「证书有问题」，用户按错的方向改配置。
+    /// </summary>
+    private static (string Summary, string Hint) DescribeFailure(Exception exception)
+    {
+        var certificate = false;
+        var handshakeCut = false;
+        var reset = false;
+        var timeout = false;
+
         for (var current = exception; current is not null; current = current.InnerException)
         {
-            if (current is System.Security.Authentication.AuthenticationException)
+            var message = current.Message;
+
+            switch (current)
             {
-                return true;
+                case System.Security.Authentication.AuthenticationException:
+                    certificate = true;
+                    break;
+                case System.Net.Sockets.SocketException socket
+                    when socket.SocketErrorCode is System.Net.Sockets.SocketError.ConnectionReset
+                        or System.Net.Sockets.SocketError.ConnectionAborted:
+                    reset = true;
+                    break;
+                case TimeoutException:
+                    timeout = true;
+                    break;
             }
 
-            if (current.Message.Contains("certificate", StringComparison.OrdinalIgnoreCase))
+            if (message.Contains("certificate", StringComparison.OrdinalIgnoreCase))
             {
-                return true;
+                certificate = true;
+            }
+            else if (message.Contains("unexpected EOF", StringComparison.OrdinalIgnoreCase)
+                     || message.Contains("0 bytes from the transport", StringComparison.OrdinalIgnoreCase))
+            {
+                handshakeCut = true;
+            }
+            else if (message.Contains("远程主机强迫关闭", StringComparison.Ordinal))
+            {
+                reset = true;
             }
         }
 
-        return false;
+        // 证书问题最具体，优先于泛化的「握手失败」
+        if (certificate)
+        {
+            return ("api.sgroup.qq.com 的证书校验未通过",
+                "：多半是代理或抓包工具替换了证书，把该域名加进直连规则后会自动恢复");
+        }
+
+        if (handshakeCut)
+        {
+            return ("与 api.sgroup.qq.com 的 TLS 握手被中途掐断",
+                "：代理规则可能把该域名设成了 REJECT，或网络对握手做了阻断，改直连再看");
+        }
+
+        if (reset)
+        {
+            return ("与 api.sgroup.qq.com 的连接被对端重置", "：网络或代理中途断开，稍后自动重连");
+        }
+
+        if (timeout)
+        {
+            return ("连接 api.sgroup.qq.com 超时", "：当前网络到该域名不通，检查代理与 DNS");
+        }
+
+        return (exception.GetType().Name, string.Empty);
     }
 
     /// <summary>

@@ -3391,7 +3391,9 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
 
                     if (matchedFiles.Count == 0)
                     {
-                        _logger.LogWarning($"没有找到匹配的文件: {savedFile}");
+                        // 仓库侧的 manifest 声明了通配符但本地没匹配到，用户改不了也修不了，
+                        // 每次启动刷若干条 WRN 只会让人以为出了问题，降级到 Debug 备用。
+                        _logger.LogDebug("仓库同步：{SavedFile} 在本地没有匹配到文件，跳过", savedFile);
                     }
                 }
             }

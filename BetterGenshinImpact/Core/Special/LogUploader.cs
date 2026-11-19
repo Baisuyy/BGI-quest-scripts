@@ -139,7 +139,10 @@ public static class LogUploader
                     return null;
                 }
 
-                return Gzip(Encoding.UTF8.GetBytes(Redact(text)));
+                // 追加一段抬头：同一个日志文件可能被多个实例、跨版本写进来，
+                // 光看行首分不清哪段是谁的。抬头放在最前面，脱敏后仍然成立（里面没有用户数据）。
+                string body = BuildPreamble(file.Name, reason) + text;
+                return Gzip(Encoding.UTF8.GetBytes(Redact(body)));
             }, ct).ConfigureAwait(false);
 
             if (payload == null)
@@ -372,6 +375,36 @@ public static class LogUploader
         }
 
         return Encoding.UTF8.GetString(buf, skip, buf.Length - skip);
+    }
+
+    /// <summary>
+    ///     上传内容的抬头：谁、什么时候、哪个版本、为什么传、截的是哪个文件。
+    ///     多开时同一个文件会被几个实例轮流写，没有这段抬头就只能靠行内的进程号猜。
+    ///     行首用 <c>#</c>，不会被服务端的「事件行」判定当成日志正文。
+    /// </summary>
+    private static string BuildPreamble(string fileName, string reason)
+    {
+        var builder = new StringBuilder(320);
+        builder.Append("# ===== BetterGI 日志上传 =====\n");
+        builder.Append("# 时间: ").Append(DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss zzz", CultureInfo.InvariantCulture)).Append('\n');
+        builder.Append("# 版本: ").Append(Global.Version ?? "unknown").Append('\n');
+        builder.Append("# 实例: S").Append(WindowsSessionId()).Append(" P").Append(Environment.ProcessId).Append('\n');
+        builder.Append("# 原因: ").Append(reason).Append('\n');
+        builder.Append("# 文件: ").Append(fileName).Append('\n');
+        builder.Append("# =============================\n");
+        return builder.ToString();
+    }
+
+    private static string WindowsSessionId()
+    {
+        try
+        {
+            return System.Diagnostics.Process.GetCurrentProcess().SessionId.ToString(CultureInfo.InvariantCulture);
+        }
+        catch (Exception)
+        {
+            return "?";
+        }
     }
 
     private static byte[] Gzip(byte[] data)

@@ -184,7 +184,8 @@ public partial class AgentPanelWindow : Window
             catch (Exception e)
             {
                 hook?.Dispose();
-                Logger.LogWarning(e, "助手面板快捷键 {Key} 注册失败，试下一个", candidate);
+                // 后面还有候选键，全部失败时另有一条汇总提示，这里不必带堆栈刷日志
+                Logger.LogDebug("助手面板快捷键 {Key} 注册失败，试下一个：{Error}", candidate, e.Message);
             }
         }
 
