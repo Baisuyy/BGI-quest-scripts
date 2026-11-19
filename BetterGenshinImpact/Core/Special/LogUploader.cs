@@ -65,7 +65,11 @@ public static class LogUploader
         Timeout = TimeSpan.FromSeconds(45),
     };
 
+    /// <summary>串行化上传：手动连点、自动与退出同时触发时，只跑一份。</summary>
     private static readonly SemaphoreSlim Gate = new(1, 1);
+
+    /// <summary>保护 <see cref="_lastAuto" /> 的普通对象锁，别拿上面的信号量当锁用。</summary>
+    private static readonly object AutoLock = new();
 
     private static DateTime _lastAuto = DateTime.MinValue;
 
@@ -167,7 +171,7 @@ public static class LogUploader
             return;
         }
 
-        lock (Gate)
+        lock (AutoLock)
         {
             if (DateTime.Now - _lastAuto < TimeSpan.FromMinutes(10))
             {
