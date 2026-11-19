@@ -79,16 +79,45 @@
                            IsPaneToggleVisible="True"
                            IsTopSeparatorVisible="False"
                            IsFooterSeparatorVisible="False"
-                           OpenPaneLength="160">
+                           OpenPaneLength="168">
             <b:Interaction.Behaviors>
                 <behavior:AnimatedNavigationSelectionIndicatorBehavior />
             </b:Interaction.Behaviors>
             <ui:NavigationView.MenuItems>
+                <!-- 常用：每天真正会点到的入口，放最上面 -->
                 <ui:NavigationViewItem Content="{i18n:T 启动}"
                                        NavigationCacheMode="Enabled"
+                                       ToolTip="开始 / 暂停当前配置的任务"
                                        TargetPageType="{x:Type pages:HomePage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Play24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem Content="{i18n:T 一条龙}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:OneDragonFlowPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <!-- 新一条龙只是 Pulonia 任务计划的独立界面包装；与旧入口并排，验收前两者都保留。
+                     名字里带「新版」，避免和上面那条完全分不清 -->
+                <ui:NavigationViewItem Content="一条龙（新版）"
+                                       NavigationCacheMode="Enabled"
+                                       ToolTip="任务计划的新界面，与上面的「一条龙」并存；配置互不影响"
+                                       TargetPageType="{x:Type pages:PuloniaOneDragonPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <ui:NavigationViewItem Content="{i18n:T 独立任务}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:TaskSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="TaskListSquareLtr24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -99,37 +128,15 @@
                         <ui:SymbolIcon Symbol="Timer24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
-                <ui:NavigationViewItem Content="{i18n:T 独立任务}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:TaskSettingsPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="TaskListSquareLtr24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
 
-                <!-- 特别版：模型配置与本地助手入口，避免埋在「独立任务」长页里找不到 -->
-                <ui:NavigationViewItem Content="AI 助手"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:AiSettingsPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Glyph="&#xf544;" Style="{StaticResource FaFontIconStyle}" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
+                <ui:NavigationViewItemSeparator />
 
+                <!-- 计划与记录：任务怎么排、跑过什么、挂在哪个账号 -->
                 <ui:NavigationViewItem Content="{i18n:T 任务计划}"
                                        NavigationCacheMode="Enabled"
                                        TargetPageType="{x:Type pages:PuloniaTaskPlanPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="BranchFork24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
-                <!-- 新一条龙只是 Pulonia 任务计划的独立界面包装；验收前保留全部旧入口。 -->
-                <ui:NavigationViewItem Content="新一条龙"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:PuloniaOneDragonPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -150,33 +157,26 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 账号记录页面暂用「狛荷屋」展示名，待定案后再接入翻译。 -->
-                <ui:NavigationViewItem Content="狛荷屋(test)"
+                <!-- 原「狛荷屋(test)」：试验中的账号记录页。标题里带 test 既难读也不像成品，
+                     改用中文名，实验性质放在提示里 -->
+                <ui:NavigationViewItem Content="账号记录"
                                        NavigationCacheMode="Enabled"
+                                       ToolTip="实验功能：记录各账号的体力、委托与周本进度"
                                        TargetPageType="{x:Type pages:AccountRecordsPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Box24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!--<ui:NavigationViewItemSeparator />-->
+                <ui:NavigationViewItemSeparator />
 
-                <ui:NavigationViewItem Content="{i18n:T 一条龙}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:OneDragonFlowPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
+                <!-- 工具：手动跑单点功能，或做设置 -->
                 <ui:NavigationViewItem Content="{i18n:T 全自动}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Bot24" />
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
 
-                        <!--<ui:NavigationViewItemSeparator />-->
-                        <!--  ConvertRange20  -->
                         <ui:NavigationViewItem Content="{i18n:T 调度器}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:ScriptControlPage}">
@@ -184,7 +184,6 @@
                                 <ui:SymbolIcon Symbol="DeveloperBoard24" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <!--  WebAsset24 | DocumentJs16 | Script16  -->
                         <ui:NavigationViewItem Content="{i18n:T JS 脚本}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:JsListPage}">
@@ -192,7 +191,6 @@
                                 <ui:SymbolIcon Symbol="DocumentJs16" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <!--  Map24  -->
                         <ui:NavigationViewItem Content="{i18n:T 地图追踪}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:MapPathingPage}">
@@ -200,7 +198,6 @@
                                 <ui:SymbolIcon Symbol="Map24" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
-                        <!--  Script16  -->
                         <ui:NavigationViewItem Content="{i18n:T 录制回放}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:KeyMouseRecordPage}">
@@ -211,59 +208,72 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <ui:NavigationViewItem Content="{i18n:T 辅助操控}"
+                <!-- 特别版：模型配置与本地助手入口，避免埋在「独立任务」长页里找不到 -->
+                <ui:NavigationViewItem Content="AI 助手"
                                        NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:MacroSettingsPage}">
+                                       ToolTip="模型配置与本地助手设置（游戏内按 Ctrl+Alt+A 唤起对话面板）"
+                                       TargetPageType="{x:Type pages:AiSettingsPage}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="XboxController24" />
+                        <ui:FontIcon Glyph="&#xf544;" Style="{StaticResource FaFontIconStyle}" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!--  按键宏：不识图的键鼠宏，见 Docs/design/key-macro.md  -->
-                <ui:NavigationViewItem Content="{i18n:T 按键宏}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:KeyMacroPage}">
+                <!-- 低频功能收进一个组。以前辅助操控 / 按键宏 / 自动演奏 / 悬浮小窗 / 快捷键 / 通知
+                     各占一行，加上上面的计划与记录，侧栏一屏放不下，找「设置」要滚半天 -->
+                <ui:NavigationViewItem Content="更多功能">
                     <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="KeyboardLayoutFloat24" />
+                        <ui:SymbolIcon Symbol="MoreHorizontal24" />
                     </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
+                    <ui:NavigationViewItem.MenuItems>
+                        <ui:NavigationViewItem Content="{i18n:T 辅助操控}"
+                                               NavigationCacheMode="Enabled"
+                                               TargetPageType="{x:Type pages:MacroSettingsPage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:SymbolIcon Symbol="XboxController24" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
 
-                <ui:NavigationViewItem Content="{i18n:T 自动演奏}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:MusicPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="MusicNote224" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
+                        <!-- 按键宏：不识图的键鼠宏，见 Docs/design/key-macro.md  -->
+                        <ui:NavigationViewItem Content="{i18n:T 按键宏}"
+                                               NavigationCacheMode="Enabled"
+                                               TargetPageType="{x:Type pages:KeyMacroPage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:SymbolIcon Symbol="KeyboardLayoutFloat24" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
 
-                <ui:NavigationViewItem Content="{i18n:T 悬浮小窗}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:GuideWindowSettingsPage}">
-                    <ui:NavigationViewItem.Icon>
-                         <ui:SymbolIcon Symbol="VideoClip24" />
-                     </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
+                        <ui:NavigationViewItem Content="{i18n:T 自动演奏}"
+                                               NavigationCacheMode="Enabled"
+                                               TargetPageType="{x:Type pages:MusicPage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:SymbolIcon Symbol="MusicNote224" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
 
-                <ui:NavigationViewItem Content="{i18n:T 快捷键}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:HotKeyPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Flash24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-                <!--<ui:NavigationViewItem Content="按键绑定"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:KeyBindingsSettingsPage}" Cursor="Hand">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="KeyboardMouse16" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>-->
-                <ui:NavigationViewItem Content="{i18n:T 通知}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:NotificationSettingsPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="Alert24" />
-                    </ui:NavigationViewItem.Icon>
+                        <ui:NavigationViewItem Content="{i18n:T 悬浮小窗}"
+                                               NavigationCacheMode="Enabled"
+                                               TargetPageType="{x:Type pages:GuideWindowSettingsPage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:SymbolIcon Symbol="VideoClip24" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+
+                        <ui:NavigationViewItem Content="{i18n:T 快捷键}"
+                                               NavigationCacheMode="Enabled"
+                                               TargetPageType="{x:Type pages:HotKeyPage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:SymbolIcon Symbol="Flash24" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+
+                        <ui:NavigationViewItem Content="{i18n:T 通知}"
+                                               NavigationCacheMode="Enabled"
+                                               TargetPageType="{x:Type pages:NotificationSettingsPage}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:SymbolIcon Symbol="Alert24" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+                    </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.FooterMenuItems>
@@ -738,9 +748,12 @@
             </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
-        <tray:NotifyIcon Grid.Row="0" Grid.Column="0"
+        <tray:NotifyIcon x:Name="TrayIcon"
+                         Grid.Row="0"
+                         Grid.Column="0"
                          FocusOnLeftClick="False"
                          Icon="{Binding InstanceIconSource, Mode=OneWay}"
+                         Visibility="{Binding Config.RemoteTaskConfig.EffectiveShowTrayIcon, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
                          LeftDoubleClick="OnNotifyIconLeftDoubleClick"
                          MenuOnRightClick="True"
                          TooltipText="{Binding TrayTooltipText, Mode=OneWay}">

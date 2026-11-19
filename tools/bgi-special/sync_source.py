@@ -49,12 +49,53 @@ KEEP = (
     # 游戏内助手小面板（热键唤起，下发任务/脚本）
     "BetterGenshinImpact/View/Windows/AgentPanelWindow.xaml",
     "BetterGenshinImpact/View/Windows/AgentPanelWindow.xaml.cs",
+    # QQ 机器人 / 远程任务：上游没有的整套能力，删掉就编译不过
+    "BetterGenshinImpact/Service/RemoteTask/",
+    "BetterGenshinImpact/Core/Config/RemoteTaskConfig.cs",
+    "BetterGenshinImpact/Core/Config/RemoteScheduleConfig.cs",
+    # 米游社绑定与每日便笺
+    "BetterGenshinImpact/Core/Mys/",
+    "BetterGenshinImpact/View/Windows/MysLoginWindow.xaml",
+    "BetterGenshinImpact/View/Windows/MysLoginWindow.xaml.cs",
+    # 多账号切换
+    "BetterGenshinImpact/GameTask/GenshinAccountSwitch/",
+    # 路径进度（断点续跑）
+    "BetterGenshinImpact/GameTask/AutoPathing/PathProgressStore.cs",
+    "BetterGenshinImpact/GameTask/AutoPathing/AutoPathingPathTask.cs",
+    # 日志链路：重复抑制与异常栈去重
+    "BetterGenshinImpact/Helpers/RepeatSuppressorSink.cs",
+    "BetterGenshinImpact/Helpers/ExceptionDedupTextFormatter.cs",
+    # 地图点位图标渲染
+    "BetterGenshinImpact/View/Controls/MaskMapPointIconRenderer.cs",
+    # 特别版文档、发版说明与安装器配置
+    "Docs/",
+    "docs/",
+    "AGENTS.md",
+    "Build/kachina.special.config.json",
+    ".github/workflows/upload-123pan.yml",
+    "Test/BetterGenshinImpact.UnitTest/ServiceTests/",
     "tools/bgi-special/",
 )
 
 
 def kept(rel: str) -> bool:
     return any(rel == k or (k.endswith("/") and rel.startswith(k)) for k in KEEP)
+
+
+# 只属于特别版、上游永远没有的目录。它们本来该在 KEEP 里，但 KEEP 是手写清单，
+# 新功能加进来时很容易漏登记——2026-11-19 那次同步就把 Service/RemoteTask 整个删了，
+# 代码在远端躺了一夜编译不过。这里当最后一道闸：真要删，先报错让人确认。
+PROTECTED = (
+    "BetterGenshinImpact/Service/RemoteTask/",
+    "BetterGenshinImpact/Core/Ai/",
+    "BetterGenshinImpact/Core/Special/",
+    "BetterGenshinImpact/Core/Mys/",
+    "BetterGenshinImpact/GameTask/GenshinAccountSwitch/",
+)
+
+
+def protected(rel: str) -> bool:
+    return any(rel == p or (p.endswith("/") and rel.startswith(p)) for p in PROTECTED)
 
 
 def files_of(root: pathlib.Path):
@@ -78,11 +119,23 @@ def main() -> int:
     local_files = set(files_of(local))
 
     removed = 0
+    blocked = []
     for rel in sorted(local_files - up_files):
         if kept(rel):
             continue
+        if protected(rel):
+            # 不删，记下来，最后整体失败：宁可这次同步不推，也别把能力层删掉
+            blocked.append(rel)
+            continue
         (local / rel).unlink()
         removed += 1
+
+    if blocked:
+        print(f"[x] 有 {len(blocked)} 个只属于特别版的文件即将被删，已中止：", file=sys.stderr)
+        for rel in blocked[:20]:
+            print(f"    {rel}", file=sys.stderr)
+        print("    处理办法：确认后加进 sync_source.py 的 KEEP 清单再重跑。", file=sys.stderr)
+        return 3
 
     copied = 0
     for rel in sorted(up_files):

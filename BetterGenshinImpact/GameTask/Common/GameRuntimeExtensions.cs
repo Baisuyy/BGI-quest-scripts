@@ -31,6 +31,13 @@ public static class GameRuntimeExtensions
     /// </summary>
     private static AllConfig Config => ConfigService.Config!;
 
+    /// <summary>
+    /// 连续把焦点从自家窗口抢回游戏的上限。用户确实在用界面时不和用户拉锯
+    /// </summary>
+    private const int MaxOwnWindowReclaims = 3;
+
+    private static int _ownWindowReclaims;
+
     #region 截图
 
     /// <summary>
@@ -265,9 +272,34 @@ public static class GameRuntimeExtensions
             if (!runtime.IsOperable())
             {
                 var name = SystemControl.GetActiveByProcess();
+
+                // BGI 自己的窗口（主界面、助手面板、授权弹窗）抢到前台时，任务并没有被用户打断，
+                // 只是焦点在软件自己身上。这种情况如果按「用户切走了」处理，任务会一直暂停：
+                // 面板发完任务不关、用户又没点回游戏，传送就卡在候选列表上直到超时。
+                // 因此这里主动把焦点还给游戏，但只做有限次——用户真的要操作界面时不能无限抢。
+                if (IsOwnWindowForeground() && _ownWindowReclaims < MaxOwnWindowReclaims)
+                {
+                    _ownWindowReclaims++;
+                    Logger.LogInformation("前台是 BetterGI 自身窗口（{Name}），自动切回游戏（第 {Count} 次）",
+                        name, _ownWindowReclaims);
+                    SystemControl.FocusWindow(window.Handle);
+                    for (var i = 0; i < 5 && !runtime.IsOperable(); i++)
+                    {
+                        wait.Sleep(200);
+                        wait.ThrowIfStopped();
+                    }
+
+                    if (runtime.IsOperable())
+                    {
+                        return;
+                    }
+                }
+
                 Logger.LogWarning($"当前获取焦点的窗口为: {name}，不是原神，暂停");
                 throw new RetryException("当前获取焦点的窗口不是原神");
             }
+
+            _ownWindowReclaims = 0;
         }
 
         var count = 0;
@@ -292,6 +324,29 @@ public static class GameRuntimeExtensions
         }
 
         wait.ThrowIfStopped();
+    }
+
+    /// <summary>
+    /// 前台窗口是否属于 BetterGI 进程自身，用于区分「用户切走了」与「本软件自己的窗口挡着」。
+    /// </summary>
+    private static bool IsOwnWindowForeground()
+    {
+        try
+        {
+            var handle = SystemControl.GetForegroundWindowHandle();
+            if (handle == 0)
+            {
+                return false;
+            }
+
+            _ = User32.GetWindowThreadProcessId(handle, out var pid);
+            return pid == (uint)Environment.ProcessId;
+        }
+        catch (Exception e)
+        {
+            Logger.LogDebug(e, "判断前台窗口归属失败");
+            return false;
+        }
     }
 
     /// <summary>

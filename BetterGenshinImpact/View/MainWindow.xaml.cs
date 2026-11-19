@@ -1,7 +1,10 @@
 using BetterGenshinImpact.Helpers.DpiAwareness;
+using BetterGenshinImpact.Service.Instance;
+using BetterGenshinImpact.Service.Interface;
 using BetterGenshinImpact.ViewModel;
 using Microsoft.Extensions.Logging;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -237,6 +240,52 @@ public partial class MainWindow : FluentWindow, INavigationWindow
     {
         base.OnSourceInitialized(e);
         WindowHelper.TryApplySystemBackdrop(this);
+    }
+
+    /// <summary>
+    /// 是否已经请求真正退出。退出流程会先置位，再关闭窗口，避免被保活逻辑拦下来。
+    /// </summary>
+    private static bool _exitRequested;
+
+    /// <summary>
+    /// 声明本次关闭是退出而不是最小化，供退出流程调用。
+    /// </summary>
+    public static void RequestExit() => _exitRequested = true;
+
+    /// <summary>
+    /// 关闭窗口时按配置留在托盘：窗口隐藏、进程存活，QQ 机器人与任务调度都不中断。
+    /// </summary>
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        if (!_exitRequested && ShouldKeepAliveInTray())
+        {
+            e.Cancel = true;
+            Hide();
+            _logger.LogInformation("主窗体已隐藏到托盘，后台保活中");
+            return;
+        }
+
+        base.OnClosing(e);
+    }
+
+    /// <summary>
+    /// 判断是否应当保活：主实例 + 已开启后台保活。
+    /// <para>
+    /// 分身实例不常驻，否则关掉主程序后托盘里会残留多个进程，还各自抢着连 QQ 网关。
+    /// </para>
+    /// </summary>
+    private static bool ShouldKeepAliveInTray()
+    {
+        try
+        {
+            var keepAlive = App.GetService<IConfigService>()?.Get().RemoteTaskConfig.KeepAliveInTray == true;
+            return keepAlive && App.GetService<InstanceService>()?.Context.IsRoot == true;
+        }
+        catch (Exception)
+        {
+            // 启动早期服务还没就绪时按不保活处理，行为与旧版本一致。
+            return false;
+        }
     }
 
     protected override void OnClosed(EventArgs e)

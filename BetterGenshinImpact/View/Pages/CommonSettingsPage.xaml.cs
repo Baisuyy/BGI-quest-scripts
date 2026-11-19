@@ -42,6 +42,18 @@ public partial class CommonSettingsPage : Page
         DetachHostWindow();
     }
 
+    /// <summary>
+    /// 打开米游社扫码绑定窗口：比让用户去开发者工具里抄 Cookie 靠谱得多。
+    /// </summary>
+    private void OnMysLoginClick(object sender, RoutedEventArgs e)
+    {
+        var window = new BetterGenshinImpact.View.Windows.MysLoginWindow
+        {
+            Owner = Window.GetWindow(this)
+        };
+        window.Show();
+    }
+
     private void HostWindowOnDeactivated(object? sender, EventArgs e)
     {
         if (CommitFocusedTextBox())

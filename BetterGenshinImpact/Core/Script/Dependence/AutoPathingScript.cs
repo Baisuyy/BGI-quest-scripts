@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading;
 using BetterGenshinImpact.GameTask.AutoPathing;
 using BetterGenshinImpact.GameTask.AutoPathing.Model;
@@ -56,11 +57,25 @@ public class AutoPathingScript
         _autoPathingFile = new LimitedFile(Global.Absolute(@"User\AutoPathing"));
     }
 
-    public async Task<bool> Run(string json)
+    public async Task<bool> Run(string json) => await Run(json, null).ConfigureAwait(false);
+
+    /// <summary>
+    /// 执行一条路线。<paramref name="logicalPath"/> 用来把进度记到具体文件上，
+    /// 断了之后下次才知道该接着哪条跑；没有文件来源时按路线名记。
+    /// </summary>
+    public async Task<bool> Run(string json, string? logicalPath)
     {
         // 登记本轮 JS 宿主操作；脚本停止后必须等待业务方法真正退出再释放游戏所有权。
         using var scriptOperation = ScriptHostOperations.Enter();
-        var task = PathingTask.BuildFromJson(json);
+        var task = string.IsNullOrWhiteSpace(logicalPath)
+            ? PathingTask.BuildFromJson(json)
+            : PathingTask.BuildFromJson(json, logicalPath);
+        if (task == null)
+        {
+            // BuildFromJson 在路线要求的 BGI 版本高于当前时会返回 null，并已经打过日志。
+            return false;
+        }
+
         var pathExecutor = new PathExecutor(_runtime, _allConfig, _ct);
         if (_config != null && _config is PathingPartyConfig patyConfig)
         {
@@ -77,7 +92,7 @@ public class AutoPathingScript
     {
         using var scriptOperation = ScriptHostOperations.Enter();
         var json = await new LimitedFile(_rootPath).ReadText(path);
-        return await Run(json);
+        return await Run(json, ResolveLogicalPath(_rootPath, path));
     }
 
     /// <summary>
@@ -91,7 +106,25 @@ public class AutoPathingScript
         // Pulonia 不再自动订阅路线；内部调用与顶层任务读取同一个已确认来源版本。
         var json = _repositoryResources is null ? await AutoPathingFile.ReadText(path)
             : await Task.Run(() => _repositoryResources.ReadPathingText(path), _ct);
-        return await Run(json);
+        return await Run(json, ResolveLogicalPath(Global.Absolute(@"User\AutoPathing"), path));
+    }
+
+    /// <summary>
+    /// 把脚本给的相对路径解析成绝对路径，作为进度记录的键。
+    /// 解析失败时返回原路径，至少还能按名字区分。
+    /// </summary>
+    private static string ResolveLogicalPath(string root, string path)
+    {
+        try
+        {
+            return Path.IsPathRooted(path)
+                ? Path.GetFullPath(path)
+                : Path.GetFullPath(Path.Combine(root, path));
+        }
+        catch
+        {
+            return path;
+        }
     }
 
     /// <summary>

@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BetterGI 特别版 · 使用说明</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0e1014;
+    --panel: #151920;
+    --panel-2: #1b2029;
+    --line: #262c37;
+    --text: #e7eaf0;
+    --muted: #8b93a1;
+    --accent: #4cc2ff;
+    --ok: #6ddc8f;
+    --warn: #ffcc66;
+    --bad: #ff8a8a;
+    --mono: "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 520px at 78% -12%, rgba(76,194,255,.13), transparent 62%),
+      radial-gradient(760px 420px at 8% 4%, rgba(109,220,143,.07), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font: 15px/1.75 "Microsoft YaHei UI", "PingFang SC", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 40px; max-width: 1180px; margin: 0 auto; padding: 40px 28px 96px; }
+
+  /* 左侧目录 */
+  nav { position: sticky; top: 40px; align-self: start; }
+  nav .brand { font-weight: 700; letter-spacing: .3px; font-size: 15px; margin-bottom: 4px; }
+  nav .brand span { color: var(--accent); }
+  nav .sub { color: var(--muted); font-size: 12px; margin-bottom: 22px; }
+  nav a {
+    display: block; color: var(--muted); text-decoration: none; font-size: 13.5px;
+    padding: 6px 10px; border-left: 2px solid transparent; border-radius: 0 6px 6px 0;
+    transition: color .16s, background .16s, border-color .16s;
+  }
+  nav a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+  nav a.on { color: var(--accent); border-left-color: var(--accent); background: rgba(76,194,255,.08); }
+
+  /* 头部 */
+  header { margin-bottom: 34px; }
+  h1 { font-size: 33px; line-height: 1.25; margin: 0 0 10px; letter-spacing: -.4px; }
+  .lede { color: var(--muted); max-width: 62ch; margin: 0 0 20px; }
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: 12px; color: #b9c2d0; background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 999px; padding: 4px 11px;
+  }
+  .badge b { color: var(--accent); font-weight: 600; }
+
+  section { margin: 0 0 46px; scroll-margin-top: 24px; }
+  h2 {
+    font-size: 21px; margin: 0 0 14px; letter-spacing: -.2px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::before {
+    content: ""; width: 4px; height: 19px; border-radius: 2px;
+    background: linear-gradient(180deg, var(--accent), rgba(76,194,255,.25));
+  }
+  h3 { font-size: 15.5px; margin: 26px 0 10px; color: #d5dbe5; }
+  p { margin: 0 0 14px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  strong { color: #fff; font-weight: 600; }
+
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 16px 0 4px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 11px; padding: 15px 16px; }
+  .tile .k { font-size: 12px; color: var(--muted); margin-bottom: 6px; letter-spacing: .2px; }
+  .tile .v { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .tile .d { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 6px; font-size: 13.8px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12.5px; letter-spacing: .3px; background: rgba(255,255,255,.02); }
+  tr:last-child td { border-bottom: 0; }
+  td code, p code, li code { font-family: var(--mono); font-size: 12.6px; background: #222834; color: #cfe0ee; padding: 1.5px 6px; border-radius: 5px; }
+
+  pre {
+    background: #10141b; border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; overflow: auto; font-family: var(--mono); font-size: 13px;
+    line-height: 1.68; color: #cfd8e3; margin: 12px 0 16px;
+  }
+  pre .c { color: #6f7a8a; }
+
+  ol, ul { margin: 10px 0 16px; padding-left: 22px; }
+  li { margin: 6px 0; }
+
+  .note { display: flex; gap: 12px; border-radius: 10px; padding: 13px 15px; margin: 16px 0; font-size: 13.8px; }
+  .note .ico { flex: 0 0 auto; font-weight: 700; }
+  .note.info { background: rgba(76,194,255,.08); border: 1px solid rgba(76,194,255,.22); }
+  .note.warn { background: rgba(255,204,102,.07); border: 1px solid rgba(255,204,102,.22); }
+  .note.bad  { background: rgba(255,138,138,.07); border: 1px solid rgba(255,138,138,.22); }
+  .note.info .ico { color: var(--accent); }
+  .note.warn .ico { color: var(--warn); }
+  .note.bad  .ico { color: var(--bad); }
+
+  .steps { counter-reset: s; margin: 14px 0; padding: 0; list-style: none; }
+  .steps li {
+    counter-increment: s; position: relative; padding: 0 0 14px 40px; margin: 0;
+  }
+  .steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 2px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: rgba(76,194,255,.10); border: 1px solid rgba(76,194,255,.35);
+    color: var(--accent); font-size: 12px; font-weight: 700;
+    display: grid; place-items: center;
+  }
+  .steps li:last-child { padding-bottom: 0; }
+
+  .chat { margin: 14px 0; display: grid; gap: 8px; }
+  .bubble { max-width: 78%; padding: 9px 13px; border-radius: 12px; font-size: 13.8px; }
+  .bubble.u { justify-self: end; background: rgba(76,194,255,.16); border: 1px solid rgba(76,194,255,.3); }
+  .bubble.a { justify-self: start; background: #1d232d; border: 1px solid var(--line); }
+  .bubble.s { justify-self: start; background: transparent; border: 0; color: var(--muted); font-family: var(--mono); font-size: 12.4px; padding: 0 2px; }
+
+  footer { border-top: 1px solid var(--line); padding-top: 18px; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 880px) {
+    .wrap { grid-template-columns: 1fr; gap: 22px; padding: 26px 18px 70px; }
+    nav { position: static; display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; }
+    nav .brand, nav .sub { display: none; }
+    nav a { border-left: 0; border-bottom: 2px solid transparent; white-space: nowrap; border-radius: 6px 6px 0 0; }
+    nav a.on { border-left-color: transparent; border-bottom-color: var(--accent); }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav id="toc">
+    <div class="brand">BetterGI <span>特别版</span></div>
+    <div class="sub">使用说明 · 0.67.x</div>
+    <a href="#what">这是什么</a>
+    <a href="#install">安装</a>
+    <a href="#quick">三分钟跑起来</a>
+    <a href="#panel">助手面板</a>
+    <a href="#tools">它能做什么</a>
+    <a href="#repo">脚本仓库打不开</a>
+    <a href="#quest">剧情脚本与路线</a>
+    <a href="#faq">常见问题</a>
+    <a href="#logs">日志与反馈</a>
+    <a href="#update">更新与回退</a>
+  </nav>
+
+  <main>
+    <header>
+      <h1>BetterGI 特别版 使用说明</h1>
+      <p class="lede">官方客户端加三样东西：本地 AI 助手、游戏内对话面板、录制路线比对。这份文档只讲多出来的部分和最容易卡住的地方。</p>
+      <div class="badges">
+        <span class="badge">Windows 10 / 11</span>
+        <span class="badge">.NET <b>10</b></span>
+        <span class="badge">版本 <b>0.67.x-special.N</b></span>
+        <span class="badge">热键 <b>Ctrl+Alt+A</b></span>
+      </div>
+    </header>
+
+    <section id="what">
+      <h2>这是什么</h2>
+      <p>特别版和官方版是同一份客户端代码，多出来的入口都挂在侧边栏，不用可以完全不碰。</p>
+      <div class="grid-3">
+        <div class="tile">
+          <div class="k">新增</div>
+          <div class="v">本地 AI 助手</div>
+          <div class="d">一句话下任务，模型自己挑内置任务或用户脚本，不模拟键鼠。</div>
+        </div>
+        <div class="tile">
+          <div class="k">新增</div>
+          <div class="v">游戏内面板</div>
+          <div class="d">按 Ctrl+Alt+A 唤起，不用切回桌面；发完任务自动把焦点还给游戏。</div>
+        </div>
+        <div class="tile">
+          <div class="k">新增</div>
+          <div class="v">录制路线比对</div>
+          <div class="d">用官方客户端里的真人录制路线校验脚本路径，标出偏差过大的段。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>安装</h2>
+      <ol class="steps">
+        <li>从 Release 下 <code>BetterGI_v*_special_Setup.exe</code>，双击选目录，装完自动启动。</li>
+        <li>也可以下 <code>.7z</code> 手动解压。首次启动会生成 <code>User/</code>、<code>Repos/</code>、<code>Logs/</code> 三个目录。</li>
+        <li>排错要用的日志就在 <code>Logs/better-genshin-impactYYYYMMDD.log</code>。</li>
+      </ol>
+      <div class="note warn">
+        <span class="ico">!</span>
+        <div>不要把特别版覆盖到已有的官方版目录上。配置文件格式一致，但版本号不同，互相顶掉之后两边都认不出自己的更新。</div>
+      </div>
+    </section>
+
+    <section id="quick">
+      <h2>三分钟跑起来</h2>
+
+      <h3>1. 配模型</h3>
+      <p>侧边栏「AI 助手」→ 服务设置：</p>
+      <table>
+        <tr><th style="width:120px">项</th><th>怎么填</th></tr>
+        <tr><td>服务协议</td><td><code>openai</code>（OpenAI 兼容：DeepSeek / 通义 / 智谱 / Kimi / Ollama / LM Studio）或 <code>anthropic</code></td></tr>
+        <tr><td>服务地址</td><td>OpenAI 兼容填到 <code>/v1</code>，如 <code>https://api.deepseek.com/v1</code>；Anthropic 填根地址</td></tr>
+        <tr><td>模型名</td><td>必须支持工具调用。纯聊天模型能回答，但下不了任务</td></tr>
+        <tr><td>密钥</td><td>本机回环地址（<code>127.0.0.1</code> / <code>localhost</code>）可留空，跑 Ollama 就是这样</td></tr>
+      </table>
+      <p>配完点「测试连接」，能返回一句话就是通了。总开关打开后助手才会真正发请求。</p>
+
+      <h3>2. 唤起面板</h3>
+      <p>游戏跑起来后按 <code>Ctrl+Alt+A</code>，右下角出现小面板：输入一句话，回车发送；再按一次隐藏。</p>
+
+      <h3>3. 说人话</h3>
+      <div class="chat">
+        <div class="bubble u">把今天的体力清掉</div>
+        <div class="bubble a">先看一下你有哪套一条龙配置。</div>
+        <div class="bubble s">[1/16] 调用 list_tasks → 找到 3 个配置</div>
+        <div class="bubble a">用「日常」这套，树脂留给「深入风龙废墟」，现在开始。</div>
+        <div class="bubble s">[2/16] 调用 run_task → 已下发，任务在后台运行</div>
+      </div>
+      <p>模型说的每句话和每步动作都会分色显示：白色是它说的话，灰色小字是工具调用，绿色是结果。</p>
+    </section>
+
+    <section id="panel">
+      <h2>助手面板</h2>
+      <div class="grid-3">
+        <div class="tile"><div class="k">唤起</div><div class="v">Ctrl+Alt+A</div><div class="d">与 BGI 其他默认热键不冲突，不会误触游戏按键。</div></div>
+        <div class="tile"><div class="k">输入</div><div class="v">回车发送</div><div class="d">Shift+回车不拦截，Esc 直接隐藏。</div></div>
+        <div class="tile"><div class="k">外观</div><div class="v">半透明常驻</div><div class="d">置顶但不抢焦点，失焦压暗，不挡战斗信息。</div></div>
+      </div>
+      <div class="note info">
+        <span class="ico">i</span>
+        <div>发完消息面板会把前台让给游戏窗口。这是必须的——BGI 的任务侧发现前台不是原神就会暂停，传送这类连续点击会全部落空。</div>
+      </div>
+    </section>
+
+    <section id="tools">
+      <h2>它能做什么</h2>
+      <p>助手手里只有 7 个动作，全部走 BGI 自己的任务接口，不是模拟键鼠：</p>
+      <table>
+        <tr><th style="width:150px">动作</th><th>作用</th></tr>
+        <tr><td><code>list_tasks</code></td><td>列出内置任务，可按组过滤</td></tr>
+        <tr><td><code>describe_task</code></td><td>看某个任务的参数模板</td></tr>
+        <tr><td><code>run_task</code></td><td>下发内置任务并执行</td></tr>
+        <tr><td><code>task_status</code></td><td>查进度、上次失败原因</td></tr>
+        <tr><td><code>stop_task</code></td><td>停止当前任务</td></tr>
+        <tr><td><code>list_scripts</code></td><td>列出 <code>User/JsScript</code> 里的脚本</td></tr>
+        <tr><td><code>run_script</code></td><td>跑一个 JS 任务脚本</td></tr>
+      </table>
+      <p>另有一个文件沙箱，可以让它读日志、写笔记，范围限制在设置的沙箱目录内。<strong>写文件和执行命令默认关闭</strong>，需要自己开。</p>
+
+      <h3>限制</h3>
+      <ul>
+        <li>单次会话最多 16 步（一步一次工具调用），复杂任务拆成两句说更稳。</li>
+        <li>单次超时 300 秒。</li>
+        <li>每次都是独立会话，<strong>不记得</strong>上一轮说过什么。「再跑一次」它听不懂，要重说。</li>
+        <li>失败时会把原因带回来，比如「未找到一条龙配置」，照着改就行，别原样重试。</li>
+      </ul>
+    </section>
+
+    <section id="repo">
+      <h2>脚本仓库打不开</h2>
+      <p>反馈最多的一个问题。先说结论：<strong>通常不是网络问题，是安装包缺了前端页面</strong>。</p>
+      <p>窗口一片空白或直接报错时，先在日志里搜这两行：</p>
+      <pre><span class="c"># 情况一：本地仓库还没同步过</span>
+System.IO.DirectoryNotFoundException: Could not find a part of the path
+  'E:\BGI-SE\BetterGI\Repos\bettergi-scripts-list'
+
+<span class="c"># 情况二：安装包缺 Assets\Web\ScriptRepo</span>
+软件内网页初始化失败 ... SetVirtualHostNameToFolderMapping
+System.IO.DirectoryNotFoundException: 系统找不到指定的路径。 (0x80070003)</pre>
+      <div class="note bad">
+        <span class="ico">×</span>
+        <div>第二种情况旧版只能看到白屏：WebView2 找不到目录，初始化直接抛异常，页面上什么都不显示。新版会退成一张说明页，把缺什么、放哪里写清楚。</div>
+      </div>
+      <h3>手动补救</h3>
+      <ol class="steps">
+        <li>「设置 → 通用」→「更新脚本仓库」，等进度条走完。新版打开仓库页时也会在后台自动补一次同步。</li>
+        <li>网络不通就切渠道。默认走 CNB（<code>cnb.cool</code>），国内可直连；GitHub 源需要代理。</li>
+        <li>还不行就用同页的「手动导入本地脚本仓库（zip）」，zip 到 <a href="https://cnb.cool/bettergi/bettergi-scripts-list">cnb.cool/bettergi/bettergi-scripts-list</a> 下载。</li>
+      </ol>
+    </section>
+
+    <section id="quest">
+      <h2>剧情脚本与路线</h2>
+      <ul>
+        <li>任务脚本在 <code>User/JsScript</code> 下按章节分目录，跑之前在「JS 脚本」页确认能看到。</li>
+        <li>生成器产出的路线里有一部分只有 1 个坐标点，那是<strong>任务提示点</strong>，不是能走的路。新版遇到会跳过并告警，不会再把角色直接怼到副本门口。</li>
+        <li>想自己补路线：用「录制回放」录一遍，存成 <code>pathing/*.json</code>，脚本会优先用你录的那条。</li>
+      </ul>
+      <div class="note info">
+        <span class="ico">i</span>
+        <div>如果你看到脚本「跑歪了」，先看日志里有没有「只有 N 个点，是任务提示点而非路线」。有的话不是坐标算错，是那段本来就没有可行走路网。</div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2>常见问题</h2>
+      <table>
+        <tr><th style="width:38%">现象</th><th style="width:32%">原因</th><th>怎么办</th></tr>
+        <tr>
+          <td>面板发完任务就卡住，日志刷「前台不是原神，暂停」</td>
+          <td>面板抢了焦点</td>
+          <td>新版已自动归还焦点；旧版先手动点一下游戏窗口</td>
+        </tr>
+        <tr>
+          <td>传送提示「可能是传送点未激活」</td>
+          <td>多数是上面那条的连带结果</td>
+          <td>先解决焦点，再重试</td>
+        </tr>
+        <tr>
+          <td>助手说「未找到一条龙配置」</td>
+          <td>你的配置名不叫「默认配置」</td>
+          <td>让它先 <code>list_tasks</code>，或把配置名告诉它</td>
+        </tr>
+        <tr>
+          <td>角色识别成 <code>Mosasaurus</code>、<code>PlayerGirlCostumeCWXR</code></td>
+          <td>队伍栏没裁对，超宽屏或 UI 缩放</td>
+          <td>UI 缩放调回 100%，或改用 16:9 分辨率</td>
+        </tr>
+        <tr>
+          <td>热更新检查失败</td>
+          <td>GitHub 直连超时</td>
+          <td>新版走三级镜像回退；全失败时按弹窗给的地址手动下</td>
+        </tr>
+        <tr>
+          <td>日志里同一条警告刷屏</td>
+          <td>旧版没做抑制</td>
+          <td>新版相同行只留一条并标「重复 N 次」</td>
+        </tr>
+      </table>
+    </section>
+
+    <section id="logs">
+      <h2>日志与反馈</h2>
+      <p>日志在 <code>Logs/better-genshin-impactYYYYMMDD.log</code>，按天滚存，保留 21 天。格式是一行一条：</p>
+      <pre>[22:44:32.151] [WRN] [Primary:S2:P12304] BetterGenshinImpact.GameTask.Common.TaskControl | 前台是 BetterGI，暂停</pre>
+      <p>提问题时带上：当天<strong>整份</strong>日志、出问题的时间点、当时在跑什么任务。只截一段经常看不出前因后果。</p>
+    </section>
+
+    <section id="update">
+      <h2>更新与回退</h2>
+      <ul>
+        <li>版本号形如 <code>0.67.0-special.4</code>，<code>special.N</code> 是构建号，每发一次加一。</li>
+        <li>客户端内「检查更新」只认特别版 Release，不会把你升回官方版。</li>
+        <li>回退：留着上一版安装目录，或从 Release 下旧的 <code>special.4</code> 覆盖。配置在 <code>User/config.json</code>，两版通用。</li>
+      </ul>
+    </section>
+
+    <footer>
+      仓库 <a href="https://github.com/Baisuyy/BGI-quest-scripts">Baisuyy/BGI-quest-scripts</a> · 客户端分支 <code>bgi-special</code> · 文档随版本更新，以客户端内实际界面为准
+    </footer>
+  </main>
+</div>
+
+<script>
+  // 目录高亮：用 IntersectionObserver 跟着滚动走
+  const links = [...document.querySelectorAll('#toc a')];
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      links.forEach(a => a.classList.remove('on'));
+      const a = map.get(e.target.id);
+      if (a) a.classList.add('on');
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+  document.querySelectorAll('section[id]').forEach(s => io.observe(s));
+
+  // 首屏没有滚动事件，先把第一项点亮
+  if (links[0]) links[0].classList.add('on');
+</script>
+</body>
+</html>

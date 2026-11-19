@@ -6,38 +6,21 @@ using System.Text;
 using BetterGenshinImpact.Core.Recognition.OCR.Engine;
 using BetterGenshinImpact.Core.Recognition.OCR.Engine.data;
 using BetterGenshinImpact.Core.Recognition.ONNX;
+using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using OpenCvSharp;
 
 namespace BetterGenshinImpact.Core.Recognition.OCR.Paddle;
 
-public class Rec : IOcrRecognizer
+public class Rec(
+    BgiOnnxModel model,
+    IReadOnlyList<string> labels,
+    OcrVersionConfig config,
+    BgiOnnxSessionFactory bgiOnnxFactory)
+    : IDisposable
 {
-    public Rec(
-        BgiOnnxModel model,
-        IReadOnlyList<string> labels,
-        OcrVersionConfig config,
-        BgiOnnxSessionFactory bgiOnnxFactory)
-        : this(labels, config, new OrtOcrInferenceSession(bgiOnnxFactory.CreateInferenceSession(model, true)))
-    {
-    }
-
-    /// <summary>注入任意推理会话（任意后端）的构造入口，预处理与解码完全共用。</summary>
-    internal Rec(
-        IReadOnlyList<string> labels,
-        OcrVersionConfig config,
-        IOcrInferenceSession session)
-    {
-        _labels = labels;
-        Config = config;
-        _session = session;
-    }
-
-    private readonly IOcrInferenceSession _session;
-    private readonly IReadOnlyList<string> _labels;
-    private readonly OcrVersionConfig Config;
-
     private readonly object _sessionLock = new();
+    private readonly InferenceSession _session = bgiOnnxFactory.CreateInferenceSession(model, true);
     private bool _disposed;
 
     // _labels = File.ReadAllLines(labelFilePath);
@@ -91,7 +74,7 @@ public class Rec : IOcrRecognizer
                 throw new ArgumentException($"src[{i}] size should not be 0, wrong input picture provided?");
         }
 
-        var modelHeight = Config.Shape.Height;
+        var modelHeight = config.Shape.Height;
         var maxWidth = (int)Math.Ceiling(srcs.Max(src =>
         {
             var size = src.Size();
@@ -139,10 +122,18 @@ public class Rec : IOcrRecognizer
                         {
                             ObjectDisposedException.ThrowIf(_disposed, this);
                             // 多线程推理会出现问题，加锁解决。
-                            var output = _session.Run(inputTensor)[0];
-                            // 因为一个已知bug,dml下输出张量内存在使用完后会被释放掉,锁之外的代码会报错；
-                            // OcrInferenceResult 已在锁内拷出数据副本。
-                            return (output.Shape, output.Data);
+                            using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = _session.Run([
+                                NamedOnnxValue.CreateFromTensor(_session.InputNames[0], inputTensor)
+                            ]);
+                            var output = results[0];
+                            if (output.ElementType is not TensorElementType.Float)
+                                throw new Exception($"Unexpected output tensor type: {output.ElementType}");
+
+                            if (output.ValueType is not OnnxValueType.ONNX_TYPE_TENSOR)
+                                throw new Exception($"Unexpected output tensor value type: {output.ValueType}");
+                            var tensor = output.AsTensor<float>();
+                            // 因为一个已知bug,tensor中内存在dml下使用完后会被释放掉,锁之外的代码会报错
+                            return (tensor.Dimensions.ToArray(), tensor.ToArray());
                         }
                     }
                 ).ToArray();
@@ -184,7 +175,7 @@ public class Rec : IOcrRecognizer
                         if (maxIndex > 0 && !(n > 0 && maxIndex == lastIndex))
                         {
                             score += maxVal;
-                            sb.Append(OcrUtils.GetLabelByIndex(maxIndex, _labels));
+                            sb.Append(OcrUtils.GetLabelByIndex(maxIndex, labels));
                         }
 
                         lastIndex = maxIndex;
@@ -197,5 +188,5 @@ public class Rec : IOcrRecognizer
         }).ToArray();
     }
 
-    public string GetConfigName => Config.Name;
+    public string GetConfigName => config.Name;
 }
