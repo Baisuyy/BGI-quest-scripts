@@ -179,6 +179,8 @@ public partial class MainWindowViewModel : ObservableObject, IViewModel, IDispos
 
     private CancellationTokenSource? _redeemCodeDismissCts;
 
+    private FeedWindow? _feedWindow;
+
     private bool HasPendingRedeemCodeUpdate => _redeemCodeCnUpdateNewVersion != null || _redeemCodeGlobalUpdateNewVersion != null;
 
     [ObservableProperty] private bool _isRedeemCodeInfoBarOpen;
@@ -717,8 +719,20 @@ public partial class MainWindowViewModel : ObservableObject, IViewModel, IDispos
         // 关闭通知卡片
         IsRedeemCodeInfoBarOpen = false;
 
-        var feedWindow = new FeedWindow(new FeedWindowViewModel());
-        feedWindow.Show();
+        // 复用已打开的兑换码窗口，关闭后再创建新实例。
+        if (_feedWindow == null)
+        {
+            _feedWindow = new FeedWindow(new FeedWindowViewModel());
+            _feedWindow.Closed += (_, _) => _feedWindow = null;
+        }
+
+        _feedWindow.Show();
+        if (_feedWindow.WindowState == WindowState.Minimized)
+        {
+            _feedWindow.WindowState = WindowState.Normal;
+        }
+
+        _feedWindow.Activate();
     }
 
     [RelayCommand]
@@ -802,10 +816,9 @@ public partial class MainWindowViewModel : ObservableObject, IViewModel, IDispos
 
         OnceRun();
 
-        // 更新改成只由人触发：启动时不查、不弹窗。想升级就去菜单点「检查更新」，
-        // 或者在 QQ 里发一句「更新」让机器人下载、发「重启更新」让它自己换。
-        // 原来那套「启动 8 秒后自动查并弹窗」会打断开机流程，也违背「我说了才更新」。
-
+        // 检查更新
+        await App.GetService<IUpdateService>()!.CheckUpdateAsync(new UpdateOption());
+        
         // 检查兑换码更新
         await CheckRedeemCodeFeedsUpdateAsync();
 

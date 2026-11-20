@@ -2,6 +2,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
 using BetterGenshinImpact.Infrastructure.Network;
 using System.Net.Http.Headers;
@@ -44,26 +46,64 @@ public static class AutoComboModelListFetcher
     /// <summary>
     /// 按服务商拉取模型名列表。失败时抛出带可读原因的异常，由调用方展示。
     /// </summary>
-    public static async Task<List<string>> FetchAsync(string provider, string endpointText, string apiKey, CancellationToken ct)
+    public static async Task<(List<string> Models, string? CorrectedEndpoint)> FetchAsync(string provider, string endpointText, string apiKey, CancellationToken ct)
     {
         var normalized = AutoComboLlmProvider.Normalize(provider);
-        var endpoint = AutoComboLlmEndpoint.Resolve(endpointText, normalized, out var isLoopback);
 
-        // 与建树保持同一口径：非本机回环地址必须配置密钥，否则这里只会拿到一个 401
-        if (string.IsNullOrWhiteSpace(apiKey) && !isLoopback)
+        Uri? endpoint;
+        bool isLoopback;
+        try
         {
-            throw new Exception("请先在任务设置页的“自动连招”卡片中配置 LLM 密钥（本机回环地址除外）");
+            endpoint = AutoComboLlmEndpoint.Resolve(endpointText, normalized, out isLoopback);
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"配置错误：{e.Message}", e);
         }
 
-        var uri = BuildModelListUri(normalized, endpoint);
+        // 与建树保持同一口径：发鱼站与本机回环地址不要求密钥，其余地址缺密钥只会拿到一个 401
+        if (string.IsNullOrWhiteSpace(apiKey) && AutoComboLlmEndpoint.RequiresApiKey(normalized, isLoopback))
+        {
+            throw new Exception("配置错误：请先在任务设置页的“自动连招”卡片中配置 LLM 密钥（本机回环地址与发鱼站除外）");
+        }
+
+        if (normalized != AutoComboLlmProvider.OpenAiCompatible)
+        {
+            // Anthropic / 发鱼站：列表地址固定，单地址取值，不回写服务地址
+            return (await FetchModelsAsync(BuildModelListUri(normalized, endpoint), normalized, apiKey, ct), null);
+        }
+
+        // OpenAI 兼容：按候选逐个尝试（输入路径+/models → 输入原文 → 域名/models → 域名/v1/models），命中即回写规范地址
+        string? lastFailure = null;
+        foreach (var candidate in BuildOpenAiCandidates(endpoint!))
+        {
+            try
+            {
+                var models = await FetchModelsAsync(new Uri(candidate), normalized, apiKey, ct);
+                return (models, ToBaseUrl(new Uri(candidate)));
+            }
+            catch (ModelListEndpointException e)
+            {
+                lastFailure = e.Message;
+            }
+        }
+
+        throw new Exception($"已尝试全部候选地址，均未获取到模型列表：{lastFailure ?? "请检查“LLM服务地址”与「LLM服务密钥」是否正确"}");
+    }
+
+    /// <summary>这个地址没能给出模型列表（非 2xx、响应不可解析或列表为空）：换下一个候选地址再试。</summary>
+    private sealed class ModelListEndpointException(string message) : Exception(message);
+
+    private static async Task<List<string>> FetchModelsAsync(Uri uri, string provider, string apiKey, CancellationToken ct)
+    {
         var ids = new List<string>();
 
         // 地址里已经把 limit 设到上限，正常情况下第一页就取完；这里再按 last_id 兜底翻页。
         // OpenAI 兼容端点不返回 has_more，会被当作只有一页。
         for (var page = 0; page < MaxModelListPages; page++)
         {
-            var (effectiveUri, body) = await GetAsync(uri, normalized, apiKey, ct);
-            var (pageIds, hasMore, lastId) = ParseModelPage(body);
+            var (effectiveUri, body) = await GetAsync(uri, provider, apiKey, ct);
+            var (pageIds, hasMore, lastId) = ParseModelPage(uri, body);
 
             foreach (var id in pageIds)
             {
@@ -77,7 +117,7 @@ public static class AutoComboModelListFetcher
             {
                 if (ids.Count == 0)
                 {
-                    throw new Exception("服务返回的模型列表为空");
+                    throw new ModelListEndpointException($"服务端未返回任何模型：GET {DescribeUri(uri)}");
                 }
 
                 return ids;
@@ -85,14 +125,34 @@ public static class AutoComboModelListFetcher
 
             if (string.IsNullOrWhiteSpace(lastId))
             {
-                throw new Exception("服务返回 has_more=true 但未给出 last_id，无法继续取下一页");
+                throw new Exception($"服务端返回 has_more=true 但未给出 last_id，无法继续取下一页：GET {DescribeUri(uri)}");
             }
 
             // 以实际生效的地址为基准翻页：重定向可能改写地址，甚至把查询串整个丢掉
-            uri = BuildPageUri(effectiveUri, normalized, lastId);
+            uri = BuildPageUri(effectiveUri, provider, lastId);
         }
 
-        throw new Exception($"模型列表分页超过 {MaxModelListPages} 页仍未取完，已停止");
+        throw new Exception($"模型列表分页超过 {MaxModelListPages} 页仍未取完，已停止：GET {DescribeUri(uri)}");
+    }
+
+    private static IEnumerable<string> BuildOpenAiCandidates(Uri endpoint)
+    {
+        var origin = $"{endpoint.Scheme}://{endpoint.Authority}";
+        var withModels = new UriBuilder(endpoint) { Path = endpoint.AbsolutePath.TrimEnd('/') + "/models" }.Uri.ToString();
+        return new[] { withModels, endpoint.ToString(), $"{origin}/models", $"{origin}/v1/models" }.Distinct();
+    }
+
+    private static string ToBaseUrl(Uri modelsUri)
+    {
+        var path = modelsUri.AbsolutePath.TrimEnd('/');
+        if (path.EndsWith("/models", StringComparison.OrdinalIgnoreCase))
+        {
+            path = path[..^"/models".Length];
+        }
+
+        return path.Length == 0 && modelsUri.Query.Length == 0
+            ? $"{modelsUri.Scheme}://{modelsUri.Authority}"
+            : new UriBuilder(modelsUri) { Path = path }.Uri.ToString();
     }
 
     /// <summary>
@@ -105,23 +165,47 @@ public static class AutoComboModelListFetcher
     {
         for (var redirects = 0; ; redirects++)
         {
-            using var request = BuildRequest(provider, uri, apiKey);
-            using var response = await HttpClient.SendAsync(request, ct);
-            var body = await response.Content.ReadAsStringAsync(ct);
-
-            // 自动重定向是关的，3xx 会落到这里：同源跳转自己跟，跨源一律拒绝
-            if ((int)response.StatusCode is >= 300 and < 400)
+            HttpResponseMessage response;
+            try
             {
-                uri = ResolveRedirect(uri, response, redirects);
-                continue;
+                using var request = BuildRequest(provider, uri, apiKey);
+                response = await HttpClient.SendAsync(request, ct);
+            }
+            catch (TaskCanceledException e) when (!ct.IsCancellationRequested)
+            {
+                throw new Exception($"网络错误：请求超时（{HttpClient.Timeout.TotalSeconds:0} 秒未收到响应）：GET {DescribeUri(uri)}", e);
+            }
+            catch (HttpRequestException e)
+            {
+                throw new Exception($"网络错误：无法连接模型列表接口：GET {DescribeUri(uri)}：{e.Message}。请检查“LLM服务地址”、网络与代理设置", e);
             }
 
-            if (!response.IsSuccessStatusCode)
+            string body;
+            using (response)
             {
-                throw new Exception($"HTTP {(int)response.StatusCode} {response.ReasonPhrase}：{Summarize(body)}");
-            }
+                try
+                {
+                    body = await response.Content.ReadAsStringAsync(ct);
+                }
+                catch (IOException e)
+                {
+                    throw new Exception($"网络错误：读取模型列表响应失败：GET {DescribeUri(uri)}：{e.Message}", e);
+                }
 
-            return (uri, body);
+                // 自动重定向是关的，3xx 会落到这里：同源跳转自己跟，跨源一律拒绝
+                if ((int)response.StatusCode is >= 300 and < 400)
+                {
+                    uri = ResolveRedirect(uri, response, redirects);
+                    continue;
+                }
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new ModelListEndpointException(BuildHttpFailureMessage(uri, response, body));
+                }
+
+                return (uri, body);
+            }
         }
     }
 
@@ -167,19 +251,19 @@ public static class AutoComboModelListFetcher
 
         if (redirects >= MaxSameAuthorityRedirects)
         {
-            throw new Exception($"服务连续重定向超过 {MaxSameAuthorityRedirects} 次（最后一次 HTTP {status} → {location}），已停止");
+            throw new Exception($"服务连续重定向超过 {MaxSameAuthorityRedirects} 次（最后一次 HTTP {status}）：GET {DescribeUri(current)}，已停止");
         }
 
         if (location is null)
         {
-            throw new Exception($"服务返回 HTTP {status} 但未给出 Location，无法继续");
+            throw new Exception($"服务返回 HTTP {status} 但未给出 Location，无法继续：GET {DescribeUri(current)}");
         }
 
         var target = location.IsAbsoluteUri ? location : new Uri(current, location);
         if (current.Scheme != target.Scheme || current.Host != target.Host || current.Port != target.Port)
         {
             throw new Exception(
-                $"服务返回了跨域重定向（HTTP {status} → {target}）。为避免密钥被转发到其他地址，这里不会跟随；" +
+                $"配置错误：服务返回了跨域重定向（HTTP {status} → {DescribeUri(target)}）。为避免密钥被转发到其他地址，这里不会跟随；" +
                 "请确认「LLM服务地址」填写的是该服务的地址。");
         }
 
@@ -187,10 +271,44 @@ public static class AutoComboModelListFetcher
     }
 
     /// <summary>
+    /// 按状态码生成可操作的失败提示：鉴权、地址配置、服务端故障各给出不同排查方向。
+    /// 提示里回显的地址已去掉查询串与用户信息，避免把可能含凭证的部分带入 UI 或日志。
+    /// </summary>
+    private static string BuildHttpFailureMessage(Uri uri, HttpResponseMessage response, string body)
+    {
+        var status = (int)response.StatusCode;
+        var category = status switch
+        {
+            401 or 403 => "鉴权失败",
+            404 => "配置错误",
+            >= 500 => "服务端错误",
+            _ => "服务端拒绝请求",
+        };
+        var hint = status switch
+        {
+            401 or 403 => "请检查 LLM 密钥是否正确；发鱼站通道无需密钥",
+            404 => "接口不存在，请检查“LLM服务地址”，OpenAI 兼容地址通常需要以 /v1 结尾",
+            >= 500 => "服务端暂时不可用，请稍后重试或联系服务提供方",
+            _ => "请检查服务商类型、服务地址以及服务端日志",
+        };
+
+        return $"{category}：GET {DescribeUri(uri)} → HTTP {status} {response.ReasonPhrase}；{hint}。响应摘要：{Summarize(body)}";
+    }
+
+    /// <summary>
+    /// 只保留协议、主机、端口与路径，丢掉查询串和用户信息，避免把可能含凭证的部分写进提示或日志。
+    /// </summary>
+    private static string DescribeUri(Uri uri)
+    {
+        var port = uri.IsDefaultPort ? "" : $":{uri.Port}";
+        return $"{uri.Scheme}://{uri.Host}{port}{uri.AbsolutePath}";
+    }
+
+    /// <summary>
     /// 解析一页列表响应：<c>{"data":[{"id":"..."}],"has_more":bool,"last_id":"..."}</c>。
     /// OpenAI 兼容端点不返回 has_more / last_id，取默认值即可（视为只有一页）。
     /// </summary>
-    private static (List<string> Ids, bool HasMore, string? LastId) ParseModelPage(string body)
+    private static (List<string> Ids, bool HasMore, string? LastId) ParseModelPage(Uri uri, string body)
     {
         JObject root;
         try
@@ -199,7 +317,7 @@ public static class AutoComboModelListFetcher
         }
         catch (Exception e) when (e is JsonException or ArgumentException)
         {
-            throw new Exception($"无法解析模型列表响应：{Summarize(body)}", e);
+            throw new ModelListEndpointException($"服务端返回无法解析的模型列表响应：GET {DescribeUri(uri)}：{Summarize(body)}");
         }
 
         var ids = new List<string>();

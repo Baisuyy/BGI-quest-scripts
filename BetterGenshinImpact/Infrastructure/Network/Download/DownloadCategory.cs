@@ -28,13 +28,7 @@ public static class DownloadCategories
         "主页网络背景图片的下载，完成后移入用户目录，留下的通常是未完成的下载");
 
     /// <summary>
-    /// 特别版增量更新包，安装成功后由更新脚本删除
-    /// </summary>
-    public static readonly DownloadCategory SpecialUpdate = new("special-update", "特别版更新包",
-        "特别版的增量更新包，装完自动删除，留下的通常是未完成或失败的下载");
-
-    /// <summary>
     /// 全部分类，供存储区域登记
     /// </summary>
-    public static IReadOnlyList<DownloadCategory> All { get; } = [OnnxRuntime, BannerImage, SpecialUpdate];
+    public static IReadOnlyList<DownloadCategory> All { get; } = [OnnxRuntime, BannerImage];
 }
