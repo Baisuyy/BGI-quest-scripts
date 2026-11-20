@@ -152,6 +152,12 @@ public static class LogUploader
 
             return await PostAsync(payload, file.Name, reason, ct).ConfigureAwait(false);
         }
+        catch (OperationCanceledException)
+        {
+            // 调用方的时间预算用尽（退出路径 15 秒），属于预期内的放弃，不是故障。
+            // 单独返回一条能看懂的原因，让调用方决定记 WRN 还是静默，避免这里重复刷日志。
+            return new LogUploadResult(false, "上传超时，已中断");
+        }
         catch (Exception e)
         {
             Serilog.Log.Warning(e, "日志上传失败");
@@ -213,6 +219,10 @@ public static class LogUploader
     ///         退出路径上不能无限等：给一个时间预算，到点就放弃。进程马上要结束了，
     ///         没传完的日志留在本地，下次出错还会再传一遍最新的。
     ///     </para>
+    ///     <para>
+    ///         放弃时要留 WRN 而不是 DBG：用户看不到窗口了，但日志里有这一行，
+    ///         出问题回捞时才能判断「到底传没传」，而不是对着一片空白猜。
+    ///     </para>
     /// </summary>
     public static async Task UploadBeforeExitAsync(TimeSpan budget)
     {
@@ -227,12 +237,16 @@ public static class LogUploader
             var r = await UploadLatestAsync("exit", cts.Token).ConfigureAwait(false);
             if (!r.Ok)
             {
-                Serilog.Log.Debug("退出时未上传日志：{Message}", r.Message);
+                Serilog.Log.Warning("退出时日志未上传：{Message}", r.Message);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            Serilog.Log.Warning("退出时日志上传超时（预算 {Seconds} 秒），已放弃", budget.TotalSeconds);
         }
         catch (Exception e)
         {
-            Serilog.Log.Debug(e, "退出时上传日志失败");
+            Serilog.Log.Warning(e, "退出时上传日志失败");
         }
     }
 

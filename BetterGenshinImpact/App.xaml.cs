@@ -860,11 +860,12 @@ public partial class App : Application
             Debug.WriteLine(ex);
         }
 
-        // 自动上传模式下，退出前把这次运行的日志发出去。最多等 8 秒：
-        // 用户按「退出」是希望它真的退，不是在这里挂半分钟。
+        // 自动上传模式下，退出前把这次运行的日志发出去。最多等 15 秒：
+        // 8MB 尾部脱敏压缩后通常只剩 1～2MB，宽带 3～5 秒传完；15 秒覆盖到慢速上行，
+        // 又不至于让「点了退出却不动」的体感太长。到点没传完就放弃，日志还在本地。
         try
         {
-            await Core.Special.LogUploader.UploadBeforeExitAsync(TimeSpan.FromSeconds(8));
+            await Core.Special.LogUploader.UploadBeforeExitAsync(TimeSpan.FromSeconds(15));
         }
         catch (Exception ex)
         {
