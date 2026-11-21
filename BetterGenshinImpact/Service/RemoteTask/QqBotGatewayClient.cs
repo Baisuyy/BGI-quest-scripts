@@ -40,9 +40,34 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
     private static readonly TimeSpan MaxBackoff = TimeSpan.FromMinutes(10);
 
     /// <summary>
-    /// 连续失败超过这个次数后不再逐次记录，只在 2 的幂次上汇总一条。
+    /// 同一种失败最多按这个间隔记一条。
+    /// <para>
+    /// 以前按「第 2/4/8/16 次」记，失败停在 5 次时反而不吵；但真实日志里连续失败上千次，
+    /// 2 的幂一样会刷屏（10:20 到 15:00 记了 1600 多条），而且完全看不出「已经坏了多久」。
+    /// 改成按时间窗：首次立刻记，之后每 30 分钟一条带累计时长的汇总。
+    /// </para>
     /// </summary>
-    private const int QuietAfterFailures = 3;
+    private static readonly TimeSpan FaultLogInterval = TimeSpan.FromMinutes(30);
+
+    /// <summary>
+    /// 当前故障的摘要文本，用于判断「还是同一个毛病」。
+    /// </summary>
+    private string? _faultSummary;
+
+    /// <summary>
+    /// 本次故障第一次发生的时刻。
+    /// </summary>
+    private DateTime _faultSince;
+
+    /// <summary>
+    /// 本次故障内累计的失败次数。
+    /// </summary>
+    private int _faultCount;
+
+    /// <summary>
+    /// 上一次写故障日志的时刻。
+    /// </summary>
+    private DateTime _lastFaultLogAt = DateTime.MinValue;
 
     /// <summary>
     /// REST 客户端，用于取令牌和网关地址。
@@ -58,6 +83,11 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
     /// 连接使用的代理，为空时直连。
     /// </summary>
     private readonly IWebProxy? _proxy;
+
+    /// <summary>
+    /// 是否跳过 TLS 证书校验，仅给「代理做了中间人解密」的场景用。
+    /// </summary>
+    private readonly bool _allowInsecureTls;
 
     /// <summary>
     /// 停止信号。
@@ -85,11 +115,16 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
     /// <param name="api">REST 客户端。</param>
     /// <param name="logger">日志。</param>
     /// <param name="proxy">可选代理。</param>
-    public QqBotGatewayClient(QqBotApiClient api, ILogger logger, IWebProxy? proxy = null)
+    /// <param name="allowInsecureTls">
+    ///     跳过 TLS 证书校验。只在代理做了中间人解密、且没法把
+    ///     <c>api.sgroup.qq.com</c> 加进直连时使用。
+    /// </param>
+    public QqBotGatewayClient(QqBotApiClient api, ILogger logger, IWebProxy? proxy = null, bool allowInsecureTls = false)
     {
         _api = api;
         _logger = logger;
         _proxy = proxy;
+        _allowInsecureTls = allowInsecureTls;
     }
 
     /// <summary>
@@ -151,7 +186,6 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
         var token = linked.Token;
         var backoff = TimeSpan.FromSeconds(2);
         var authFailures = 0;
-        var connectFailures = 0;
 
         while (!token.IsCancellationRequested)
         {
@@ -159,12 +193,13 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             {
                 await RunSessionAsync(token).ConfigureAwait(false);
                 authFailures = 0;
-                if (connectFailures > 0)
+                // 会话正常结束（到点被腾讯收线）也算恢复：说明网络和证书这一层是通的。
+                var recovered = ResetFaultTracking();
+                if (!string.IsNullOrEmpty(recovered))
                 {
-                    _logger.LogInformation("QQ 机器人网关已恢复，此前连续失败 {Count} 次", connectFailures);
+                    _logger.LogInformation("QQ 机器人网关已恢复，{Detail}", recovered);
                 }
 
-                connectFailures = 0;
                 backoff = TimeSpan.FromSeconds(2);
             }
             catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -183,13 +218,8 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             }
             catch (Exception exception)
             {
-                connectFailures++;
-                // 前几次把原因说清楚，之后按 2 的幂汇总：一次代理配错能刷出上千行同文，
-                // 用户去翻日志时反而找不到真正的报错。
-                if (connectFailures <= QuietAfterFailures || IsPowerOfTwo(connectFailures))
-                {
-                    LogConnectFailure(exception, connectFailures, backoff);
-                }
+                // 一句话说清楚「什么毛病、坏了多久」，同类失败 30 分钟内只记一条。
+                LogConnectFailure(exception, backoff);
             }
             finally
             {
@@ -212,33 +242,65 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
     }
 
     /// <summary>
-    /// 是否 2 的幂：用来把「第 8 次、第 16 次、第 32 次……」挑出来做汇总。
-    /// </summary>
-    private static bool IsPowerOfTwo(int value)
-    {
-        return value > 0 && (value & (value - 1)) == 0;
-    }
-
-    /// <summary>
     /// 记录一次网络类失败。不输出堆栈——这里的调用链对用户没有意义，
     /// 需要堆栈时把日志级别调到 Debug，BgiHttpDefaultsHandler 会带异常另记一条。
+    /// <para>
+    /// 节流按「同一种原因 + 30 分钟」：首次立刻记，之后每个窗口一条，并带上「已持续多久、失败多少次」。
+    /// 这样一份日志里既能看见故障发生过，也能看见它持续了多久，而不是被同一个字符串刷满。
+    /// </para>
     /// </summary>
-    private void LogConnectFailure(Exception exception, int failures, TimeSpan retry)
+    private void LogConnectFailure(Exception exception, TimeSpan retry)
     {
         var (summary, hint) = DescribeFailure(exception);
+        var now = DateTime.Now;
+
+        // 换了原因就重开一轮统计：代理断开和 DNS 失败混在一起会让「已持续」失去意义。
+        if (!string.Equals(_faultSummary, summary, StringComparison.Ordinal))
+        {
+            _faultSummary = summary;
+            _faultSince = now;
+            _faultCount = 0;
+            _lastFaultLogAt = DateTime.MinValue;
+        }
+
+        _faultCount++;
+
+        if (_lastFaultLogAt != DateTime.MinValue && now - _lastFaultLogAt < FaultLogInterval)
+        {
+            return;
+        }
+
+        _lastFaultLogAt = now;
         var retryText = retry >= TimeSpan.FromMinutes(1)
             ? $"{retry.TotalMinutes:0.#} 分钟后重试"
             : $"{retry.TotalSeconds:0} 秒后重试";
 
-        if (failures == 1)
+        if (_faultCount == 1)
         {
             _logger.LogWarning("QQ 机器人网关连不上：{Summary}{Hint}，{Retry}", summary, hint, retryText);
+            return;
         }
-        else
+
+        _logger.LogWarning("QQ 机器人网关仍连不上（已持续 {Minutes} 分钟，失败 {Count} 次）：{Summary}，{Retry}",
+            Math.Max(1, (int)(now - _faultSince).TotalMinutes), _faultCount, summary, retryText);
+    }
+
+    /// <summary>
+    /// 连接恢复后重置故障统计，供下一次故障重新计时。
+    /// </summary>
+    private string ResetFaultTracking()
+    {
+        if (_faultCount == 0)
         {
-            _logger.LogWarning("QQ 机器人网关仍连不上（已连续失败 {Count} 次）：{Summary}，{Retry}",
-                failures, summary, retryText);
+            return string.Empty;
         }
+
+        var text = $"此前连续失败 {_faultCount} 次，持续 {(int)Math.Max(0, (DateTime.Now - _faultSince).TotalMinutes)} 分钟";
+        _faultSummary = null;
+        _faultCount = 0;
+        _faultSince = default;
+        _lastFaultLogAt = DateTime.MinValue;
+        return text;
     }
 
     /// <summary>
@@ -303,7 +365,8 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
         if (certificate)
         {
             return ("api.sgroup.qq.com 的证书校验未通过",
-                "：多半是代理或抓包工具替换了证书，把该域名加进直连规则后会自动恢复");
+                "：多半是代理或抓包工具替换了证书。把该域名加进直连规则最干净；"
+                + "代理无法按域名分流时，可在「远程任务」里打开「忽略证书校验」（会重启连接）");
         }
 
         if (handshakeCut)
@@ -364,8 +427,16 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             socket.Options.Proxy = _proxy;
         }
 
+        if (_allowInsecureTls)
+        {
+            // ClientWebSocket 的证书回调是 per-socket 的，不会污染其它连接。
+            socket.Options.RemoteCertificateValidationCallback = static (_, _, _, _) => true;
+        }
+
         await socket.ConnectAsync(new Uri(gatewayUrl), token).ConfigureAwait(false);
         _logger.LogInformation("QQ 机器人已连接网关 {Url}", gatewayUrl);
+        // TLS 和 DNS 都过了：把之前的故障统计归零，下一次坏掉重新计时。
+        ResetFaultTracking();
 
         var heartbeatInterval = TimeSpan.FromSeconds(30);
         using var heartbeatCts = CancellationTokenSource.CreateLinkedTokenSource(token);

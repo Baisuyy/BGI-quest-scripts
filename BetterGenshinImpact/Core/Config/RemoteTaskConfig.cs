@@ -49,6 +49,18 @@ public partial class RemoteTaskConfig : ObservableValidator
     private string _qqBotAllowedOpenIds = string.Empty;
 
     /// <summary>
+    /// 忽略 QQ 网关的 TLS 证书校验，仅用于本机代理（Clash / Fiddler 之类）做了中间人解密时。
+    /// <para>
+    /// 代理开了 MITM 之后，<c>api.sgroup.qq.com</c> 返回的是代理自签的证书，
+    /// 系统信任链校验必然失败，机器人永远连不上。把域名加进直连是更干净的做法；
+    /// 如果代理没法按域名分流，只能打开这个开关——它会把机器人流量暴露给代理进程，
+    /// 所以默认关闭，且改动后需要重启程序（连接循环是常驻的）。
+    /// </para>
+    /// </summary>
+    [ObservableProperty]
+    private bool _qqBotAllowInsecureTls;
+
+    /// <summary>
     /// 任务没有正常结束时回传一张游戏截图。
     /// <para>
     /// 只在失败或取消时截：成功后的画面就是角色站在终点，看不出任何东西。

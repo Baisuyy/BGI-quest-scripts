@@ -135,10 +135,18 @@ public sealed class QqBotService : IHostedService
 
         try
         {
-            var httpClient = _httpClientFactory.CreateClient(HttpClientNames.Notification);
+            var httpClient = remote.QqBotAllowInsecureTls
+                ? CreateInsecureClient()
+                : _httpClientFactory.CreateClient(HttpClientNames.Notification);
+            if (remote.QqBotAllowInsecureTls)
+            {
+                _logger.LogWarning("QQ 机器人已启用「忽略证书校验」，机器人流量会对代理进程可见；确认代理已按域名分流后建议关掉");
+            }
+
             var api = new QqBotApiClient(httpClient, appId, appSecret, _logger);
             // 跟随「网络与代理」设置：ClientWebSocket 默认不看 HttpClient.DefaultProxy。
-            var gateway = new QqBotGatewayClient(api, _logger, HttpClient.DefaultProxy);
+            var gateway = new QqBotGatewayClient(
+                api, _logger, HttpClient.DefaultProxy, remote.QqBotAllowInsecureTls);
             gateway.MessageReceived += OnMessageReceivedAsync;
             _executionService.RunCompleted += OnRunCompleted;
             _planRunner.Finished += OnPlanFinished;
@@ -542,6 +550,33 @@ public sealed class QqBotService : IHostedService
         }
 
         return string.Empty;
+    }
+
+    /// <summary>
+    /// 给「忽略证书校验」开关用的 HTTP 客户端。
+    /// <para>
+    /// 不走 <see cref="IHttpClientFactory" />：命名客户端的 handler 是全局共享的，
+    /// 在这里按单次配置改它的 TLS 策略会连带影响通知等其它请求。单独建一个只给机器人用的即可。
+    /// </para>
+    /// </summary>
+    private static HttpClient CreateInsecureClient()
+    {
+        var handler = new SocketsHttpHandler
+        {
+            PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+            // 没有 DecompressionMethods.All 这个成员，要按位自己拼。
+            AutomaticDecompression = System.Net.DecompressionMethods.GZip
+                                     | System.Net.DecompressionMethods.Deflate
+                                     | System.Net.DecompressionMethods.Brotli,
+            SslOptions =
+            {
+                RemoteCertificateValidationCallback = static (_, _, _, _) => true,
+            },
+        };
+        return new HttpClient(handler, disposeHandler: true)
+        {
+            Timeout = TimeSpan.FromSeconds(45),
+        };
     }
 
     /// <summary>
