@@ -682,7 +682,9 @@ public sealed class RemoteTaskCommandHandler(
         if (ParseIndex(command.Args) is { } index)
         {
             // 多角色时回「绑定米游社 2」：这一步只是选角色，不再去轮询
-            return new RemoteTaskReply(mysBinding.TrySelectRole(key, index, out var chosen)
+            var (ok, chosen) = await mysBinding.TrySelectRoleAsync(key, index, cancellationToken)
+                .ConfigureAwait(false);
+            return new RemoteTaskReply(ok
                 ? chosen
                 : "现在没有待选的角色。先发「绑定米游社」扫码，扫完我再把角色列出来。");
         }

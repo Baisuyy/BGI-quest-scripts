@@ -110,6 +110,12 @@ public sealed class MysPassportClient(HttpClient httpClient, ILogger<MysPassport
         "https://api-takumi.mihoyo.com/binding/api/getUserGameRolesByCookie?game_biz=hk4e_cn";
 
     /// <summary>
+    /// 米游社「我的角色」卡片接口，与实时便笺同源，用同一套 v2 登录态。
+    /// </summary>
+    private const string RecordCardUrl =
+        "https://api-takumi-record.mihoyo.com/game_record/card/wapi/getGameRecordCard";
+
+    /// <summary>
     /// 二维码有效期：接口给 5 分钟，这里按 3 分钟算，留出扫码和确认的余量。
     /// </summary>
     private static readonly TimeSpan QrLifetime = TimeSpan.FromMinutes(3);
@@ -206,6 +212,12 @@ public sealed class MysPassportClient(HttpClient httpClient, ILogger<MysPassport
     /// <summary>
     /// 按 Cookie 查账号下的原神角色。
     /// <para>
+    /// 先走米游社「我的角色」卡片接口（<c>getGameRecordCard</c>）：它和实时便笺同源，
+    /// 用的是同一套 v2 登录态，绑定时能顺手验证这份 Cookie 到底能不能查数据。
+    /// 卡片接口拿不到时再退回老的 binding 接口——后者只认 v1 的 <c>cookie_token</c>，
+    /// 扫码得到的新登录态基本都查不出来，所以只能当兜底。
+    /// </para>
+    /// <para>
     /// 查不到不算失败：有些账号只在米游社绑过通行证、没同步角色，这时候让用户手填 UID
     /// 比让整次绑定失败更合理。
     /// </para>
@@ -213,6 +225,106 @@ public sealed class MysPassportClient(HttpClient httpClient, ILogger<MysPassport
     /// <param name="cookie">扫码得到的登录态。</param>
     /// <param name="ct">取消令牌。</param>
     public async Task<IReadOnlyList<MysGameRole>> GetRolesAsync(string cookie, CancellationToken ct = default)
+    {
+        var fromCard = await GetRolesFromCardAsync(cookie, ct).ConfigureAwait(false);
+        if (fromCard.Count > 0)
+        {
+            return fromCard;
+        }
+
+        return await GetRolesFromBindingAsync(cookie, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 用「我的角色」卡片接口列角色：与实时便笺同源，能顺带验证登录态是否真的可用。
+    /// </summary>
+    private async Task<IReadOnlyList<MysGameRole>> GetRolesFromCardAsync(string cookie, CancellationToken ct)
+    {
+        var accountId = MysCookieBuilder.AccountId(cookie);
+        if (string.IsNullOrWhiteSpace(accountId))
+        {
+            return [];
+        }
+
+        var query = "uid=" + accountId;
+        using var request = new HttpRequestMessage(HttpMethod.Get, $"{RecordCardUrl}?{query}");
+        request.Headers.TryAddWithoutValidation("Cookie", cookie);
+        request.Headers.TryAddWithoutValidation("DS", MysSign.BuildDs(query));
+        request.Headers.TryAddWithoutValidation("x-rpc-app_version", MysSign.AppVersion);
+        request.Headers.TryAddWithoutValidation("x-rpc-client_type", "5");
+        request.Headers.TryAddWithoutValidation("x-rpc-language", "zh-cn");
+        request.Headers.TryAddWithoutValidation("User-Agent", MysSign.AppUserAgent);
+        request.Headers.TryAddWithoutValidation("Referer", "https://webstatic.mihoyo.com/");
+
+        try
+        {
+            using var response = await httpClient.SendAsync(request, ct).ConfigureAwait(false);
+            var text = await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("米游社角色卡片 HTTP {Status}", (int)response.StatusCode);
+                return [];
+            }
+
+            var root = JsonNode.Parse(text) as JsonObject;
+            var retcode = root?["retcode"]?.GetValue<int>() ?? -1;
+            if (retcode != 0)
+            {
+                logger.LogInformation("米游社角色卡片被拒：retcode={Retcode}，message={Message}",
+                    retcode, root?["message"]?.ToString());
+                return [];
+            }
+
+            if (root!["data"]?["list"] is not JsonArray list)
+            {
+                return [];
+            }
+
+            var roles = new List<MysGameRole>(list.Count);
+            foreach (var item in list.OfType<JsonObject>())
+            {
+                // 一个账号可能同时玩崩铁/绝区零，这里只要原神
+                var biz = item["game_biz"]?.ToString();
+                if (!string.IsNullOrEmpty(biz) && !biz.Equals("hk4e_cn", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var uid = item["game_uid"]?.ToString() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(uid))
+                {
+                    continue;
+                }
+
+                roles.Add(new MysGameRole(
+                    uid,
+                    item["nickname"]?.ToString() ?? "旅行者",
+                    ParseLevel(item["level"]),
+                    item["region"]?.ToString() ?? "cn_gf01"));
+            }
+
+            if (roles.Count > 0)
+            {
+                logger.LogInformation("米游社角色卡片：取到 {Count} 个原神角色", roles.Count);
+            }
+
+            return roles;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "米游社角色卡片查询异常");
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// 老接口兜底：只认 <c>cookie_token</c>，手填 Cookie 的老用户仍可能走到这里。
+    /// </summary>
+    private async Task<IReadOnlyList<MysGameRole>> GetRolesFromBindingAsync(string cookie, CancellationToken ct)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, RolesByCookieUrl);
         request.Headers.TryAddWithoutValidation("Cookie", cookie);

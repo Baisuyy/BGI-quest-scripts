@@ -79,16 +79,57 @@ public sealed class MysBindingTests
         var dictionary = MysCookieBuilder.Collect(headers, null);
         var cookie = MysCookieBuilder.Compose(dictionary);
 
-        Assert.Equal(
-            "ltuid_v2=123456789; account_id_v2=123456789; ltoken_v2=ltoken-value; cookie_token_v2=cookie-value; mid=abcdef",
-            cookie);
+        Assert.Contains("ltuid_v2=123456789", cookie);
+        Assert.Contains("account_id_v2=123456789", cookie);
+        Assert.Contains("ltoken_v2=ltoken-value", cookie);
+        Assert.Contains("cookie_token_v2=cookie-value", cookie);
+        Assert.Contains("mid=abcdef", cookie);
+        Assert.Contains("unrelated=1", cookie);
         Assert.Null(MysCookieBuilder.Validate(cookie));
         Assert.Contains("123456789", MysCookieBuilder.Describe(cookie));
         Assert.DoesNotContain("ltoken-value", MysCookieBuilder.Describe(cookie));
     }
 
     /// <summary>
-    /// 只有旧名字时补出 v2 的名字：新版接口只认 ltuid_v2。
+    /// <c>ltmid_v2</c> / <c>account_mid_v2</c> 一个都不能丢。
+    /// <para>
+    /// v2 令牌靠配对的 mid 定位签发会话，早期版本按白名单挑字段，把 mid 丢掉了，
+    /// 结果扫码绑定显示成功、查树脂永远 Please login。这个用例就是那条防线的守门人。
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void Cookie_KeepsMidFields()
+    {
+        string[] headers =
+        [
+            "ltuid_v2=123456789; Path=/",
+            "ltmid_v2=mid-value; Path=/",
+            "ltoken_v2=v2_ltoken; Path=/"
+        ];
+
+        var cookie = MysCookieBuilder.Compose(MysCookieBuilder.Collect(headers, null));
+
+        Assert.Contains("ltmid_v2=mid-value", cookie);
+        Assert.Contains("account_mid_v2=mid-value", cookie);
+        Assert.Contains("mid=mid-value", cookie);
+    }
+
+    /// <summary>
+    /// 令牌不能新旧互抄：<c>v2_</c> 开头的值塞进 <c>ltoken</c> 会被当成格式错误。
+    /// </summary>
+    [Fact]
+    public void Cookie_DoesNotCopyTokenAcrossVersions()
+    {
+        string[] headers = ["ltuid_v2=1; Path=/", "ltoken_v2=v2_abc; Path=/"];
+
+        var cookie = MysCookieBuilder.Compose(MysCookieBuilder.Collect(headers, null));
+
+        Assert.Contains("ltoken_v2=v2_abc", cookie);
+        Assert.DoesNotContain("ltoken=v2_abc", cookie);
+    }
+
+    /// <summary>
+    /// 只有旧名字时补出 v2 的 ID；令牌保持原样，不跨版本抄。
     /// </summary>
     [Fact]
     public void Cookie_FillMissingV2Names()
@@ -98,7 +139,10 @@ public sealed class MysBindingTests
         var cookie = MysCookieBuilder.Compose(MysCookieBuilder.Collect(headers, null));
 
         Assert.Contains("ltuid_v2=987654321", cookie);
-        Assert.Contains("ltoken_v2=old-token", cookie);
+        Assert.Contains("ltuid=987654321", cookie);
+        Assert.Contains("ltoken=old-token", cookie);
+        Assert.DoesNotContain("ltoken_v2=old-token", cookie);
+        Assert.Null(MysCookieBuilder.Validate(cookie));
     }
 
     /// <summary>

@@ -39,6 +39,7 @@ public sealed record MysBindOutcome(string Text, bool Confirmed = false);
 /// </summary>
 public sealed class MysBindingService(
     MysPassportClient passport,
+    MysDailyNoteClient dailyNote,
     IConfigService configService,
     ILogger<MysBindingService> logger)
 {
@@ -151,8 +152,9 @@ public sealed class MysBindingService(
             configService.Save();
             _binds.TryRemove(key, out _);
             return new MysBindOutcome(
-                "登录态已经存好了，但米游社没返回这个账号下的角色列表。\n"
-                + "在「设置 → 通用 → 远程任务」里把原神 UID 填上就能查树脂；也可以用「切号」回游戏主界面，我从画面上读。",
+                "登录态已经存好了，但米游社没返回这个账号下的原神角色。\n"
+                + "在「设置 → 通用 → 远程任务」里把原神 UID 填上就能查树脂；也可以用「切号」回游戏主界面，我从画面上读。\n"
+                + "如果填完 UID 仍提示未登录，说明这份登录态不完整，重发一次「绑定米游社」再扫。",
                 Confirmed: true);
         }
 
@@ -163,7 +165,11 @@ public sealed class MysBindingService(
             configService.Save();
             _binds.TryRemove(key, out _);
             logger.LogInformation("米游社扫码绑定完成：UID {Uid}", role.Uid);
-            return new MysBindOutcome(BuildSuccessText(role), Confirmed: true);
+
+            // 立刻查一次便笺：绑定这步只证明「拿到了 Cookie」，能不能查树脂要看服务端认不认。
+            // 不查的话用户要等到下次问体力才发现登录态是废的，中间那句「绑定好了」就是误导。
+            var (note, error) = await VerifyAsync(cookie, role.Uid, ct).ConfigureAwait(false);
+            return new MysBindOutcome(BuildSuccessText(role, note, error), Confirmed: true);
         }
 
         // 多个角色：先记住登录态，让用户回一个序号。
@@ -176,32 +182,36 @@ public sealed class MysBindingService(
     }
 
     /// <summary>
-    /// 多个角色时按序号选定一个。
+    /// 多个角色时按序号选定一个，并立刻查一次便笺验证登录态。
     /// </summary>
     /// <param name="key">会话键。</param>
     /// <param name="index">从 1 开始的序号。</param>
     /// <param name="text">回复给用户的话。</param>
-    public bool TrySelectRole(string key, int index, out string text)
+    /// <param name="ct">取消令牌。</param>
+    public async Task<(bool Ok, string Text)> TrySelectRoleAsync(
+        string key,
+        int index,
+        CancellationToken ct = default)
     {
-        text = string.Empty;
         if (!TryGetLive(key, out var pending) || pending.Roles is not { Count: > 0 } roles)
         {
-            return false;
+            return (false, string.Empty);
         }
 
         if (index < 1 || index > roles.Count)
         {
-            text = $"序号超出范围，1 到 {roles.Count} 之间选一个。";
-            return true;
+            return (true, $"序号超出范围，1 到 {roles.Count} 之间选一个。");
         }
 
         var role = roles[index - 1];
-        configService.Get().RemoteTaskConfig.MysUid = role.Uid;
+        var config = configService.Get().RemoteTaskConfig;
+        config.MysUid = role.Uid;
         configService.Save();
         _binds.TryRemove(key, out _);
         logger.LogInformation("米游社扫码绑定完成：UID {Uid}", role.Uid);
-        text = BuildSuccessText(role);
-        return true;
+
+        var (note, error) = await VerifyAsync(config.MysCookie, role.Uid, ct).ConfigureAwait(false);
+        return (true, BuildSuccessText(role, note, error));
     }
 
     /// <summary>
@@ -227,9 +237,48 @@ public sealed class MysBindingService(
     }
 
     /// <summary>
+    /// 绑定成功后立刻查一次便笺，确认这份登录态在服务端真的能用。
+    /// </summary>
+    /// <param name="cookie">刚拿到的登录态。</param>
+    /// <param name="uid">选中角色的 UID。</param>
+    /// <param name="ct">取消令牌。</param>
+    /// <returns>读数；失败时同时给出原因。</returns>
+    private async Task<(MysDailyNote? Note, string? Error)> VerifyAsync(
+        string cookie,
+        string uid,
+        CancellationToken ct)
+    {
+        try
+        {
+            var note = await dailyNote.QueryAsync(cookie, uid, ct).ConfigureAwait(false);
+            if (note != null)
+            {
+                logger.LogInformation("米游社绑定自检通过：树脂 {Current}/{Max}", note.CurrentResin, note.MaxResin);
+                return (note, null);
+            }
+
+            var reason = dailyNote.LastError;
+            logger.LogWarning("米游社绑定自检未通过：{Reason}", reason);
+            return (null, reason);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning(e, "米游社绑定自检异常");
+            return (null, "查询时出了点异常：" + e.Message);
+        }
+    }
+
+    /// <summary>
     /// 绑定成功的回复：带上角色名和 UID，方便用户确认绑的是不是想绑的那个号。
     /// </summary>
-    private static string BuildSuccessText(MysGameRole role)
+    /// <param name="role">选中的角色。</param>
+    /// <param name="note">自检读数；没查通时为 null。</param>
+    /// <param name="error">自检失败的原因。</param>
+    private static string BuildSuccessText(MysGameRole role, MysDailyNote? note, string? error)
     {
         var builder = new StringBuilder();
         builder.Append("绑定好了：").Append(role.Nickname)
@@ -241,7 +290,20 @@ public sealed class MysBindingService(
         }
 
         builder.Append("）\n");
-        builder.Append("以后不开游戏也能问「还有多少树脂」。换号或登录过期，重新发「绑定米游社」覆盖就行。");
+        if (note != null)
+        {
+            // 真查通了才敢说「以后不开游戏也能问」；只拿到 Cookie 不等于能用
+            builder.Append("刚试查了一次：现在树脂 ")
+                .Append(note.CurrentResin).Append('/').Append(note.MaxResin)
+                .Append("，浓缩 ").Append(note.CondensedResin).Append(" 个。\n")
+                .Append("以后不开游戏也能问「还有多少树脂」。换号或登录过期，重新发「绑定米游社」覆盖就行。");
+        }
+        else
+        {
+            builder.Append("但登录态没能通过实测：").Append(error ?? "米游社没有返回数据").Append('\n')
+                .Append("先重新发一次「绑定米游社」再扫；如果两次都一样，把上面这句话原样发我，我按 retcode 查。");
+        }
+
         return builder.ToString();
     }
 

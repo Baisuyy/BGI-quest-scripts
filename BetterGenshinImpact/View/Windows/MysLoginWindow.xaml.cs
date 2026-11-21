@@ -128,7 +128,7 @@ public partial class MysLoginWindow : FluentWindow
     /// <summary>
     /// 绑定选中的角色。
     /// </summary>
-    private void OnConfirmRoleClick(object sender, RoutedEventArgs e)
+    private async void OnConfirmRoleClick(object sender, RoutedEventArgs e)
     {
         if (RolePicker.SelectedIndex < 0)
         {
@@ -136,7 +136,8 @@ public partial class MysLoginWindow : FluentWindow
             return;
         }
 
-        if (_binding.TrySelectRole(DesktopKey, RolePicker.SelectedIndex + 1, out var text))
+        var (ok, text) = await _binding.TrySelectRoleAsync(DesktopKey, RolePicker.SelectedIndex + 1);
+        if (ok)
         {
             StatusText.Text = text + "\n可以关掉这个窗口了。";
             Finish();

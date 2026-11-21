@@ -121,23 +121,25 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
             var retcode = root?["retcode"]?.GetValue<int>() ?? -1;
             if (retcode != 0)
             {
+                var message = root?["message"]?.GetValue<string>();
                 LastError = retcode switch
                 {
                     // 米游社对「登录态不完整」和「登录态过期」都给 5003，区分不了就都提示到
                     5003 => "米游社判为未登录（retcode 5003），登录态多半缺字段或已过期。"
                             + "发一句「绑定米游社」重新扫码最省事；要在设置里手填的话，"
-                            + "得带 ltoken_v2 / ltuid_v2 / cookie_token，少一个都会是 5003。",
-                    // 10001 的 message 实测就是 "Please login"：Cookie 无效、过期、
-                    // 或者不是网页端签发的令牌都会落到这里。以前这条被写成「检查 UID 是否
-                    // 填成了米游社账号 ID」，用户照做只会把 UID 改坏，问题还在。
-                    10001 => "米游社说未登录（retcode 10001）。通常是 Cookie 里的 ltoken_v2 "
-                             + "已经过期，或这份登录态不是网页端签发的。发一句「绑定米游社」"
-                             + "重新扫码即可，不用改 UID。",
+                            + "得带 ltoken_v2 / ltuid_v2 / ltmid_v2，少一个都会是 5003。",
+                    // 10001 / 1001 的 message 实测都是 "Please login"。真正的原因往往不是令牌过期，
+                    // 而是 v2 令牌缺了配对的 mid：服务端找不到签发它的会话，只能当没登录。
+                    10001 or 1001 => "米游社说未登录（retcode " + retcode + "）。"
+                                     + "常见原因是登录态里缺 mid（旧版客户端扫码时会丢），"
+                                     + "或 ltoken_v2 已经过期。发一句「绑定米游社」重新扫码即可，不用改 UID。",
                     -100 => "米游社说 Cookie 无效（retcode -100）。请重新扫码绑定。",
-                    _ => $"米游社拒绝请求（retcode {retcode}）。",
+                    _ => string.IsNullOrWhiteSpace(message)
+                        ? $"米游社拒绝请求（retcode {retcode}）。"
+                        : $"米游社拒绝请求（retcode {retcode}：{message}）。"
                 };
-                logger.LogWarning("米游社查询被拒：retcode={Retcode}，message={Message}",
-                    retcode, root?["message"]?.GetValue<string>());
+                logger.LogWarning("米游社查询被拒：retcode={Retcode}，message={Message}，Cookie 字段={Fields}",
+                    retcode, message, string.Join(',', DescribeFields(normalized)));
                 return null;
             }
 
@@ -170,6 +172,18 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
             return null;
         }
     }
+
+    /// <summary>
+    /// 只列出 Cookie 里有哪些字段名，用来判断是不是丢了 mid / cookie_token。
+    /// <para>
+    /// 值一律不写进日志：上传通道虽然会脱敏，但源头不留原文更省心。
+    /// </para>
+    /// </summary>
+    private static IEnumerable<string> DescribeFields(string cookie)
+        => cookie
+            .Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.Split('=', 2)[0].Trim())
+            .Where(name => name.Length > 0);
 
     /// <summary>
     /// 把用户粘来的 Cookie 收拾成一行。

@@ -9,23 +9,38 @@ namespace BetterGenshinImpact.Core.Mys;
 /// <summary>
 /// 把扫码登录返回的 <c>Set-Cookie</c> 与 <c>tokens</c> 拼成一条能直接用的 Cookie。
 /// <para>
-/// 米游社同一份登录态有新旧两套名字（<c>ltuid</c> / <c>ltuid_v2</c>），而网页端接口只认
-/// 带 <c>_v2</c> 的那套。扫码接口不一定把两套都给全，所以这里做一次补齐：
-/// 缺 <c>ltuid_v2</c> 就用 <c>account_id</c>，缺 <c>cookie_token_v2</c> 就从 tokens 里按类型取。
+/// 米游社同一份登录态有新旧两套名字（<c>ltuid</c> / <c>ltuid_v2</c>、<c>mid</c> / <c>ltmid_v2</c>）。
+/// v2 令牌不是自包含的：服务端要靠同名的 mid 找到签发它的那次会话，少了 mid，
+/// <c>ltoken_v2</c> 再新也会被当成未登录（retcode 10001 / 1001 <c>Please login</c>）。
+/// 所以这里**不再按白名单挑字段**——扫码给什么就留什么，只额外补齐缺失的别名。
+/// </para>
+/// <para>
+/// 早期版本只保留十几个"看起来重要"的字段，把 <c>ltmid_v2</c>、<c>account_mid_v2</c>
+/// 直接丢掉了，于是扫码绑定显示成功、查树脂却一直 Please login。这正是那次事故的根因。
 /// </para>
 /// </summary>
 public static class MysCookieBuilder
 {
     /// <summary>
     /// 拼装顺序：账号在前、令牌在后，方便用户对着开发者工具逐个核对。
+    /// 不在此列但确实存在的字段会在末尾原样保留。
     /// </summary>
     private static readonly string[] PreferredOrder =
     [
         "ltuid_v2", "ltuid", "account_id_v2", "account_id",
+        "ltmid_v2", "mid", "account_mid_v2",
         "ltoken_v2", "ltoken",
         "cookie_token_v2", "cookie_token",
         "stoken_v2", "stoken",
-        "mid", "login_ticket"
+        "login_ticket", "login_uid"
+    ];
+
+    /// <summary>
+    /// 明确没有价值的字段，拼进请求头只会让排查更糊。
+    /// </summary>
+    private static readonly string[] IgnoredNames =
+    [
+        "Path", "Expires", "Max-Age", "Domain", "Secure", "HttpOnly", "SameSite"
     ];
 
     /// <summary>
@@ -54,12 +69,20 @@ public static class MysCookieBuilder
 
             var name = pair[..split].Trim();
             var value = pair[(split + 1)..].Trim().Trim('"');
-            if (value.Length == 0 || value.Equals("deleted", StringComparison.OrdinalIgnoreCase))
+            if (name.Length == 0)
             {
                 continue;
             }
 
-            if (PreferredOrder.Contains(name, StringComparer.OrdinalIgnoreCase))
+            if (value.Length == 0 || value.Equals("deleted", StringComparison.OrdinalIgnoreCase))
+            {
+                // 服务端显式作废某个字段时不能留着旧值，否则下次还以为登录态在
+                cookie.Remove(name);
+                continue;
+            }
+
+            // 全收：v2 令牌靠同名的 mid 定位会话，漏一个字段就只剩 Please login
+            if (!IgnoredNames.Contains(name, StringComparer.OrdinalIgnoreCase))
             {
                 cookie[name] = value;
             }
@@ -100,32 +123,66 @@ public static class MysCookieBuilder
             cookie.TryAdd("account_id_v2", accountId);
         }
 
+        // mid 同理：v2 令牌要它才能定位会话，扫码 body 里也会给
+        var mid = FirstNonEmpty(cookie, "ltmid_v2", "account_mid_v2", "mid")
+                  ?? data?["user_info"]?["mid"]?.ToString();
+        if (!string.IsNullOrWhiteSpace(mid))
+        {
+            cookie.TryAdd("ltmid_v2", mid);
+            cookie.TryAdd("account_mid_v2", mid);
+        }
+
         Normalize(cookie);
         return cookie;
     }
 
     /// <summary>
-    /// 把旧名字升级成 <c>_v2</c>，升级完就把旧字段去掉：
-    /// 两套名字同时出现会让 Cookie 变长几十个字符，而接口只读新名字。
+    /// 从 Cookie 里取米游社账号 ID（<c>ltuid</c> 那一串），取不到返回 null。
+    /// <para>
+    /// 注意它和原神 UID 不是一回事：账号 ID 一般在 1 亿到 3 亿之间，原神 UID 是 9 位。
+    /// </para>
+    /// </summary>
+    public static string? AccountId(string cookie)
+        => string.IsNullOrWhiteSpace(cookie)
+            ? null
+            : FirstNonEmpty(cookie, "ltuid_v2", "ltuid", "account_id_v2", "account_id");
+
+    /// <summary>
+    /// 两套名字互相补齐，**但不删任何一边**。
+    /// <para>
+    /// 新版接口读 <c>_v2</c>，老接口（<c>binding/api/getUserGameRolesByCookie</c>、
+    /// <c>dailyNote</c>）读的是 <c>ltuid</c> / <c>mid</c>。只留一边就一定有一条链路查不到，
+    /// 而这点体积（几十字节）完全不值得省。
+    /// </para>
+    /// <para>
+    /// 只补 ID 类字段。令牌类不能互抄：<c>ltoken_v2</c> 的值以 <c>v2_</c> 开头，
+    /// 塞进 <c>ltoken</c> 会被服务端当成格式错误的 v1 令牌，比缺字段更糟。
+    /// </para>
     /// </summary>
     private static void Normalize(Dictionary<string, string> cookie)
     {
-        Promote(cookie, "ltuid_v2", "ltuid");
-        Promote(cookie, "ltoken_v2", "ltoken");
-        Promote(cookie, "cookie_token_v2", "cookie_token");
-        Promote(cookie, "stoken_v2", "stoken");
+        Alias(cookie, "ltuid_v2", "ltuid");
+        Alias(cookie, "ltmid_v2", "mid");
+        Alias(cookie, "account_id_v2", "account_id");
+        Alias(cookie, "account_mid_v2", "ltmid_v2");
+        // 上面可能刚从 account_mid_v2 补出 ltmid_v2，再同步一次 mid
+        Alias(cookie, "ltmid_v2", "mid");
     }
 
-    private static void Promote(Dictionary<string, string> cookie, string current, string legacy)
+    /// <summary>
+    /// 一边有、另一边没有时复制一份过去；两边都有时以 <paramref name="current"/> 为准。
+    /// </summary>
+    private static void Alias(Dictionary<string, string> cookie, string current, string legacy)
     {
-        if (!cookie.ContainsKey(current) && cookie.TryGetValue(legacy, out var value))
+        if (cookie.TryGetValue(current, out var value) && value.Length > 0)
         {
-            cookie[current] = value;
+            cookie[legacy] = value;
+            return;
         }
 
-        if (cookie.ContainsKey(current))
+        if (cookie.TryGetValue(legacy, out var fallback) && fallback.Length > 0)
         {
-            cookie.Remove(legacy);
+            cookie[current] = fallback;
         }
     }
 
