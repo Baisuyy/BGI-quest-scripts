@@ -108,6 +108,42 @@ public static class SpecialUpdater
     /// </summary>
     internal static async Task NoticeUpstreamAsync(UpdateOption option, IHttpClientFactory httpClientFactory, ILogger logger)
     {
+        var upstream = await FetchUpstreamVersionAsync(httpClientFactory, logger).ConfigureAwait(true);
+        if (string.IsNullOrWhiteSpace(upstream))
+        {
+            return;
+        }
+
+        string baseline = BaseVersion();
+        if (CompareVersion(upstream, baseline) <= 0)
+        {
+            return;
+        }
+
+        bool manual = option.Trigger == UpdateTrigger.Manual;
+        if (!manual && string.Equals(ReadNotifiedUpstream(), upstream, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        await ThemedMessageBox.InformationAsync(
+            $"上游 BetterGI 已经发布 {upstream}，特别版目前基于 {baseline}。\n\n" +
+            "特别版不是改个版本号就能跟上的：上游这批改动要重新合并、重新回归，" +
+            "适配完成前请以当前版本为准。\n\n" +
+            "这不是「你的版本旧了」的提示，不用去下载官方包——装上去会丢掉特别版的功能。",
+            "上游已有新版本");
+
+        if (!manual)
+        {
+            WriteNotifiedUpstream(upstream);
+        }
+    }
+
+    /// <summary>
+    ///     读官方 notice.json 里的 version 字段。读不到返回 null，调用方按「不知道」处理。
+    /// </summary>
+    private static async Task<string?> FetchUpstreamVersionAsync(IHttpClientFactory httpClientFactory, ILogger logger)
+    {
         try
         {
             var client = httpClientFactory.CreateClient();
@@ -116,39 +152,12 @@ public static class SpecialUpdater
 
             using var document = JsonDocument.Parse(text);
             var upstream = document.RootElement.TryGetProperty("version", out var node) ? node.GetString() : null;
-            if (string.IsNullOrWhiteSpace(upstream))
-            {
-                return;
-            }
-
-            string baseline = BaseVersion();
-            if (string.CompareOrdinal(ParseVersion(upstream), ParseVersion(baseline)) <= 0)
-            {
-                return;
-            }
-
-            bool manual = option.Trigger == UpdateTrigger.Manual;
-            if (!manual && string.Equals(ReadNotifiedUpstream(), upstream, StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            await ThemedMessageBox.InformationAsync(
-                $"上游 BetterGI 已经发布 {upstream}，特别版目前基于 {baseline}。\n\n" +
-                "特别版不是改个版本号就能跟上的：上游这批改动要重新合并、重新回归，" +
-                "适配完成前请以当前版本为准。\n\n" +
-                "这不是「你的版本旧了」的提示，不用去下载官方包——装上去会丢掉特别版的功能。",
-                "上游已有新版本");
-
-            if (!manual)
-            {
-                WriteNotifiedUpstream(upstream);
-            }
+            return string.IsNullOrWhiteSpace(upstream) ? null : upstream;
         }
         catch (Exception exception)
         {
-            // 读不到上游清单不影响任何功能：这只是「顺便看一眼」，失败就安静跳过。
-            logger.LogDebug(exception, "检查上游版本失败");
+            logger.LogDebug(exception, "读取上游版本失败");
+            return null;
         }
     }
 
@@ -259,7 +268,19 @@ public static class SpecialUpdater
         {
             if (manual)
             {
-                await ThemedMessageBox.InformationAsync($"当前已是最新的特别版（{current}）。", "检查更新");
+                // 手动检查是用户主动问「有没有新版」，把上游状态一起说清楚，
+                // 省得他再去官网对一遍「官方更新了没」。
+                var upstream = await FetchUpstreamVersionAsync(httpClientFactory, logger).ConfigureAwait(true);
+                var upstreamHint = string.Empty;
+                if (!string.IsNullOrWhiteSpace(upstream))
+                {
+                    upstreamHint = CompareVersion(upstream, BaseVersion()) > 0
+                        ? $"\n\n上游 BetterGI 已到 {upstream}，特别版还在 {BaseVersion()} 上做适配。"
+                        : $"\n\n上游 BetterGI 当前 {upstream}，两边是同步的。";
+                }
+
+                await ThemedMessageBox.InformationAsync(
+                    $"当前已是最新的特别版（{current}）。{upstreamHint}", "检查更新");
             }
 
             return true;
