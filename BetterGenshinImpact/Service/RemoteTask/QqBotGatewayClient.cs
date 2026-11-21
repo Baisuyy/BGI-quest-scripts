@@ -251,6 +251,7 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
         var handshakeCut = false;
         var reset = false;
         var timeout = false;
+        var dnsFailure = false;
 
         for (var current = exception; current is not null; current = current.InnerException)
         {
@@ -266,6 +267,14 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
                         or System.Net.Sockets.SocketError.ConnectionAborted:
                     reset = true;
                     break;
+                case System.Net.Sockets.SocketException socket
+                    when socket.SocketErrorCode is System.Net.Sockets.SocketError.HostNotFound
+                        or System.Net.Sockets.SocketError.NoData
+                        or System.Net.Sockets.SocketError.TryAgain:
+                    // 11001「不知道这样的主机」是 DNS 挂了，不是对端拒绝。
+                    // 之前落到默认分支只显示 HttpRequestException 类型名，用户根本不知道该查什么。
+                    dnsFailure = true;
+                    break;
                 case TimeoutException:
                     timeout = true;
                     break;
@@ -279,6 +288,10 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
                      || message.Contains("0 bytes from the transport", StringComparison.OrdinalIgnoreCase))
             {
                 handshakeCut = true;
+            }
+            else if (message.Contains("不知道这样的主机", StringComparison.Ordinal))
+            {
+                dnsFailure = true;
             }
             else if (message.Contains("远程主机强迫关闭", StringComparison.Ordinal))
             {
@@ -304,12 +317,39 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
             return ("与 api.sgroup.qq.com 的连接被对端重置", "：网络或代理中途断开，稍后自动重连");
         }
 
+        // DNS 失败要排在超时前面：某些网络下解析失败会先表现为 TimeoutException，
+        // 说成「连接超时」会把人引到防火墙上去查，其实是域名没解析出来。
+        if (dnsFailure)
+        {
+            return ("解析不到 api.sgroup.qq.com（DNS 失败）",
+                "：网络本身可能没通，或代理的 DNS 没接住这个域名；换成系统 DNS / 直连再试");
+        }
+
         if (timeout)
         {
             return ("连接 api.sgroup.qq.com 超时", "：当前网络到该域名不通，检查代理与 DNS");
         }
 
         return (exception.GetType().Name, string.Empty);
+    }
+
+    /// <summary>
+    /// 是不是「对端正常收线」。腾讯网关到点就会断开，且经常不走完整关闭握手，
+    /// 表现为 1006 或 "without completing the close handshake"——这类断连不影响任务，
+    /// 重连后会话序号还能续上。
+    /// </summary>
+    private static bool IsPeerClosed(WebSocketException exception)
+    {
+        if (exception.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+        {
+            return true;
+        }
+
+        var message = exception.Message;
+        return message.Contains("without completing the close handshake", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("The remote party closed", StringComparison.OrdinalIgnoreCase)
+               || message.Contains("已中止", StringComparison.Ordinal)
+               || message.Contains("远程方", StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -370,7 +410,16 @@ public sealed partial class QqBotGatewayClient : IAsyncDisposable
         }
         catch (WebSocketException exception)
         {
-            _logger.LogWarning("QQ 机器人 WebSocket 异常：{Message}", exception.Message);
+            if (IsPeerClosed(exception))
+            {
+                // 腾讯网关按会话时长主动踢线，一天十几次是常态，重连后一切照旧。
+                // 记 WRN 只会让人以为网络有毛病，也会把真正的握手/证书错误埋掉。
+                _logger.LogInformation("QQ 机器人网关会话被对端关闭，准备重连");
+            }
+            else
+            {
+                _logger.LogWarning("QQ 机器人 WebSocket 异常：{Message}", exception.Message);
+            }
         }
         finally
         {
