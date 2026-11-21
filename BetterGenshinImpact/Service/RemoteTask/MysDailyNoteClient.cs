@@ -127,7 +127,13 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
                     5003 => "米游社判为未登录（retcode 5003），登录态多半缺字段或已过期。"
                             + "发一句「绑定米游社」重新扫码最省事；要在设置里手填的话，"
                             + "得带 ltoken_v2 / ltuid_v2 / cookie_token，少一个都会是 5003。",
-                    10001 => "米游社参数不对（retcode 10001），检查 UID 是否填成了米游社账号 ID。",
+                    // 10001 的 message 实测就是 "Please login"：Cookie 无效、过期、
+                    // 或者不是网页端签发的令牌都会落到这里。以前这条被写成「检查 UID 是否
+                    // 填成了米游社账号 ID」，用户照做只会把 UID 改坏，问题还在。
+                    10001 => "米游社说未登录（retcode 10001）。通常是 Cookie 里的 ltoken_v2 "
+                             + "已经过期，或这份登录态不是网页端签发的。发一句「绑定米游社」"
+                             + "重新扫码即可，不用改 UID。",
+                    -100 => "米游社说 Cookie 无效（retcode -100）。请重新扫码绑定。",
                     _ => $"米游社拒绝请求（retcode {retcode}）。",
                 };
                 logger.LogWarning("米游社查询被拒：retcode={Retcode}，message={Message}",
@@ -138,6 +144,11 @@ public sealed class MysDailyNoteClient(HttpClient httpClient, ILogger<MysDailyNo
             var data = root?["data"] as JsonObject;
             if (data == null)
             {
+                // retcode=0 但 data 为空：多半是 UID 与 Cookie 不属于同一账号，
+                // 或者角色还没在米游社同步出来。不写清楚，用户只会看到「读不到树脂」。
+                LastError = $"米游社返回了空数据（UID {roleId}）。确认这个 UID 就在当前绑定的账号下，"
+                            + "刚绑定的角色可能还要等几分钟才同步。";
+                logger.LogWarning("米游社响应缺少 data：UID={Uid}", roleId);
                 return null;
             }
 
