@@ -5,7 +5,7 @@
 上游同步（sync_source.py）会整体覆盖源码，本脚本负责把「改到上游文件里」的几处补丁贴回去：
 
 1. EngineExtend.InitHost         —— ocr / quest / OcrFactory / Bv / ai 宿主
-2. AllConfig                     —— 内置 AI 配置节点与旧配置兼容入口
+2. （已移除）AllConfig —— 特别版配置节点改由 AllConfig.Special.cs 承载
 3. App.xaml.cs                   —— 注册 AiKernel 单例
 4. PathExecutor.MoveTo           —— 第三次卡死放弃前让内置 AI 接管
 5. TaskSettingsPage.xaml         —— 插入内置 AI 设置卡片
@@ -25,7 +25,6 @@ import sys
 ROOT = pathlib.Path.cwd()
 
 ENGINE_EXTEND = "BetterGenshinImpact/Core/Script/EngineExtend.cs"
-ALL_CONFIG = "BetterGenshinImpact/Core/Config/AllConfig.cs"
 APP = "BetterGenshinImpact/App.xaml.cs"
 PATH_EXECUTOR = "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.cs"
 SETTINGS_PAGE = "BetterGenshinImpact/View/Pages/TaskSettingsPage.xaml"
@@ -54,68 +53,12 @@ HOST_BLOCK = '''
 '''
 
 # ---------------------------------------------------------------- 2. 配置节点
-
-CONFIG_ANCHOR = "    public AutoComboBuildConfig AutoComboBuildConfig { get; set; } = new();"
-
-CONFIG_BLOCK = '''
-
-    /// <summary>
-    ///     内置大模型配置（特别版）
-    /// </summary>
-    public AiConfig AiConfig { get; set; } = new();
-
-    /// <summary>
-    ///     旧版脚本 AI 配置的兼容入口：读到时自动并入 <see cref="AiConfig"/>，不再单独写出。
-    /// </summary>
-    [JsonPropertyName("aiAgentConfig")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public LegacyAiAgentConfig? LegacyAiConfig
-    {
-        get => null;
-        set
-        {
-            if (value == null)
-            {
-                return;
-            }
-
-            // 旧配置只有端点/模型/密钥等基础项，接管相关开关按默认值补齐
-            AiConfig.Enabled = value.Enabled;
-            if (!string.IsNullOrWhiteSpace(value.Endpoint)) AiConfig.Endpoint = value.Endpoint;
-            if (!string.IsNullOrWhiteSpace(value.ModelName)) AiConfig.ModelName = value.ModelName;
-            if (!string.IsNullOrWhiteSpace(value.ApiKey)) AiConfig.ApiKey = value.ApiKey;
-            if (value.Temperature > 0) AiConfig.Temperature = value.Temperature;
-            if (value.TimeoutSeconds > 0) AiConfig.TimeoutSeconds = value.TimeoutSeconds;
-            if (value.MaxCallsPerRun > 0) AiConfig.MaxCallsPerRun = value.MaxCallsPerRun;
-            AiConfig.VisionMode = string.Equals(value.VisionMode, "multimodal", StringComparison.OrdinalIgnoreCase);
-            if (!string.IsNullOrWhiteSpace(value.SystemPromptExtra)) AiConfig.SystemPromptExtra = value.SystemPromptExtra;
-        }
-    }
-
-    /// <summary>
-    ///     旧版（脚本专用）AI 配置结构，仅用于读取历史 config.json。
-    /// </summary>
-    public sealed class LegacyAiAgentConfig
-    {
-        public bool Enabled { get; set; }
-
-        public string Endpoint { get; set; } = "";
-
-        public string ModelName { get; set; } = "";
-
-        public string ApiKey { get; set; } = "";
-
-        /// <summary>旧版是字符串：<c>off</c> / <c>multimodal</c>。</summary>
-        public string VisionMode { get; set; } = "off";
-
-        public int MaxCallsPerRun { get; set; }
-
-        public int TimeoutSeconds { get; set; }
-
-        public double Temperature { get; set; }
-
-        public string SystemPromptExtra { get; set; } = "";
-    }'''
+#
+# AllConfig / CommonConfig 的特别版成员不在这里注入。
+# 它们是 partial 类，特别版字段放在 AllConfig.Special.cs / CommonConfig.Special.cs 里，
+# 由 sync_source.py 按「*.Special.cs 一律保留」的规则跳过覆盖。
+# 这样做的好处：上游改这两个文件的结构时，同步不会因为锚点漂移而失败，
+# 也不会出现「注入漏了一半、编译过了但功能没了」这种更难发现的情况。
 
 # ---------------------------------------------------------------- 3. DI 注册
 
@@ -291,8 +234,6 @@ def patch_page() -> bool:
 def main() -> int:
     patch(ENGINE_EXTEND, 'AddHostObject("ocr"', HOST_ANCHOR,
           HOST_ANCHOR + HOST_BLOCK, "脚本宿主 ocr/quest/ai")
-    patch(ALL_CONFIG, "public AiConfig AiConfig", CONFIG_ANCHOR,
-          CONFIG_ANCHOR + CONFIG_BLOCK, "AllConfig.AiConfig")
     patch(APP, "services.AddSingleton<AiKernel>();", APP_ANCHOR,
           APP_ANCHOR + APP_BLOCK, "注册 AiKernel")
     patch(PATH_EXECUTOR, "TryAiRescueAsync(screen, waypoint, position)", STUCK_ANCHOR,
@@ -309,7 +250,7 @@ def main() -> int:
     patch(APP_HOST, "AgentPanelWindow.EnsureGlobalHotkey", APP_HOST_ANCHOR,
           APP_HOST_ANCHOR + APP_HOST_BLOCK, "助手小面板快捷键")
 
-    # AllConfig / App / VM 需要额外的 using
+    # EngineExtend / App / VM 需要引用 Core.Ai 里的 AiKernel
     for rel, anchor, line in (
         (ENGINE_EXTEND, "using BetterGenshinImpact.Core.Config;", "using BetterGenshinImpact.Core.Ai;\n"),
         (APP, "using BetterGenshinImpact.Core.Config;", "using BetterGenshinImpact.Core.Ai;\n"),

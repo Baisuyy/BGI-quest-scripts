@@ -79,6 +79,9 @@ jobs:
           python3 tools/bgi-special/sync_source.py /tmp/upstream
           python3 tools/bgi-special/patch_special.py
           python3 tools/bgi-special/apply_upstream_extra.py
+          # 推送前先验一遍特别版的东西还在。这一步不过就不推——
+          # 2026-11-20 那次同步「成功推送」但分支编不过，问题在第二天才被发现。
+          python3 tools/bgi-special/verify_special.py
           echo "${{ steps.up.outputs.sha }}" > .bgi-upstream
 
       - name: 提交并推送
@@ -119,8 +122,12 @@ jobs:
           BODY=$(printf '%s\n' \
             "自动同步上游 \`${REF}\`（${SHA}）失败，源码未推送。" \
             "" \
-            "常见原因：上游改动了 \`EngineExtend.InitHost\`、\`PathExecutor.MoveTo\` 或任务设置页的结构，补丁锚点匹配不到；" \
+            "常见原因：上游改动了 \`EngineExtend.InitHost\`、\`PathExecutor\` 的任务循环或任务设置页的结构，补丁锚点匹配不到；" \
             "或 \`VisionHost.cs\` 依赖的接口（\`ImageRegion\` / \`OcrFactory\` / \`IOcrService\`）签名变化。" \
+            "" \
+            "\`verify_special.py\` 报错时看它列出的具体条目：能力层文件被删就补 \`sync_source.py\` 的 KEEP；" \
+            "补丁标记缺失就看 \`patch_special.py\` 对应那条的锚点；" \
+            "上游文件里出现特别版字段，说明有人把它写回了会被覆盖的地方，要搬到同名 \`*.Special.cs\`。" \
             "" \
             "处理方式：本地按 SPECIAL-API.md 的说明调整" \
             "\`tools/bgi-special/patch_special.py\`、\`tools/bgi-special/apply_upstream_extra.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \

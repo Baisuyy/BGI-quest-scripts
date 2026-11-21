@@ -74,6 +74,9 @@ KEEP = (
     "Build/kachina.special.config.json",
     ".github/workflows/upload-123pan.yml",
     "Test/BetterGenshinImpact.UnitTest/ServiceTests/",
+    # 特别版新增的单测：上游没有，不登记就在同步时被当「废弃文件」删掉，
+    # 而且删了不会编译失败，只是悄悄少了一层保护。
+    "Test/BetterGenshinImpact.UnitTest/HelperTests/RepeatSuppressorSinkTests.cs",
     "tools/bgi-special/",
 )
 
@@ -88,6 +91,12 @@ DROP = (
 
 
 def kept(rel: str) -> bool:
+    # *.Special.cs 是「特别版寄存在上游类型上的 partial 文件」的固定约定。
+    # 这类文件专门用来避开一个坑：CommonConfig / AllConfig 上游也有，同步时会被整份覆盖，
+    # 字段写在里面就等于每轮被删一次（2026-11-20 因此让远端分支编译不过）。
+    # 用后缀自动识别，省得每加一个就得记得回来改清单——漏登记的代价是编译失败。
+    if rel.endswith(".Special.cs"):
+        return True
     return any(rel == k or (k.endswith("/") and rel.startswith(k)) for k in KEEP)
 
 
@@ -132,6 +141,7 @@ def main() -> int:
     local_files = set(files_of(local))
 
     removed = 0
+    removed_names = []
     blocked = []
     for rel in sorted(local_files - up_files):
         if kept(rel):
@@ -142,6 +152,7 @@ def main() -> int:
             continue
         (local / rel).unlink()
         removed += 1
+        removed_names.append(rel)
 
     if blocked:
         print(f"[x] 有 {len(blocked)} 个只属于特别版的文件即将被删，已中止：", file=sys.stderr)
@@ -174,6 +185,11 @@ def main() -> int:
             pass
 
     print(f"[+] 删除 {removed} 个文件，覆盖 {copied} 个文件")
+    # 删了什么要能看见：只报个数字，事后想确认「是不是误删」只能去翻 diff。
+    for rel in removed_names[:20]:
+        print(f"    - {rel}")
+    if len(removed_names) > 20:
+        print(f"    …… 另有 {len(removed_names) - 20} 个")
     return 0
 
 
