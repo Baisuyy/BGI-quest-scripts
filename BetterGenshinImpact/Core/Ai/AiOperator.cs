@@ -347,7 +347,11 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                 5. 最多 {maxSteps} 步，超时会强制交还；步数紧张时优先做最有把握的动作。
                 6. 任务面板给了当前任务与步骤：如果目标点就在任务目标附近，任务进度变化（步骤文字或计数）说明走对了；连续几步任务进度不动，说明这条路只是绕过路障、与任务无关，按距离继续走即可。
                 7. 拿不准任务是否推进时调用 quest 重新读面板，不要连续两次以上调用。
-                8. 禁止调用未提供的工具，禁止输出代码或解释长段落。
+                8. 状态里「位置 未知」= 小地图没匹配上，你现在不知道自己在哪、朝哪：
+                   · 若允许传送，直接 tp 落到目标点——这是位置未知时唯一确定的动作，不要先盲走；
+                   · 不能传送时，先 climb 或 turn 找个参照物，再向前试探一两步，别连续 move；
+                   · 盲走两步位置仍是未知，就 finish(false) 说明「坐标识别失败」，把控制权还回去。
+                9. 禁止调用未提供的工具，禁止输出代码或解释长段落。
                 """;
     }
 
@@ -479,8 +483,10 @@ public sealed class AiOperator(GameRuntime runtime, AllConfig config, AiKernel k
                     return new ExecutionResult(false, false, "不允许传送，请改用走位。" + budget, state);
                 }
 
-                var distance = state.Distance ?? 0;
-                if (distance < 80)
+                // 关键：位置未知时 Distance 是 null，以前 `?? 0` 把它当成「0 米，不必传送」，
+                // 于是「坐标识别失败 → 唯一能救命的手段被拒 → 盲走 → 失败」。
+                // 现在只在确实知道距离且很近时才劝退；未知反而优先传，落点至少是确定的。
+                if (state.Distance is double distance && distance < 80)
                 {
                     return new ExecutionResult(false, false,
                         $"距离只有 {distance:F0} 米，不必传送，请走位。" + budget, state);

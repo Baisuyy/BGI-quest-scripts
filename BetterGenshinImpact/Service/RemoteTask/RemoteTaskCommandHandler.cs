@@ -1045,6 +1045,11 @@ public sealed class RemoteTaskCommandHandler(
     {
         var config = configService.Get();
         var text = $"没看懂「{message.Content}」。\n\n{BuildHelp()}";
+        if (message.Content.Contains("脚本", StringComparison.Ordinal))
+        {
+            text += "\n\n想不起脚本叫什么，发「脚本列表」，我把装了的都列出来。";
+        }
+
         if (config.RemoteTaskConfig.SelfLearningEnabled && kernel.Available)
         {
             text += "\n\n如果这事确实要我在游戏里点，前面加「自由操作」再说一遍，我自己看着办。";

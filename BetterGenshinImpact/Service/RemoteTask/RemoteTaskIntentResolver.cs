@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using BetterGenshinImpact.Core.Ai;
+using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Service.Interface;
 using Microsoft.Extensions.Logging;
 
@@ -55,6 +58,14 @@ public sealed class RemoteTaskIntentResolver(
         {
             logger.LogInformation("图鉴命中「{Text}」→ {Material}", text, fromWiki);
             return new RemoteTaskCommand(RemoteTaskCommandKind.Path, Args: fromWiki);
+        }
+
+        // 脚本名直接命中就不再问模型：「跑一下寄自彼岸的昨日」这种说法模型经常答成 chat/pilot，
+        // 但脚本名本身是唯一的，本地比对更准也更省一次请求。
+        if (MatchLocalScript(text) is { } script)
+        {
+            logger.LogInformation("脚本名命中「{Text}」→ {Script}", text, script);
+            return new RemoteTaskCommand(RemoteTaskCommandKind.Script, Args: script);
         }
 
         if (!kernel.Available)
@@ -133,6 +144,14 @@ public sealed class RemoteTaskIntentResolver(
             : $"本地已有路线的采集物（共 {materials.Count} 种，只能从这里挑）：{string.Join("、", materials.Take(80))}"
               + (materials.Count > 80 ? "……" : string.Empty);
 
+        // 用户自己装的第三方脚本（User/JsScript）。以前提示词里完全没有这条路，
+        // 用户说「跑一下剧情脚本」模型只会 pilot 或 chat，脚本永远调不起来。
+        var scripts = CollectScriptHints();
+        var scriptHint = scripts.Count == 0
+            ? "用户脚本目录里还没有装任何脚本，涉及第三方脚本时只能说明「先装脚本」。"
+            : $"本地已安装的第三方脚本（共 {scripts.Count} 个，script 意图只能从这里挑）：\n"
+              + string.Join("\n", scripts.Select(s => $"- {s.Name}（目录 {s.Folder}）{(s.Desc.Length > 0 ? "：" + s.Desc : string.Empty)}"));
+
         // 用 $$ 前缀：raw string 里单大括号是字面量，插值要写双大括号。
         return $$"""
                 {{persona}}
@@ -145,15 +164,19 @@ public sealed class RemoteTaskIntentResolver(
 
                 {{materialHint}}
 
-                输出四选一：
+                {{scriptHint}}
+
+                输出五选一：
                 1. 要干活：{"intent":"run","task_id":"上面的某个标识","say":"一句中文确认"}
                    兑换码要把码本身带上：{"intent":"run","task_id":"redeem_code","code":"8HZH86K6E2PW","say":"一句中文"}
                    采集素材要把采集物名带上：{"intent":"run","task_id":"auto_pathing","material":"霓裳花","say":"一句中文"}
                 2. 这些日常操作不用跑任务，直接说要做哪个：
                    {"intent":"control","action":"status|screenshot|stop|help|list|resin|inventory|wish|close_game|bind_mys|update|apply_update","say":"一句中文"}
-                3. 清单里没有对应任务，但可以在游戏界面上点出来（查看背包、翻菜单、点某个按钮）：
+                3. 要跑上面清单里的第三方脚本：{"intent":"script","name":"脚本名或目录名","say":"一句中文"}
+                   用户说「跑剧情」「跑那个寄自彼岸的昨日」「执行一下 xxx 脚本」都属于这一类。
+                4. 清单里没有对应任务，但可以在游戏界面上点出来（查看背包、翻菜单、点某个按钮）：
                    {"intent":"pilot","goal":"一句话说清要做什么","say":"一句中文"}
-                4. 与游戏操作无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
+                5. 与游戏操作无关，或信息不够：{"intent":"chat","say":"用一两句话回答或追问"}
 
                 规则：
                 - task_id 必须来自上面的清单，不要编造。
@@ -161,6 +184,9 @@ public sealed class RemoteTaskIntentResolver(
                 - 只有确实是「去游戏里点几下就能完成」的事才用 pilot；问知识、问你在干嘛、闲聊一律 chat。
                 - pilot 的 goal 要写成能直接执行的祈使句，例如「打开背包看有多少摩拉」。
                 - 用户单独发来一串字母数字（例如 8HZH86K6E2PW），就是兑换码，用 run + redeem_code，并把码放进 code。
+                - 用户点名要跑某个第三方脚本（「跑剧情」「那个每日委托脚本」「执行寄自彼岸的昨日」）用 script，
+                  name 只能从上面的脚本清单里挑，匹配不上就用 chat 说明「没装这个脚本」并列出最接近的两个。
+                  script 不要退回 pilot——pilot 是代替用户点界面，和跑脚本是两回事。
                 - 要采素材（「采清心」「胡桃突破材料」「米提亚材料」「帮我弄点霓裳花」）用 run + auto_pathing。
                   material 填的是**采集物名，不是角色名**，并且必须出现在上面的本地清单里：
                   胡桃→霓裳花、雷电将军→天云草实、钟离→琉璃袋。
@@ -204,6 +230,7 @@ public sealed class RemoteTaskIntentResolver(
             {
                 "run" => ResolveRun(GetString(root, "task_id"), GetString(root, "code"), GetString(root, "material"), say),
                 "control" => ResolveControl(GetString(root, "action"), say),
+                "script" => ResolveScript(GetString(root, "name"), say),
                 "pilot" => ResolvePilot(GetString(root, "goal"), say),
                 "chat" => new RemoteTaskCommand(RemoteTaskCommandKind.Chat, Say: say),
                 _ => null
@@ -214,6 +241,146 @@ public sealed class RemoteTaskIntentResolver(
             return null;
         }
     }
+
+    /// <summary>
+    /// 消息里直接出现了某个脚本名（或它的目录名）时，认作「跑这个脚本」。
+    /// <para>
+    /// 只认长度 3 以上的完整名，避免「脚本」「每日」这种短词把闲聊抢成执行。
+    /// </para>
+    /// </summary>
+    private static string? MatchLocalScript(string text)
+    {
+        var compact = RemoteTaskCommandParser.Compact(text);
+        foreach (var script in CollectScriptHints())
+        {
+            var stem = Path.GetFileNameWithoutExtension(script.Name);
+            if (stem.Length >= 3 && compact.Contains(RemoteTaskCommandParser.Compact(stem), StringComparison.OrdinalIgnoreCase))
+            {
+                return string.IsNullOrEmpty(script.Folder) ? script.Name : script.Folder;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 模型判断「要跑某个第三方脚本」，校验名字确实在本地装过。
+    /// <para>
+    /// 名字允许模糊：模型常把「寄自彼岸的昨日.js」写成「寄自彼岸的昨日」，
+    /// 或只给目录名。匹配不上时返回一句带候选的聊天，而不是让它去 pilot 乱点。
+    /// </para>
+    /// </summary>
+    private RemoteTaskCommand? ResolveScript(string? name, string? say)
+    {
+        var wanted = name?.Trim();
+        if (string.IsNullOrWhiteSpace(wanted))
+        {
+            return null;
+        }
+
+        var scripts = CollectScriptHints();
+        if (scripts.Count > 0)
+        {
+            var exact = scripts.FirstOrDefault(s =>
+                string.Equals(s.Folder, wanted, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(s.Name, wanted, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(Path.GetFileNameWithoutExtension(s.Name), wanted, StringComparison.OrdinalIgnoreCase));
+
+            var hit = exact.Name is not null
+                ? exact
+                : scripts.FirstOrDefault(s =>
+                    s.Name.Contains(wanted, StringComparison.OrdinalIgnoreCase)
+                    || wanted.Contains(Path.GetFileNameWithoutExtension(s.Name), StringComparison.OrdinalIgnoreCase));
+
+            if (hit.Name is not null)
+            {
+                // 用目录名交回去：run_script 在同一目录里有多个脚本时按目录定位更准。
+                return new RemoteTaskCommand(
+                    RemoteTaskCommandKind.Script,
+                    Say: say,
+                    Args: string.IsNullOrEmpty(hit.Folder) ? hit.Name : hit.Folder);
+            }
+
+            var candidates = string.Join("、", scripts.Take(5).Select(s => s.Name));
+            return new RemoteTaskCommand(
+                RemoteTaskCommandKind.Chat,
+                Say: $"没装叫「{wanted}」的脚本。现在有：{candidates}。想跑哪个直接说名字。");
+        }
+
+        // 目录里什么都没有：交给 handler 的 ScriptAsync 去回「要跑哪个脚本 + 空列表」，
+        // 比在这里编一句「没装」更一致。
+        return new RemoteTaskCommand(RemoteTaskCommandKind.Script, Say: say, Args: wanted);
+    }
+
+    /// <summary>
+    /// 本地已安装的第三方脚本清单。只读 <c>User/JsScript</c> 下一层：
+    /// 目录带 manifest.json 的取清单里的名字，单文件 .js 直接用文件名。
+    /// </summary>
+    private static List<ScriptHint> CollectScriptHints()
+    {
+        var list = new List<ScriptHint>();
+        try
+        {
+            var root = Global.ScriptPath();
+            if (!Directory.Exists(root))
+            {
+                return list;
+            }
+
+            foreach (var dir in Directory.EnumerateDirectories(root))
+            {
+                var folder = Path.GetFileName(dir);
+                var name = folder;
+                var desc = string.Empty;
+
+                var manifest = Path.Combine(dir, "manifest.json");
+                if (File.Exists(manifest))
+                {
+                    try
+                    {
+                        if (JsonNode.Parse(File.ReadAllText(manifest)) is JsonObject node)
+                        {
+                            var declared = node["name"]?.GetValue<string>();
+                            if (!string.IsNullOrWhiteSpace(declared))
+                            {
+                                name = declared;
+                            }
+
+                            desc = node["description"]?.GetValue<string>() ?? string.Empty;
+                        }
+                    }
+                    catch
+                    {
+                        // 清单坏了按目录名走，不影响其余脚本
+                    }
+                }
+
+                list.Add(new ScriptHint(name, folder, Trim(desc, 40)));
+            }
+
+            foreach (var file in Directory.EnumerateFiles(root, "*.js"))
+            {
+                list.Add(new ScriptHint(Path.GetFileName(file), string.Empty, string.Empty));
+            }
+        }
+        catch
+        {
+            // 目录被占用/无权限：当作没有脚本，让模型走 chat
+        }
+
+        return list.Take(30).ToList();
+    }
+
+    private static string Trim(string text, int max)
+    {
+        var flat = text.Replace('\r', ' ').Replace('\n', ' ').Trim();
+        return flat.Length <= max ? flat : flat[..max] + "…";
+    }
+
+    /// <summary>
+    /// 一个可被远程调起的脚本条目。
+    /// </summary>
+    private readonly record struct ScriptHint(string Name, string Folder, string Desc);
 
     /// <summary>
     /// 校验模型给出的任务标识一定在注册表里，避免把编造的标识传给状态机。

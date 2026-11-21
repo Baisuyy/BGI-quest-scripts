@@ -612,13 +612,16 @@ public static class RemoteTaskCommandParser
     /// </summary>
     private static readonly (RemoteTaskCommandKind Kind, string[] Keywords)[] BuiltinKeywords =
     [
-        (RemoteTaskCommandKind.Help, ["help", "帮助", "菜单", "指令", "用法", "你能做什么"]),
-        (RemoteTaskCommandKind.Status, ["status", "progress", "状态", "进度", "在跑吗", "在干嘛", "跑完了吗"]),
+        (RemoteTaskCommandKind.Help, ["help", "帮助", "菜单", "指令", "用法", "你能做什么", "怎么用", "不会用", "有哪些命令",
+            "有什么命令", "功能列表", "怎么玩"]),
+        (RemoteTaskCommandKind.Status, ["status", "progress", "状态", "进度", "在跑吗", "在干嘛", "跑完了吗", "还要多久",
+            "跑到哪了", "在跑什么", "怎么样了", "好了没"]),
         (RemoteTaskCommandKind.CloseGame, ["关游戏", "关闭游戏", "退出游戏", "关掉游戏", "把游戏关了", "关原神", "退出原神", "结束游戏"]),
         (RemoteTaskCommandKind.FullscreenScreenshot, ["全屏截图", "截全屏", "屏幕截图", "桌面截图", "全局截图", "整个屏幕"]),
         (RemoteTaskCommandKind.Resin, ["查体力", "看体力", "体力多少", "体力查询", "有多少体力", "还剩多少体力", "体力还剩多少",
+            "体力满了没", "体力满了吗", "体力爆了没", "树脂满了吗", "树脂满了没",
             "查树脂", "看树脂", "树脂多少", "树脂查询", "有多少树脂", "体力", "树脂"]),
-        (RemoteTaskCommandKind.Inventory, ["背包", "看背包", "查看背包", "打开背包", "包里有什么", "查看物品"]),
+        (RemoteTaskCommandKind.Inventory, ["背包", "看背包", "查看背包", "打开背包", "包里有什么", "查看物品", "有多少摩拉"]),
         (RemoteTaskCommandKind.Wish, ["抽卡", "祈愿", "看抽卡", "抽卡记录", "祈愿记录"]),
         (RemoteTaskCommandKind.Login, ["切号", "换号", "换账号", "扫码登录", "登录二维码", "登录界面"]),
         // 更新只收带前缀的说法：单独一个「更新」交给 ExactOnlyKeywords，
@@ -629,9 +632,11 @@ public static class RemoteTaskCommandParser
         (RemoteTaskCommandKind.BindMys, ["绑定米游社", "米游社绑定", "绑定mys", "米游社登录", "登录米游社",
             "绑定米游社账号", "扫码绑定米游社", "绑定一下米游社"]),
         (RemoteTaskCommandKind.Schedule, ["定时任务", "计划任务", "定时", "有哪些定时"]),
-        (RemoteTaskCommandKind.Screenshot, ["screenshot", "截图", "画面", "看看"]),
-        (RemoteTaskCommandKind.Stop, ["stop", "cancel", "停止", "取消", "打断", "停"]),
-        (RemoteTaskCommandKind.TaskList, ["tasks", "list", "任务列表", "任务", "列表", "能做什么"])
+        (RemoteTaskCommandKind.Script, ["脚本列表", "有哪些脚本", "有什么脚本", "装了哪些脚本", "我的脚本"]),
+        (RemoteTaskCommandKind.Screenshot, ["screenshot", "截图", "画面", "看看", "现在什么样", "游戏画面", "拍张照"]),
+        (RemoteTaskCommandKind.Stop, ["stop", "cancel", "停止", "取消", "打断", "停", "别跑了", "先停下", "暂停一下"]),
+        (RemoteTaskCommandKind.TaskList, ["tasks", "list", "任务列表", "任务", "列表", "能做什么", "有什么任务", "有啥任务",
+            "能跑什么"])
     ];
 
     /// <summary>
@@ -717,7 +722,7 @@ public static class RemoteTaskCommandParser
     /// <summary>
     /// 只保留文字与数字，去掉空白和标点。
     /// </summary>
-    private static string Compact(string text)
+    internal static string Compact(string text)
     {
         return new string(text.Where(c => !char.IsWhiteSpace(c) && !char.IsPunctuation(c) && c != '！' && c != '？').ToArray());
     }
