@@ -63,6 +63,9 @@ public class UpdateService : IUpdateService
             // ---- 特别版：官方三条更新通道都会把客户端覆盖回官方版，改走自己的 Release ----
             if (await SpecialUpdater.TryHandleAsync(option, _httpClientFactory, _logger))
             {
+                // 特别版处理完，再顺带看一眼上游走到哪了：两条渠道互不影响，
+                // 上游更新意味着特别版要做一次合并适配，用户有权知道。
+                await SpecialUpdater.NoticeUpstreamAsync(option, _httpClientFactory, _logger);
                 return;
             }
             // ---- 特别版 ----

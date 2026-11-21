@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -81,6 +82,126 @@ public static class SpecialUpdater
         ReleasesPage,
         "https://gh-proxy.com/" + ReleasesPage,
     ];
+
+    /// <summary>
+    ///     上游（官方 BetterGI）的版本清单。
+    ///     <para>
+    ///         与特别版自己的 Release 是两条独立渠道：它只说明「上游走到哪了」，
+    ///         不代表特别版可以跟着升级——特别版的改动要重新合并到上游代码上。
+    ///         这个 OSS 地址国内直连可用，正好补上 GitHub 连不上时的信息缺口。
+    ///     </para>
+    /// </summary>
+    private const string UpstreamNoticeUrl = "https://hui-config.oss-cn-hangzhou.aliyuncs.com/bgi/notice.json";
+
+    /// <summary>
+    ///     记住「上游这个版本已经提醒过」，避免每次启动都弹。
+    ///     存文件而不是存配置：配置文件里的字段会被上游同步脚本整段覆盖。
+    /// </summary>
+    private static string UpstreamStatePath => Global.Absolute(@"User\config\special-upstream.json");
+
+    /// <summary>
+    ///     检查上游是否已经走在特别版前面。是则提示（自动检查只提示一次，手动检查每次都说明）。
+    ///     <para>
+    ///         这里只提示不下载：上游的新版本是官方包，装上去特别版的能力（内置 AI、远程任务、
+    ///         日志上报）会全部消失，和「特别版更新」是两件完全不同的事。
+    ///     </para>
+    /// </summary>
+    internal static async Task NoticeUpstreamAsync(UpdateOption option, IHttpClientFactory httpClientFactory, ILogger logger)
+    {
+        try
+        {
+            var client = httpClientFactory.CreateClient();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+            var text = await client.GetStringAsync(UpstreamNoticeUrl, cts.Token).ConfigureAwait(true);
+
+            using var document = JsonDocument.Parse(text);
+            var upstream = document.RootElement.TryGetProperty("version", out var node) ? node.GetString() : null;
+            if (string.IsNullOrWhiteSpace(upstream))
+            {
+                return;
+            }
+
+            string baseline = BaseVersion();
+            if (string.CompareOrdinal(ParseVersion(upstream), ParseVersion(baseline)) <= 0)
+            {
+                return;
+            }
+
+            bool manual = option.Trigger == UpdateTrigger.Manual;
+            if (!manual && string.Equals(ReadNotifiedUpstream(), upstream, StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            await ThemedMessageBox.InformationAsync(
+                $"上游 BetterGI 已经发布 {upstream}，特别版目前基于 {baseline}。\n\n" +
+                "特别版不是改个版本号就能跟上的：上游这批改动要重新合并、重新回归，" +
+                "适配完成前请以当前版本为准。\n\n" +
+                "这不是「你的版本旧了」的提示，不用去下载官方包——装上去会丢掉特别版的功能。",
+                "上游已有新版本");
+
+            if (!manual)
+            {
+                WriteNotifiedUpstream(upstream);
+            }
+        }
+        catch (Exception exception)
+        {
+            // 读不到上游清单不影响任何功能：这只是「顺便看一眼」，失败就安静跳过。
+            logger.LogDebug(exception, "检查上游版本失败");
+        }
+    }
+
+    /// <summary>
+    ///     去掉特别版后缀的主版本，例如 <c>0.67.0-special.7.7.2</c> → <c>0.67.0</c>。
+    /// </summary>
+    private static string BaseVersion()
+    {
+        var match = Regex.Match(CurrentVersion(), @"^\d+\.\d+\.\d+");
+        return match.Success ? match.Value : CurrentVersion();
+    }
+
+    private static string? ReadNotifiedUpstream()
+    {
+        try
+        {
+            var path = UpstreamStatePath;
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            var node = Newtonsoft.Json.Linq.JObject.Parse(File.ReadAllText(path));
+            return node.Value<string>("notifiedUpstream");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static void WriteNotifiedUpstream(string version)
+    {
+        try
+        {
+            var path = UpstreamStatePath;
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            File.WriteAllText(path, new Newtonsoft.Json.Linq.JObject
+            {
+                ["notifiedUpstream"] = version,
+                ["notifiedAt"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            }.ToString());
+        }
+        catch
+        {
+            // 写不了状态文件最多是下次再弹一次，不值得打断流程
+        }
+    }
 
     /// <summary>
     ///     处理一次更新检查。特别版总是自行处理，返回 true 表示调用方不应再走官方逻辑。
