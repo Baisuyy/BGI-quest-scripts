@@ -109,21 +109,6 @@ startFrom: '7027/5',  // 全流程：从 7027 的第 5 段开始
 - 路线是直线插值，不是录制路径：遇山体、河流、建筑会撞上去，靠卡死检测脱困，失败就停在原地
 - 传送只到最近的锚点，然后步行；106 个段只有单点，就是「传过去 → 直走」
 
-## 特别版客户端
-
-[Releases](../../releases) 有自编译的 BetterGI 特别版：宿主 API 与内置大模型，默认全部关闭，不开时与官方版行为一致。
-
-| 接口 | 用途 |
-|---|---|
-| `ocr.readScreen()` / `ocr.readRegion(x, y, w, h)` | 屏幕或指定区域转文字，返回带坐标与置信度的行 |
-| `quest.tracker()` | 读左上角任务面板的标题与当前步骤 |
-| `ai.Chat(text)` | 调大模型，密钥留在客户端，脚本拿不到 |
-| `OcrFactory` / `Bv` | OCR 引擎与 BgiVision 判定，供脚本自行组合 |
-
-**内置大模型**：跑图第 3 次卡死、原本要放弃整条路线时，BGI 自己抓坐标与状态交给模型，由它调用走位、传送、开关功能等工具接管脱困，到达或拉近 5 米后交还路线逻辑。配置入口：*任务设置 → AI 智能决策（内置）*，说明见 [`AI-内置决策.md`](https://github.com/Baisuyy/BGI-quest-scripts/blob/bgi-special/Docs/AI-内置决策.md)。
-
-源码在 [`bgi-special`](../../tree/bgi-special) 分支，单提交快照（不带上游历史，避免订阅时多下几百 MB）。手动跑 `Build BGI Special` 出包，`Sync Upstream BGI` 每天跟一次上游，失败开 issue。解压后覆盖原目录即可，先备份 `User`。
-
 ## 文档
 
 - [`docs/主线解析/`](docs/主线解析) — 53 幕解析成果
