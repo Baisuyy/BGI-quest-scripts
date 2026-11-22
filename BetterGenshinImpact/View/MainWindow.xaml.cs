@@ -12,7 +12,9 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.Helpers.Ui;
+using BetterGenshinImpact.Service.Search;
 using BetterGenshinImpact.View.Behavior;
+using BetterGenshinImpact.View.Pages;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions;
 using Wpf.Ui.Controls;
@@ -54,8 +56,64 @@ public partial class MainWindow : FluentWindow, INavigationWindow
         Application.Current.MainWindow = this;
 
         AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler(OnGlobalPreviewMouseWheel), true);
+        // Ctrl+K 直接聚焦顶栏搜索框，和浏览器/编辑器里的习惯一致
+        PreviewKeyDown += OnWindowPreviewKeyDown;
 
         Loaded += (s, e) => Activate();
+    }
+
+    /// <summary>
+    /// Ctrl+K 聚焦搜索框；Esc 在搜索框里时清空。
+    /// </summary>
+    private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            GlobalSearchBox.Focus();
+            GlobalSearchBox.SelectAll();
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>
+    /// 顶栏搜索框：回车提交，Esc 清空。
+    /// </summary>
+    private void OnGlobalSearchKeyDown(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Enter:
+                SubmitGlobalSearch();
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                GlobalSearchBox.Text = string.Empty;
+                e.Handled = true;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 把关键词交给搜索结果页，再导航过去。
+    /// <para>
+    /// 导航只接受页面类型，带不了参数，关键词走 <see cref="Service.Search.GlobalSearchState"/>。
+    /// </para>
+    /// </summary>
+    private void SubmitGlobalSearch()
+    {
+        var keyword = GlobalSearchBox.Text?.Trim();
+        if (string.IsNullOrEmpty(keyword))
+        {
+            return;
+        }
+
+        var state = App.GetService<GlobalSearchState>();
+        if (state != null)
+        {
+            state.Query = keyword;
+        }
+
+        Navigate(typeof(SearchResultPage));
     }
 
     private void OnGlobalPreviewMouseWheel(object sender, MouseWheelEventArgs e)
