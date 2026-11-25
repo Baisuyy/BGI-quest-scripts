@@ -78,6 +78,43 @@ public class Global
         return false;
     }
 
+    /// <summary>
+    ///     脚本 / 路线里写的 bgiVersion 是「至少要这个版本」，不是「必须精确等于」。
+    ///     <para>
+    ///         特别版版本号是 0.67.0-special.7.7.2 这种：SemVer 把 "-" 后面当预发布，
+    ///         排序在 0.67.0 之前，于是要求 0.67.0 的路线在特别版上全被判成「版本不够」，
+    ///         2026-11-25 的线上日志里所有标注了 bgiVersion 的路线都因此拒绝运行。
+    ///         特别版是在该内核版本上继续开发，比较时去掉 -special 段即可。
+    ///     </para>
+    ///     <para>
+    ///         只用于「要求的最低版本」判断，不要拿去比较两个特别版之间的新旧——
+    ///         那会把 0.67.0-special.8 和 0.67.0-special.7.7.2 看成一样。
+    ///     </para>
+    /// </summary>
+    /// <param name="requiredVersion">脚本或路线要求的最低版本</param>
+    /// <returns>当前版本是否满足要求；版本号解析失败时放行</returns>
+    public static bool IsRequirementMet(string requiredVersion)
+    {
+        try
+        {
+            var required = SemVersion.Parse(StripSpecialSuffix(requiredVersion));
+            var current = SemVersion.Parse(StripSpecialSuffix(Version));
+            return required.CompareSortOrderTo(current) <= 0;
+        }
+        catch
+        {
+            // 写错的版本号不该让脚本直接不可用，交给其它校验
+            return true;
+        }
+    }
+
+    /// <summary>去掉特别版的 -special.x 后缀，只留内核版本。</summary>
+    private static string StripSpecialSuffix(string version)
+    {
+        var index = version.IndexOf("-special", StringComparison.OrdinalIgnoreCase);
+        return index > 0 ? version[..index] : version;
+    }
+
     public static void WriteAllText(string relativePath, string blackListJson)
     {
         var path = Absolute(relativePath);

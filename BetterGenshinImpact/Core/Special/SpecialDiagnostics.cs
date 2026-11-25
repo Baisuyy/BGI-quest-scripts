@@ -174,7 +174,11 @@ public static class SpecialDiagnostics
                 var take = (int)Math.Min(file.Length, Math.Min(budget, 6L * 1024 * 1024));
                 var entry = zip.CreateEntry("logs/" + file.Name, CompressionLevel.Fastest);
                 using var output = entry.Open();
-                using var input = file.OpenRead();
+                // 正在写的日志由 Serilog 以 FileShare.ReadWrite 持有，默认的 FileInfo.OpenRead()
+                // 只申请 FileShare.Read，会以「另一个进程正在使用」为由失败——
+                // 2026-11-25 的线上日志里每次导出诊断包都刷一条 IOException。
+                using var input = new FileStream(file.FullName, FileMode.Open, FileAccess.Read,
+                    FileShare.ReadWrite | FileShare.Delete);
                 if (file.Length > take)
                 {
                     input.Seek(file.Length - take, SeekOrigin.Begin);
