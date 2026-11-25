@@ -89,14 +89,11 @@ KEEP = (
 
 # 上游有、但特别版明确不要的文件。同步时既不从上游拷贝进来，本地残存的也照删。
 # 与 KEEP 相反：KEEP 是「上游没有也要留着」，DROP 是「上游有也不许进来」。
-DROP = (
-    # 只有官方仓库（owner == babalae）才会跑，在 fork 里每次发 Release 都留一条
-    # 灰色的 skipped 记录，纯噪音
-    ".github/workflows/mirrorchyan_release_note.yml",
-    # on: release —— 特别版每次发版都会在 windows-latest 上跑一遍，
-    # 然后用 secrets.MirrorChyanUploadToken（本仓库没有）失败。
-    ".github/workflows/mirrorchyan_uploading.yml",
-)
+#
+# 注意：别往这里放 .github/workflows/ 下的东西。KEEP 整个目录之后，上游的 workflow
+# 本来就进不来；而「删本地残存」这一步会让提交里出现 workflow 删除，一样触发
+# GITHUB_TOKEN 的 workflow 写限制，被我们自己的闸门挡住。要清就手工 git rm 一次。
+DROP = ()
 
 
 def kept(rel: str) -> bool:
