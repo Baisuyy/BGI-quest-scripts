@@ -18,9 +18,15 @@ import sys
 
 # 相对仓库根路径；以 / 结尾表示整个目录
 KEEP = (
-    ".github/workflows/build-special.yml",
-    ".github/workflows/sync-upstream.yml",
-    ".github/workflows/update-release-notes.yml",
+    # 整目录保留，不跟上游。两个原因：
+    # 1) GITHUB_TOKEN 推不了 workflow 文件（GitHub 硬限制，permissions 里没有对应开关）。
+    #    上游一旦改了 publish.yml，同步提交就带上 workflow 变更，push 会被
+    #    「refusing to allow a GitHub App to create or update workflow」直接拒掉，
+    #    而日志里只看到 exit code 1。2026-11-25 就是这么失效的。
+    # 2) 上游那套 publish.yml / mirrorchyan 发布流程对特别版没有意义，进来只会
+    #    在 Actions 列表里多几个手滑就能触发上游发版的按钮。
+    # 特别版自己的 CI 全部手写在这个目录里，由本文件自己的提交维护。
+    ".github/workflows/",
     ".github/release-notes-template.md",
     ".bgi-upstream",
     "README-SPECIAL.md",
@@ -87,6 +93,9 @@ DROP = (
     # 只有官方仓库（owner == babalae）才会跑，在 fork 里每次发 Release 都留一条
     # 灰色的 skipped 记录，纯噪音
     ".github/workflows/mirrorchyan_release_note.yml",
+    # on: release —— 特别版每次发版都会在 windows-latest 上跑一遍，
+    # 然后用 secrets.MirrorChyanUploadToken（本仓库没有）失败。
+    ".github/workflows/mirrorchyan_uploading.yml",
 )
 
 

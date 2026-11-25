@@ -35,6 +35,10 @@ MUST_EXIST = (
     "BetterGenshinImpact/Core/Pathing/",
     "BetterGenshinImpact/GameTask/AutoPathing/PathProgressStore.cs",
     "Test/BetterGenshinImpact.UnitTest/HelperTests/RepeatSuppressorSinkTests.cs",
+    # 特别版 CI 不跟上游。这两个文件上游没有，靠 KEEP 的 .github/workflows/ 保留；
+    # 一旦 KEEP 被误删，它们会被当成「上游已废弃文件」清掉，这里立刻报出来。
+    ".github/workflows/build-special.yml",
+    ".github/workflows/sync-upstream.yml",
 )
 
 # (文件, 必须出现的一段文本, 说明)。逐条对应 patch_special.py 里的一个补丁，
