@@ -78,6 +78,10 @@ jobs:
           set -euo pipefail
           python3 tools/bgi-special/sync_source.py /tmp/upstream
           python3 tools/bgi-special/patch_special.py
+          python3 tools/bgi-special/apply_upstream_extra.py
+          # 推送前先验一遍特别版的东西还在。这一步不过就不推——
+          # 2026-11-20 那次同步「成功推送」但分支编不过，问题在第二天才被发现。
+          python3 tools/bgi-special/verify_special.py
           echo "${{ steps.up.outputs.sha }}" > .bgi-upstream
 
       - name: 提交并推送
@@ -91,8 +95,37 @@ jobs:
           git config user.name  "bgi-special-bot"
           git config user.email "bgi-special-bot@users.noreply.github.com"
           git add -A
+
+          # 闸门：提交里不许出现 .github/workflows 的改动。
+          # GITHUB_TOKEN 没有 workflow 文件写权限（这是 GitHub 的硬限制，
+          # permissions 里根本没有对应的 key，设 "Read and write" 也没用），
+          # 一旦带上就是 push 被 remote rejected，日志里只有 exit code 1。
+          WF=$(git diff --cached --name-only -- '.github/workflows/' || true)
+          if [ -n "$WF" ]; then
+            {
+              echo "PUSH_ERR<<EOF"
+              echo "提交里带上了 .github/workflows 的改动，GITHUB_TOKEN 无权推送："
+              printf '%s\n' "$WF"
+              echo ""
+              echo "上游改了自己的 workflow，而 sync_source.py 的 KEEP 没挡住。"
+              echo "处理：确认 .github/workflows/ 仍在 KEEP 里；上游的 CI 对特别版没用，不要同步。"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            printf '%s\n' "$WF" >&2
+            exit 1
+          fi
+
           git commit -q -m "chore(sync): 同步上游 ${REF} @ ${SHA}" --allow-empty
-          git push origin HEAD:bgi-special
+          if ! git push origin HEAD:bgi-special > /tmp/push.log 2>&1; then
+            tail -n 30 /tmp/push.log >&2
+            {
+              echo "PUSH_ERR<<EOF"
+              echo "git push 被远端拒绝，原始输出："
+              tail -n 30 /tmp/push.log
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: 触发特别版构建
@@ -100,8 +133,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh workflow run build-special.yml --ref main -f ref=bgi-special -f make_release=true
-          echo "已触发构建"
+          # 只构建、不发版：不填 version 时 build-special 会用 `$GITHUB_RUN_NUMBER` 当尾号，
+          # 同步一次就凭空多出 special.100 这种号，还比人发的版本大；发布页于是同时有
+          # 0.67.0-special.7.3 与 0.67.1-special.7.2 两条线，客户端每次同步都弹更新。
+          # 发版改由推 special-v* 标签决定，这里只验证「同步完还能编译」。
+          gh workflow run build-special.yml --ref main -f ref=bgi-special -f make_release=false
+          echo "已触发构建（不发 Release）"
 
       - name: 同步失败时开 issue
         if: ${{ failure() }}
@@ -109,18 +146,28 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REF: ${{ steps.up.outputs.ref }}
           SHA: ${{ steps.up.outputs.sha }}
+          PUSH_ERR: ${{ steps.push.outputs.PUSH_ERR }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           BODY=$(printf '%s\n' \
             "自动同步上游 \`${REF}\`（${SHA}）失败，源码未推送。" \
             "" \
-            "常见原因：上游改动了 \`EngineExtend.InitHost\`、\`PathExecutor.MoveTo\` 或任务设置页的结构，补丁锚点匹配不到；" \
+            "常见原因：上游改动了 \`EngineExtend.InitHost\`、\`PathExecutor\` 的任务循环或任务设置页的结构，补丁锚点匹配不到；" \
             "或 \`VisionHost.cs\` 依赖的接口（\`ImageRegion\` / \`OcrFactory\` / \`IOcrService\`）签名变化。" \
             "" \
+            "\`verify_special.py\` 报错时看它列出的具体条目：能力层文件被删就补 \`sync_source.py\` 的 KEEP；" \
+            "补丁标记缺失就看 \`patch_special.py\` 对应那条的锚点；" \
+            "上游文件里出现特别版字段，说明有人把它写回了会被覆盖的地方，要搬到同名 \`*.Special.cs\`。" \
+            "" \
             "处理方式：本地按 SPECIAL-API.md 的说明调整" \
-            "\`tools/bgi-special/patch_special.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
+            "\`tools/bgi-special/patch_special.py\`、\`tools/bgi-special/apply_upstream_extra.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \
             "" \
             "构建日志：${RUN_URL}")
+          # push 那一步的原始报错，比上面这份通用排查清单有用得多
+          if [ -n "${PUSH_ERR:-}" ]; then
+            BODY=$(printf '%s\n\n%s\n%s\n%s\n' "$BODY" "---" '```' "${PUSH_ERR}")
+            BODY=$(printf '%s\n%s\n' "$BODY" '```')
+          fi
           EXIST=$(gh issue list --state open --search "上游同步失败 in:title" \
                   --json number --jq '.[0].number // empty')
           if [ -n "$EXIST" ]; then

@@ -1,10 +1,14 @@
 name: Build BGI Special
 
-# 特别版客户端构建：只手动触发（workflow_dispatch），可选分支/版本/是否发 Release。
-# 推代码不再自动构建；每日上游同步成功后由 sync-upstream.yml 显式派发一次。
-run-name: "BGI Special ${{ inputs.version || format('build-{0}', github.run_number) }}"
+# 特别版客户端构建：手动触发（workflow_dispatch），可选分支/版本/是否发 Release。
+# 推代码不构建；但推 special-v* 标签会直接走同一套流程，版本号取自标签名。
+# 每日上游同步成功后由 sync-upstream.yml 显式派发一次。
+run-name: "BGI Special ${{ inputs.version || github.ref_name }}"
 
 on:
+  push:
+    tags:
+      - "special-v*"
   workflow_dispatch:
     inputs:
       ref:
@@ -117,14 +121,34 @@ jobs:
         shell: pwsh
         env:
           INPUT_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+          REF_TYPE: ${{ github.ref_type }}
         run: |
           $csproj = 'BetterGenshinImpact/BetterGenshinImpact.csproj'
           $m = Select-String -Path $csproj -Pattern '<Version>([^<]+)</Version>'
           if (-not $m) { throw '未能从 csproj 读取 <Version>' }
-          $base = $m.Matches[0].Groups[1].Value
+          $declared = $m.Matches[0].Groups[1].Value
+
+          # <Version> 现在写的是完整版本串（0.67.0-special.7.5），但发版说明里「基于上游 X 构建」
+          # 要的是上游主版本，直接拿整串会写成「基于上游 0.67.0-special.7.5 构建」。
+          $baseMatch = [regex]::Match($declared, '^\d+\.\d+\.\d+')
+          if (-not $baseMatch.Success) { throw "无法从 <Version>$declared</Version> 解析主版本" }
+          $base = $baseMatch.Value
+
           $override = $env:INPUT_VERSION
+          # 推标签触发时没有 inputs，版本号直接取标签名：special-v0.67.0-special.7 → 0.67.0-special.7
+          if ([string]::IsNullOrWhiteSpace($override) -and
+              $env:REF_TYPE -eq 'tag' -and $env:REF_NAME -like 'special-v*') {
+              $override = $env:REF_NAME.Substring('special-v'.Length)
+              Write-Host "版本号取自标签：$env:REF_NAME"
+          }
+
           if ([string]::IsNullOrWhiteSpace($override)) {
+              # 只该出现在「不填版本、只想验证能编译」的手动构建里：GITHUB_RUN_NUMBER 与
+              # 人发的版本号没有关系，会得到 special.100 这种跳号，而且比正式版本更大，
+              # 客户端会一直提示更新。要发版就填 version 或推 special-v* 标签。
               $version = "$base-special.$env:GITHUB_RUN_NUMBER"
+              Write-Host "未指定版本，按运行号生成：$version（仅用于验证构建）"
           } else {
               $version = $override.Trim()
           }
@@ -187,43 +211,171 @@ jobs:
           "sizeMB=$sizeMB"   >> $env:GITHUB_OUTPUT
           Write-Host "压缩包：$archive（$sizeMB MB）"
 
-      - name: 生成自解压安装包
+      - name: 下载 kachina-builder
+        uses: robinraju/release-downloader@v1.8
+        with:
+          repository: "YuehaiTeam/kachina-installer"
+          latest: true
+          fileName: "kachina-builder.exe"
+
+      - name: 用 Kachina 生成安装包
         id: sfx
         shell: pwsh
         run: |
           $v = '${{ steps.ver.outputs.version }}'
-          $archive = '${{ steps.pack.outputs.archive }}'
+          if (-not (Test-Path 'kachina-builder.exe')) { throw 'kachina-builder.exe 未下载成功' }
 
-          # 7-Zip 自带的自解压模块，双击后选目录解压，不做任何在线更新
-          $module = Join-Path ${env:ProgramFiles} '7-Zip\7z.sfx'
-          if (-not (Test-Path $module)) { $module = Join-Path ${env:ProgramFiles(x86)} '7-Zip\7z.sfx' }
-          if (-not (Test-Path $module)) { throw '未找到 7z.sfx，无法生成自解压安装包' }
+          # 断言更新源：这份 config 一旦误用成官方那份，特别版用户点「检查更新」
+          # 就会被拉回官方版（版本号更低、功能更少），而且卸载信息也会指向官方。
+          $cfg = Get-Content 'Build\kachina.special.config.json' -Raw | ConvertFrom-Json
+          $bad = @($cfg.source | Where-Object { $_.uri -match 'babalae|cocogoat|bettergi/better-genshin-impact' })
+          if ($bad.Count -gt 0) {
+              throw "kachina.special.config.json 里有指向官方上游的更新源：$($bad.id -join ', ')"
+          }
+          $own = @($cfg.source | Where-Object { $_.uri -match 'Baisuyy/BGI-quest-scripts' })
+          if ($own.Count -eq 0) {
+              throw 'kachina.special.config.json 没有指向本仓库的更新源，装完的包无法自动更新'
+          }
+          Write-Host "更新源校验通过：$($own.id -join ', ')"
 
-          $config = @"
-          ;!@Install@!UTF-8!
-          Title="BetterGI 特别版 $v"
-          BeginPrompt="解压到所选目录，完成后自动启动 BetterGI？"
-          Progress="yes"
-          RunProgram="BetterGI\BetterGI.exe"
-          ;!@InstallEnd@!
-          "@
-          # 必须是 UTF-8 无 BOM，否则 7z 会把 BOM 当作配置内容
-          $configPath = 'dist/sfx-config.txt'
-          [IO.File]::WriteAllText((Resolve-Path 'dist').Path + '/sfx-config.txt', $config.Trim(), (New-Object System.Text.UTF8Encoding $false))
+          # 先把内置更新器放进待打包目录：装完之后程序自己「检查更新」用的就是它
+          & .\kachina-builder.exe pack -c Build\kachina.special.config.json -o dist/BetterGI/BetterGI.update.exe
+          if ($LASTEXITCODE -ne 0) { throw "生成内置更新器失败，退出码 $LASTEXITCODE" }
 
-          $setup = "dist/BetterGI_v${v}_Setup.exe"
-          $out = [IO.File]::Create($setup)
+          Push-Location dist
           try {
-              foreach ($part in @($module, $configPath, $archive)) {
-                  $in = [IO.File]::OpenRead($part)
-                  try { $in.CopyTo($out) } finally { $in.Dispose() }
-              }
-          } finally { $out.Dispose() }
+              # gen 生成带哈希的安装清单，-r 指定更新仓库，-u 指定随包分发的更新器
+              ..\kachina-builder.exe gen -j 6 -i BetterGI -m metadata.json -o hashed `
+                  -r Baisuyy/BGI-quest-scripts -t $v -u .\BetterGI\BetterGI.update.exe
+              if ($LASTEXITCODE -ne 0) { throw "kachina gen 失败，退出码 $LASTEXITCODE" }
 
-          $sizeMB = [math]::Round((Get-Item $setup).Length / 1MB, 1)
-          "setup=$setup"    >> $env:GITHUB_OUTPUT
+              $setup = "BetterGI.Install.$v.exe"
+              ..\kachina-builder.exe pack -c ..\Build\kachina.special.config.json -m metadata.json -d hashed -o $setup
+              if ($LASTEXITCODE -ne 0) { throw "kachina pack 失败，退出码 $LASTEXITCODE" }
+          } finally { Pop-Location }
+
+          $setupPath = "dist/BetterGI.Install.$v.exe"
+          if (-not (Test-Path $setupPath)) { throw "安装包没有生成：$setupPath" }
+          $sizeMB = [math]::Round((Get-Item $setupPath).Length / 1MB, 1)
+          "setup=$setupPath" >> $env:GITHUB_OUTPUT
           "setupMB=$sizeMB" >> $env:GITHUB_OUTPUT
-          Write-Host "自解压安装包：$setup（$sizeMB MB）"
+          Write-Host "Kachina 安装包：$setupPath（$sizeMB MB）"
+
+      # 增量包：只装与上一个 special 版本不同的文件。
+      # 完整包 546 MB，走 GitHub 代理镜像下载常常只有几百 KB/s，而一次发版真正变的通常只有
+      # 主程序 DLL 与前端产物（几十 MB 以内），所以让客户端优先下这个包。
+      - name: 生成增量包
+        id: patch
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $cur = '${{ steps.ver.outputs.version }}'
+          $repo = '${{ github.repository }}'
+
+          # 本轮 Release 还没创建，列表里最新的 special 就是上一个版本；
+          # 重跑时上一次可能已经建过同名 Release，用 tag 名把自己排除掉。
+          #
+          # 以前这里是 `gh release list --json ... | ConvertFrom-Json`：gh 输出的 JSON 是多行文本，
+          # PowerShell 会把它拆成 string[] 逐行交给 ConvertFrom-Json，第一行 "[" 直接抛异常，
+          # 整个步骤 exit 1。又因为设了 continue-on-error，失败只是让增量包凭空消失
+          # （7.2 / 7.3 / 7.4 全都没出过包），所以一直没人发现。
+          # 现在让 gh 自己用 jq 取一个纯文本 tag 名，PowerShell 不再解析 JSON。
+          $jq = '[.[] | select(.tag_name | startswith("special-v"))'
+          $jq += ' | select(.tag_name != "special-v' + $cur + '")]'
+          $jq += ' | sort_by(.created_at) | reverse | .[0].tag_name'
+          $prevTag = gh api "repos/$repo/releases?per_page=30" --jq $jq
+          if ($LASTEXITCODE -ne 0) { throw "查询历史 Release 失败，退出码 $LASTEXITCODE" }
+          $prevTag = "$prevTag".Trim().Trim('"')
+          if ([string]::IsNullOrWhiteSpace($prevTag) -or $prevTag -eq 'null') {
+              Write-Host '没有可对比的历史版本，跳过增量包'
+              exit 0
+          }
+          $prevVer = $prevTag.Substring('special-v'.Length)
+          Write-Host "对比基准：$prevTag（$prevVer）"
+
+          gh release download $prevTag --repo $repo --pattern '*special-win-x64.7z' --dir dist/prev --clobber
+          if ($LASTEXITCODE -ne 0) { throw "下载 $prevTag 失败，退出码 $LASTEXITCODE" }
+          Write-Host "已下载：$((Get-ChildItem 'dist/prev').Name -join ', ')"
+          $prevArchive = Get-ChildItem 'dist/prev' -Filter '*.7z' | Select-Object -First 1
+          7z x $prevArchive.FullName "-odist/prev/extract" -y | Out-Null
+          if ($LASTEXITCODE -ne 0) { throw "解压上一个版本失败，退出码 $LASTEXITCODE" }
+          if (-not (Test-Path 'dist/prev/extract/BetterGI')) {
+              # 压缩包里可能没有 BetterGI 顶层目录，找一层下钻
+              $found = Get-ChildItem 'dist/prev/extract' -Directory | Select-Object -First 1
+              if ($found) { Move-Item $found.FullName 'dist/prev/extract/BetterGI' }
+          }
+          if (-not (Test-Path 'dist/prev/extract/BetterGI')) { throw '解压后找不到 BetterGI 目录' }
+
+          $newRoot = (Resolve-Path 'dist/BetterGI').Path
+          $oldRoot = (Resolve-Path 'dist/prev/extract/BetterGI').Path
+
+          $files = New-Object System.Collections.Generic.List[object]
+          $removed = New-Object System.Collections.Generic.List[string]
+
+          foreach ($f in Get-ChildItem $newRoot -Recurse -File) {
+              $rel = $f.FullName.Substring($newRoot.Length).TrimStart('\')
+              # User 是用户数据（配置、脚本、截图、地图缓存），既不该进增量包，
+              # 也不该被当成「这一版新增的文件」铺到用户目录里。
+              if ($rel -like 'User\*') { continue }
+              $old = Join-Path $oldRoot $rel
+              $hash = $null
+              if (Test-Path $old) {
+                  # 大小相同才值得算哈希，省掉大半磁盘读取
+                  if ((Get-Item $old).Length -eq $f.Length) {
+                      $a = (Get-FileHash $f.FullName -Algorithm SHA256).Hash
+                      $b = (Get-FileHash $old -Algorithm SHA256).Hash
+                      if ($a -eq $b) { continue }
+                      $hash = $a
+                  }
+              }
+              if (-not $hash) { $hash = (Get-FileHash $f.FullName -Algorithm SHA256).Hash }
+              $files.Add([ordered]@{ path = $rel; size = $f.Length; sha256 = $hash })
+          }
+
+          foreach ($f in Get-ChildItem $oldRoot -Recurse -File) {
+              $rel = $f.FullName.Substring($oldRoot.Length).TrimStart('\')
+              if ($rel -like 'User\*') { continue }
+              if (-not (Test-Path (Join-Path $newRoot $rel))) { $removed.Add($rel) }
+          }
+
+          $stage = 'dist/patch'
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory "$stage/files" -Force | Out-Null
+          foreach ($item in $files) {
+              $dest = Join-Path "$stage/files" $item.path
+              New-Item -ItemType Directory (Split-Path $dest -Parent) -Force | Out-Null
+              Copy-Item (Join-Path $newRoot $item.path) $dest -Force
+          }
+
+          $manifest = [ordered]@{
+              from    = $prevVer
+              to      = $cur
+              base    = 'BetterGI'
+              files   = @($files)
+              removed = @($removed)
+          }
+          $manifest | ConvertTo-Json -Depth 6 | Out-File "$stage/manifest.json" -Encoding utf8
+
+          $patchName = "BetterGI_v${cur}_patch-from-$prevVer.zip"
+          Compress-Archive -Path "$stage/*" -DestinationPath "dist/$patchName" -CompressionLevel Optimal
+          $patchMB = [math]::Round((Get-Item "dist/$patchName").Length / 1MB, 1)
+          "patch=dist/$patchName" >> $env:GITHUB_OUTPUT
+          "patchMB=$patchMB"      >> $env:GITHUB_OUTPUT
+          Write-Host "增量包：$patchName（$patchMB MB，变更 $($files.Count) 个、删除 $($removed.Count) 个）"
+          Write-Host "资产文件名：$patchName"
+
+      - name: 增量包缺失提示
+        # 增量包失败不该拦住发版，但必须留痕：7.2～7.4 就是静默丢掉的，
+        # 等到用户问「覆盖安装怎么没有热更新」才发现从来没生成过。
+        if: ${{ always() && steps.patch.outputs.patch == '' }}
+        shell: pwsh
+        run: |
+          $msg = '本次没有生成增量包，从上一个版本升级的用户只能下完整包。原因见「生成增量包」步骤的日志。'
+          Write-Host "::warning::$msg"
+          "### ⚠️ 增量包未生成`n`n$msg" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
       - name: 上传构建产物
         uses: actions/upload-artifact@v4
@@ -234,7 +386,8 @@ jobs:
           compression-level: 0
 
       - name: 创建 Release
-        if: ${{ inputs.make_release }}
+        # 手动触发看勾选；推标签触发时没有 inputs，按标签语义一律发布
+        if: ${{ inputs.make_release || startsWith(github.ref, 'refs/tags/special-v') }}
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -245,18 +398,44 @@ jobs:
           SIZE_MB: ${{ steps.pack.outputs.sizeMB }}
           SETUP: ${{ steps.sfx.outputs.setup }}
           SETUP_MB: ${{ steps.sfx.outputs.setupMB }}
-          REF: ${{ inputs.ref || 'bgi-special' }}
+          PATCH: ${{ steps.patch.outputs.patch }}
+          PATCH_MB: ${{ steps.patch.outputs.patchMB }}
+          REF: ${{ inputs.ref || github.ref_name }}
           # 构建的源码在 inputs.ref，未必是触发分支：用 --ref main 触发时 github.sha 是 main 的提交，
           # 直接拿它当 target 会把 tag 打到 main 上（脚本仓库内容），而不是这次构建的客户端源码
           FULL_SHA: ${{ steps.src.outputs.commit }}
         run: |
           $tag = "special-v$env:VERSION"
 
+          # 说明只写这一版改了什么，不再整段复制「与官方版的差异」——
+          # 那部分属于 README，发版页每次重复一遍只会把本版改动淹掉。
+          # 有 Docs/release-notes/<版本>.md 就用它；没写就按上一个 special 标签到本次的提交标题兜底。
+          $bodyFile = "Docs/release-notes/$env:VERSION.md"
+          if (Test-Path $bodyFile) {
+              $body = (Get-Content $bodyFile -Raw).Trim()
+              Write-Host "本版说明来自 $bodyFile"
+          } else {
+              $prev = (git describe --tags --abbrev=0 --match 'special-v*' 'HEAD^' 2>$null)
+              $range = if ([string]::IsNullOrWhiteSpace($prev)) { 'HEAD' } else { "$prev..HEAD" }
+              Write-Host "没有 $bodyFile，按 $range 的提交标题生成"
+              $lines = @(git log $range --no-merges --pretty=format:'- %s' -- . `
+                  ':(exclude)Docs/**' ':(exclude).github/**' 2>$null |
+                  ForEach-Object { $_ -replace '^\w+(\([^)]*\))?:\s*', '' } |
+                  Where-Object { $_ -and $_ -notmatch '^(release|chore|docs|ci)' })
+              if ($lines.Count -eq 0) { $lines = @('- 维护性更新，没有单独的用户可见改动。') }
+              $body = "## 本版改动`n`n" + ($lines -join "`n")
+          }
+
           $notes = Get-Content '.github/release-notes-template.md' -Raw
           $notes = $notes.Replace('{{VERSION}}', $env:VERSION)
           $notes = $notes.Replace('{{BASE}}', $env:BASE)
           $notes = $notes.Replace('{{REF}}', $env:REF)
           $notes = $notes.Replace('{{SHA}}', $env:SHA)
+          $notes = $notes.Replace('{{NOTES}}', $body)
+          # 没有增量包时说清楚，别让读者照着「可以直接热更新」的说明去找一个不存在的包
+          if ([string]::IsNullOrWhiteSpace($env:PATCH)) {
+              $notes = "> **本次没有附带增量包**：从上一个版本升级请下载完整包（安装器或 7z 均可，User 目录照样不会被覆盖）。`n`n" + $notes
+          }
           $notes | Out-File -FilePath 'RELEASE_NOTES.md' -Encoding utf8
 
           # 先建空壳再逐个上传：一次带上 1.3GB 资产容易在中途断流，
@@ -274,6 +453,9 @@ jobs:
             $env:SETUP,
             (Join-Path (Get-Location) 'dist/BetterGI/BetterGI.exe')
           )
+          # 增量包允许缺失（对比失败时不会生成），有就一起传
+          if ($env:PATCH -and (Test-Path $env:PATCH)) { $assets += (Resolve-Path $env:PATCH).Path }
+          $expected = $assets.Count
           foreach ($asset in $assets) {
               if (-not (Test-Path $asset)) { throw "资产缺失：$asset" }
               $ok = $false
@@ -289,8 +471,92 @@ jobs:
           }
 
           $listed = gh release view $tag --json assets --jq '.assets | length'
-          if ($lastExitCode -ne 0 -or [int]$listed -ne 3) { throw "资产数量异常：$listed（期望 3）" }
-          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 资产 $listed 个）"
+          if ($lastExitCode -ne 0 -or [int]$listed -ne $expected) { throw "资产数量异常：$listed（期望 $expected）" }
+          $patchInfo = if ([string]::IsNullOrWhiteSpace($env:PATCH_MB)) { "未生成" } else { "$env:PATCH_MB MB" }
+          Write-Host "已发布 $tag（7z $env:SIZE_MB MB / 安装包 $env:SETUP_MB MB / 增量包 $patchInfo / 资产 $listed 个）"
+
+      - name: 上传到 123 云盘
+        # 放在 Release 之后：这边失败不影响 GitHub 侧已经完成的发布
+        if: ${{ inputs.make_release || startsWith(github.ref, 'refs/tags/special-v') }}
+        continue-on-error: true
+        shell: pwsh
+        env:
+          PAN123_WEBDAV_USER: ${{ secrets.PAN123_WEBDAV_USER }}
+          PAN123_WEBDAV_PASS: ${{ secrets.PAN123_WEBDAV_PASS }}
+          PAN123_WEBDAV_URL: ${{ secrets.PAN123_WEBDAV_URL }}
+          PAN123_WEBDAV_ROOT: ${{ secrets.PAN123_WEBDAV_ROOT }}
+          PAN123_CLIENT_ID: ${{ secrets.PAN123_CLIENT_ID }}
+          PAN123_CLIENT_SECRET: ${{ secrets.PAN123_CLIENT_SECRET }}
+          PAN123_PARENT_ID: ${{ secrets.PAN123_PARENT_ID }}
+          VERSION: ${{ steps.ver.outputs.version }}
+          ARCHIVE: ${{ steps.pack.outputs.archive }}
+          SETUP: ${{ steps.sfx.outputs.setup }}
+        run: |
+          # 两条通道：WebDAV（需历史会员权益）优先，没有就退回开放平台应用密钥。
+          # 这一段以前只在没配时打一行 ::notice::，配了但传失败也只留一条绿色步骤，
+          # 结果就是「123 盘上传呢」——都在日志深处，页面上看不出来。
+          # 现在无论跳过、成功还是失败，都往运行摘要里写一行结论。
+          function Write-Result([string]$state, [string]$detail) {
+              "### 123 云盘：$state`n`n$detail" | Out-File $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
+          $hasWebdav = (-not [string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_USER)) -and
+                       (-not [string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_PASS))
+          $hasOpen = (-not [string]::IsNullOrWhiteSpace($env:PAN123_CLIENT_ID)) -and
+                     (-not [string]::IsNullOrWhiteSpace($env:PAN123_CLIENT_SECRET))
+
+          if (-not $hasWebdav -and -not $hasOpen) {
+              $msg = "未配置凭据，本次没有上传。要开启：仓库 Secrets 里加 PAN123_CLIENT_ID / PAN123_CLIENT_SECRET（开放平台应用），或 PAN123_WEBDAV_USER / PAN123_WEBDAV_PASS（历史会员的 WebDAV）。"
+              Write-Host "::warning::$msg"
+              Write-Result "跳过（未配置凭据）" $msg
+              exit 0
+          }
+
+          python -m pip install --quiet --disable-pip-version-check requests
+
+          $files = @()
+          $names = @()
+          foreach ($path in @($env:ARCHIVE, $env:SETUP)) {
+              if (-not [string]::IsNullOrWhiteSpace($path) -and (Test-Path $path)) {
+                  $files += @("--file", (Split-Path $path -Leaf))
+                  $names += (Split-Path $path -Leaf)
+              }
+          }
+          if ($files.Count -eq 0) {
+              Write-Host "::warning::没有找到要上传的产物"
+              Write-Result "跳过（找不到产物）" "dist 下没有安装包或压缩包，检查打包步骤。"
+              exit 0
+          }
+
+          try {
+              if ($hasWebdav) {
+                  # WebDAV：MKCOL 逐级建目录 + 流式 PUT，内存占用与包体大小无关
+                  $root = if ([string]::IsNullOrWhiteSpace($env:PAN123_WEBDAV_ROOT)) { "/BGI.special" } else { $env:PAN123_WEBDAV_ROOT.Trim() }
+                  $root = $root.TrimEnd("/")
+                  $remote = "$root/$($env:VERSION)"
+                  Write-Host "走 WebDAV，远端目录：$remote"
+                  $arguments = @("tools/bgi-special/upload_123pan_webdav.py", "--dir", "dist", "--remote", $remote) + $files
+                  python @arguments
+                  if ($LASTEXITCODE -ne 0) { throw "WebDAV 上传失败，退出码 $LASTEXITCODE" }
+                  Write-Result "已上传" "版本 $($env:VERSION)，走 WebDAV，目录 ``$remote``：`n`n$($names -join "`n")"
+              }
+              else {
+                  # 开放平台：clientID/clientSecret 换 token 后分片上传
+                  $parentArgs = @("--parent-name", "BGI.special")
+                  if (-not [string]::IsNullOrWhiteSpace($env:PAN123_PARENT_ID)) {
+                      $parentArgs = @("--parent-id", $env:PAN123_PARENT_ID.Trim())
+                  }
+                  Write-Host "走开放平台 API，目标目录：$($parentArgs -join ' ')"
+                  $arguments = @("tools/bgi-special/upload_123pan.py", "--dir", "dist") + $parentArgs + $files
+                  python @arguments
+                  if ($LASTEXITCODE -ne 0) { throw "开放平台上传失败，退出码 $LASTEXITCODE" }
+                  Write-Result "已上传" "版本 $($env:VERSION)，走开放平台，目录 ``BGI.special``：`n`n$($names -join "`n")"
+              }
+          }
+          catch {
+              Write-Result "失败" ($_.Exception.Message + "`n`nGitHub 侧的发布已经完成，不影响下载。可以修好凭据后在 Actions 里单独跑「补传 123 云盘」，不用重跑整轮构建。")
+              throw
+          }
 
       - name: 写入运行摘要
         if: always()
