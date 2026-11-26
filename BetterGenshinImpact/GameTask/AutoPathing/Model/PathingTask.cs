@@ -107,9 +107,11 @@ public class PathingTask
         {
             taskPosition.PointExtParams.EnableMonsterLootSplit = task.Info.EnableMonsterLootSplit;
         }
-        // 比较版本号大小 BgiVersion（要求的是「最低版本」，特别版按内核版本比）
-        if (!string.IsNullOrWhiteSpace(task.Info.BgiVersion) && !Global.IsRequirementMet(task.Info.BgiVersion))
+        // 比较版本号大小 BgiVersion
+        if (!string.IsNullOrWhiteSpace(task.Info.BgiVersion) && Global.IsNewVersion(task.Info.BgiVersion))
         {
+            TaskControl.Logger.LogError("地图追踪任务 {Name} 版本号要求 {BgiVersion} 大于当前 BetterGI 版本号 {CurrentVersion} ， 禁止运行，请更新 BetterGI 版本！", task.FileName, task.Info.BgiVersion, Global.Version);
+            TaskControl.Logger.LogError("地图追踪任务 {Name} 版本号要求 {BgiVersion} 大于当前 BetterGI 版本号 {CurrentVersion} ， 禁止运行，请更新 BetterGI 版本！", task.FileName, task.Info.BgiVersion, Global.Version);
             TaskControl.Logger.LogError("地图追踪任务 {Name} 版本号要求 {BgiVersion} 大于当前 BetterGI 版本号 {CurrentVersion} ， 禁止运行，请更新 BetterGI 版本！", task.FileName, task.Info.BgiVersion, Global.Version);
             return null;
         }

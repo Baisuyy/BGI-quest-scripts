@@ -8,7 +8,6 @@
                  xmlns:markup="clr-namespace:BetterGenshinImpact.Markup"
                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                  xmlns:pages="clr-namespace:BetterGenshinImpact.View.Pages"
-                 xmlns:tray="http://schemas.lepo.co/wpfui/2022/xaml/tray"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:viewModel="clr-namespace:BetterGenshinImpact.ViewModel"
                  xmlns:i18n="clr-namespace:BetterGenshinImpact.Service.I18n"
@@ -38,6 +37,57 @@
             <Setter Property="Command" Value="{Binding SelectCommand, Mode=OneWay}" />
         </Style>
 
+        <!--  托盘菜单：由 TrayIcon 在右键托盘图标时打开  -->
+        <ContextMenu x:Key="TrayMenu" Placement="MousePoint">
+            <ContextMenu.DataContext>
+                <markup:ServiceLocator Type="{x:Type viewModel:NotifyIconViewModel}" />
+            </ContextMenu.DataContext>
+            <ui:MenuItem Header="{Binding InstanceDisplayName, Mode=OneWay}"
+                         IsEnabled="False"
+                         Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ui:MenuItem.Icon>
+                    <Ellipse Width="12"
+                             Height="12"
+                             Fill="{Binding InstanceAccentBrush, Mode=OneWay}" />
+                </ui:MenuItem.Icon>
+            </ui:MenuItem>
+            <Separator Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <ui:MenuItem Command="{Binding ShowOrHideCommand}"
+                         Header="{i18n:T 显示或隐藏此实例窗口}"
+                         Icon="{ui:SymbolIcon Window24}" />
+            <Separator />
+            <ui:MenuItem Command="{Binding OpenChildSessionWindowCommand}"
+                          Header="{i18n:T 桌面分身}"
+                          Icon="{ui:SymbolIcon DesktopCursor24}"
+                          Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <!--  悬浮小窗：只在主实例提供  -->
+            <ui:MenuItem Header="{i18n:T 悬浮小窗}"
+                         Icon="{ui:SymbolIcon VideoClip24}"
+                         Visibility="{Binding IsGuideWindowAvailable, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ui:MenuItem Command="{Binding ToggleGuideWindowCommand}"
+                             Header="{Binding GuideToggleText, Mode=OneWay}"
+                             Icon="{ui:SymbolIcon PictureInPicture24}" />
+                <ui:MenuItem Command="{Binding OpenGuideFromClipboardCommand}"
+                             Header="{i18n:T 打开剪贴板中的链接}"
+                             Icon="{ui:SymbolIcon ClipboardLink24}" />
+                <ui:MenuItem Command="{Binding RestoreGuideWindowCommand}"
+                             Header="{i18n:T 恢复小窗（关闭穿透、不透明）}"
+                             Icon="{ui:SymbolIcon ArrowReset24}" />
+                <Separator />
+                <ui:MenuItem Command="{Binding OpenGuideSettingsCommand}"
+                             Header="{i18n:T 小窗设置}"
+                             Icon="{ui:SymbolIcon Settings24}" />
+            </ui:MenuItem>
+            <Separator Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <ui:MenuItem Command="{Binding CheckUpdateCommand}"
+                         Header="{i18n:T 检查更新}"
+                         Icon="{ui:SymbolIcon ArrowAutofitUp24}"
+                         Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <Separator Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <ui:MenuItem Command="{Binding ExitCommand}"
+                         Header="{Binding ExitMenuText, Mode=OneWay}"
+                         Icon="{ui:SymbolIcon Dismiss24}" />
+        </ContextMenu>
     </Window.Resources>
     <b:Interaction.Triggers>
         <b:EventTrigger EventName="Activated">
@@ -79,45 +129,16 @@
                            IsPaneToggleVisible="True"
                            IsTopSeparatorVisible="False"
                            IsFooterSeparatorVisible="False"
-                           OpenPaneLength="168">
+                           OpenPaneLength="160">
             <b:Interaction.Behaviors>
                 <behavior:AnimatedNavigationSelectionIndicatorBehavior />
             </b:Interaction.Behaviors>
             <ui:NavigationView.MenuItems>
-                <!-- 常用：每天真正会点到的入口，放最上面 -->
                 <ui:NavigationViewItem Content="{i18n:T 启动}"
                                        NavigationCacheMode="Enabled"
-                                       ToolTip="开始 / 暂停当前配置的任务"
                                        TargetPageType="{x:Type pages:HomePage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Play24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
-                <ui:NavigationViewItem Content="{i18n:T 一条龙}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:OneDragonFlowPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
-                <!-- 新一条龙只是 Pulonia 任务计划的独立界面包装；与旧入口并排，验收前两者都保留。
-                     名字里带「新版」，避免和上面那条完全分不清 -->
-                <ui:NavigationViewItem Content="一条龙（新版）"
-                                       NavigationCacheMode="Enabled"
-                                       ToolTip="任务计划的新界面，与上面的「一条龙」并存；配置互不影响"
-                                       TargetPageType="{x:Type pages:PuloniaOneDragonPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
-                    </ui:NavigationViewItem.Icon>
-                </ui:NavigationViewItem>
-
-                <ui:NavigationViewItem Content="{i18n:T 独立任务}"
-                                       NavigationCacheMode="Enabled"
-                                       TargetPageType="{x:Type pages:TaskSettingsPage}">
-                    <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="TaskListSquareLtr24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -128,15 +149,37 @@
                         <ui:SymbolIcon Symbol="Timer24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="{i18n:T 独立任务}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:TaskSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="TaskListSquareLtr24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
 
-                <ui:NavigationViewItemSeparator />
+                <!-- 特别版：模型配置与本地助手入口，避免埋在「独立任务」长页里找不到 -->
+                <ui:NavigationViewItem Content="AI 助手"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:AiSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Glyph="&#xf544;" Style="{StaticResource FaFontIconStyle}" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
 
-                <!-- 计划与记录：任务怎么排、跑过什么、挂在哪个账号 -->
                 <ui:NavigationViewItem Content="{i18n:T 任务计划}"
                                        NavigationCacheMode="Enabled"
                                        TargetPageType="{x:Type pages:PuloniaTaskPlanPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="BranchFork24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
+                <!-- 新一条龙只是 Pulonia 任务计划的独立界面包装；验收前保留全部旧入口。 -->
+                <ui:NavigationViewItem Content="新一条龙"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:PuloniaOneDragonPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
@@ -157,26 +200,33 @@
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 原「狛荷屋(test)」：试验中的账号记录页。标题里带 test 既难读也不像成品，
-                     改用中文名，实验性质放在提示里 -->
-                <ui:NavigationViewItem Content="账号记录"
+                <!-- 账号记录页面暂用「狛荷屋」展示名，待定案后再接入翻译。 -->
+                <ui:NavigationViewItem Content="狛荷屋(test)"
                                        NavigationCacheMode="Enabled"
-                                       ToolTip="实验功能：记录各账号的体力、委托与周本进度"
                                        TargetPageType="{x:Type pages:AccountRecordsPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Box24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <ui:NavigationViewItemSeparator />
+                <!--<ui:NavigationViewItemSeparator />-->
 
-                <!-- 工具：手动跑单点功能，或做设置 -->
+                <ui:NavigationViewItem Content="{i18n:T 一条龙}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:OneDragonFlowPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="AnimalTurtle24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+
                 <ui:NavigationViewItem Content="{i18n:T 全自动}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="Bot24" />
                     </ui:NavigationViewItem.Icon>
                     <ui:NavigationViewItem.MenuItems>
 
+                        <!--<ui:NavigationViewItemSeparator />-->
+                        <!--  ConvertRange20  -->
                         <ui:NavigationViewItem Content="{i18n:T 调度器}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:ScriptControlPage}">
@@ -184,6 +234,7 @@
                                 <ui:SymbolIcon Symbol="DeveloperBoard24" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <!--  WebAsset24 | DocumentJs16 | Script16  -->
                         <ui:NavigationViewItem Content="{i18n:T JS 脚本}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:JsListPage}">
@@ -191,6 +242,7 @@
                                 <ui:SymbolIcon Symbol="DocumentJs16" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <!--  Map24  -->
                         <ui:NavigationViewItem Content="{i18n:T 地图追踪}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:MapPathingPage}">
@@ -198,6 +250,7 @@
                                 <ui:SymbolIcon Symbol="Map24" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
+                        <!--  Script16  -->
                         <ui:NavigationViewItem Content="{i18n:T 录制回放}"
                                                NavigationCacheMode="Enabled"
                                                TargetPageType="{x:Type pages:KeyMouseRecordPage}">
@@ -208,72 +261,59 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
 
-                <!-- 特别版：模型配置与本地助手入口，避免埋在「独立任务」长页里找不到 -->
-                <ui:NavigationViewItem Content="AI 助手"
+                <ui:NavigationViewItem Content="{i18n:T 辅助操控}"
                                        NavigationCacheMode="Enabled"
-                                       ToolTip="模型配置与本地助手设置（游戏内按 Ctrl+Alt+A 唤起对话面板）"
-                                       TargetPageType="{x:Type pages:AiSettingsPage}">
+                                       TargetPageType="{x:Type pages:MacroSettingsPage}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:FontIcon Glyph="&#xf544;" Style="{StaticResource FaFontIconStyle}" />
+                        <ui:SymbolIcon Symbol="XboxController24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
 
-                <!-- 低频功能收进一个组。以前辅助操控 / 按键宏 / 自动演奏 / 悬浮小窗 / 快捷键 / 通知
-                     各占一行，加上上面的计划与记录，侧栏一屏放不下，找「设置」要滚半天 -->
-                <ui:NavigationViewItem Content="更多功能">
+                <!--  按键宏：不识图的键鼠宏，见 Docs/design/key-macro.md  -->
+                <ui:NavigationViewItem Content="{i18n:T 按键宏}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:KeyMacroPage}">
                     <ui:NavigationViewItem.Icon>
-                        <ui:SymbolIcon Symbol="MoreHorizontal24" />
+                        <ui:SymbolIcon Symbol="KeyboardLayoutFloat24" />
                     </ui:NavigationViewItem.Icon>
-                    <ui:NavigationViewItem.MenuItems>
-                        <ui:NavigationViewItem Content="{i18n:T 辅助操控}"
-                                               NavigationCacheMode="Enabled"
-                                               TargetPageType="{x:Type pages:MacroSettingsPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="XboxController24" />
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
+                </ui:NavigationViewItem>
 
-                        <!-- 按键宏：不识图的键鼠宏，见 Docs/design/key-macro.md  -->
-                        <ui:NavigationViewItem Content="{i18n:T 按键宏}"
-                                               NavigationCacheMode="Enabled"
-                                               TargetPageType="{x:Type pages:KeyMacroPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="KeyboardLayoutFloat24" />
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="{i18n:T 自动演奏}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:MusicPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="MusicNote224" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
 
-                        <ui:NavigationViewItem Content="{i18n:T 自动演奏}"
-                                               NavigationCacheMode="Enabled"
-                                               TargetPageType="{x:Type pages:MusicPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="MusicNote224" />
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="{i18n:T 悬浮小窗}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:GuideWindowSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                         <ui:SymbolIcon Symbol="VideoClip24" />
+                     </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
 
-                        <ui:NavigationViewItem Content="{i18n:T 悬浮小窗}"
-                                               NavigationCacheMode="Enabled"
-                                               TargetPageType="{x:Type pages:GuideWindowSettingsPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="VideoClip24" />
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-
-                        <ui:NavigationViewItem Content="{i18n:T 快捷键}"
-                                               NavigationCacheMode="Enabled"
-                                               TargetPageType="{x:Type pages:HotKeyPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="Flash24" />
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-
-                        <ui:NavigationViewItem Content="{i18n:T 通知}"
-                                               NavigationCacheMode="Enabled"
-                                               TargetPageType="{x:Type pages:NotificationSettingsPage}">
-                            <ui:NavigationViewItem.Icon>
-                                <ui:SymbolIcon Symbol="Alert24" />
-                            </ui:NavigationViewItem.Icon>
-                        </ui:NavigationViewItem>
-                    </ui:NavigationViewItem.MenuItems>
+                <ui:NavigationViewItem Content="{i18n:T 快捷键}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:HotKeyPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Flash24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <!--<ui:NavigationViewItem Content="按键绑定"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:KeyBindingsSettingsPage}" Cursor="Hand">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="KeyboardMouse16" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>-->
+                <ui:NavigationViewItem Content="{i18n:T 通知}"
+                                       NavigationCacheMode="Enabled"
+                                       TargetPageType="{x:Type pages:NotificationSettingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Alert24" />
+                    </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
             <ui:NavigationView.FooterMenuItems>
@@ -418,41 +458,25 @@
                 <ui:ImageIcon Source="{Binding InstanceIconSource, Mode=OneWay}" />
             </ui:TitleBar.Icon>
             <ui:TitleBar.Header>
-                <!-- 横向排列：左边标题可拖动窗口，右边搜索框独立，不继承拖拽行为。
-                     用 StackPanel 而不是 Grid：TitleBar 的 Header 是 Auto 宽度，
-                     Grid 里的 * 列拿不到剩余空间，搜索框会被压成 0 -->
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                        <b:Interaction.Behaviors>
-                            <behavior:WindowDragBehavior />
-                        </b:Interaction.Behaviors>
+                    <b:Interaction.Behaviors>
+                        <behavior:WindowDragBehavior />
+                    </b:Interaction.Behaviors>
+                    <TextBlock VerticalAlignment="Center"
+                               Text="{Binding Title, Mode=OneWay}" />
+                    <Border Height="22"
+                            Margin="8,0,0,0"
+                            Padding="8,0"
+                            VerticalAlignment="Center"
+                            Background="{Binding InstanceAccentBrush, Mode=OneWay}"
+                            CornerRadius="11"
+                            Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock VerticalAlignment="Center"
-                                   Text="{Binding Title, Mode=OneWay}" />
-                        <Border Height="22"
-                                Margin="8,0,0,0"
-                                Padding="8,0"
-                                VerticalAlignment="Center"
-                                Background="{Binding InstanceAccentBrush, Mode=OneWay}"
-                                CornerRadius="11"
-                                Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock VerticalAlignment="Center"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Foreground="White"
-                                       Text="{Binding InstanceTagText, Mode=OneWay}" />
-                        </Border>
-                    </StackPanel>
-
-                    <!-- 全局搜索：输入回车跳到「搜索结果」页，结果不在下拉里堆着 -->
-                    <ui:TextBox x:Name="GlobalSearchBox"
-                                Width="300"
-                                Margin="20,0,0,0"
-                                VerticalAlignment="Center"
-                                FontSize="13"
-                                Icon="{ui:SymbolIcon Search24}"
-                                KeyDown="OnGlobalSearchKeyDown"
-                                PlaceholderText="搜索页面、任务、脚本  (Ctrl+K)"
-                                ToolTip="回车搜索；Esc 清空" />
+                                   FontSize="12"
+                                   FontWeight="SemiBold"
+                                   Foreground="White"
+                                   Text="{Binding InstanceTagText, Mode=OneWay}" />
+                    </Border>
                 </StackPanel>
             </ui:TitleBar.Header>
             <ui:TitleBar.TrailingContent>
@@ -763,68 +787,5 @@
                 </StackPanel>
             </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
-
-        <tray:NotifyIcon x:Name="TrayIcon"
-                         Grid.Row="0"
-                         Grid.Column="0"
-                         FocusOnLeftClick="False"
-                         Icon="{Binding InstanceIconSource, Mode=OneWay}"
-                         Visibility="{Binding Config.RemoteTaskConfig.EffectiveShowTrayIcon, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}"
-                         LeftDoubleClick="OnNotifyIconLeftDoubleClick"
-                         MenuOnRightClick="True"
-                         TooltipText="{Binding TrayTooltipText, Mode=OneWay}">
-            <tray:NotifyIcon.Menu>
-                <ContextMenu>
-                    <ContextMenu.DataContext>
-                        <markup:ServiceLocator Type="{x:Type viewModel:NotifyIconViewModel}" />
-                    </ContextMenu.DataContext>
-                    <ui:MenuItem Header="{Binding InstanceDisplayName, Mode=OneWay}"
-                                 IsEnabled="False"
-                                 Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ui:MenuItem.Icon>
-                            <Ellipse Width="12"
-                                     Height="12"
-                                     Fill="{Binding InstanceAccentBrush, Mode=OneWay}" />
-                        </ui:MenuItem.Icon>
-                    </ui:MenuItem>
-                    <Separator Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <ui:MenuItem Command="{Binding ShowOrHideCommand}"
-                                 Header="{i18n:T 显示或隐藏此实例窗口}"
-                                 Icon="{ui:SymbolIcon Window24}" />
-                    <Separator />
-                    <ui:MenuItem Command="{Binding OpenChildSessionWindowCommand}"
-                                  Header="{i18n:T 桌面分身}"
-                                  Icon="{ui:SymbolIcon DesktopCursor24}"
-                                  Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <!--  悬浮小窗：只在主实例提供  -->
-                    <ui:MenuItem Header="{i18n:T 悬浮小窗}"
-                                 Icon="{ui:SymbolIcon VideoClip24}"
-                                 Visibility="{Binding IsGuideWindowAvailable, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ui:MenuItem Command="{Binding ToggleGuideWindowCommand}"
-                                     Header="{Binding GuideToggleText, Mode=OneWay}"
-                                     Icon="{ui:SymbolIcon PictureInPicture24}" />
-                        <ui:MenuItem Command="{Binding OpenGuideFromClipboardCommand}"
-                                     Header="{i18n:T 打开剪贴板中的链接}"
-                                     Icon="{ui:SymbolIcon ClipboardLink24}" />
-                        <ui:MenuItem Command="{Binding RestoreGuideWindowCommand}"
-                                     Header="{i18n:T 恢复小窗（关闭穿透、不透明）}"
-                                     Icon="{ui:SymbolIcon ArrowReset24}" />
-                        <Separator />
-                        <ui:MenuItem Command="{Binding OpenGuideSettingsCommand}"
-                                     Header="{i18n:T 小窗设置}"
-                                     Icon="{ui:SymbolIcon Settings24}" />
-                    </ui:MenuItem>
-                    <Separator Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <ui:MenuItem Command="{Binding CheckUpdateCommand}"
-                                 Header="{i18n:T 检查更新}"
-                                 Icon="{ui:SymbolIcon ArrowAutofitUp24}"
-                                 Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <Separator Visibility="{Binding IsPrimaryInstance, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <ui:MenuItem Command="{Binding ExitCommand}"
-                                 Header="{Binding ExitMenuText, Mode=OneWay}"
-                                 Icon="{ui:SymbolIcon Dismiss24}" />
-                </ContextMenu>
-            </tray:NotifyIcon.Menu>
-        </tray:NotifyIcon>
     </Grid>
 </ui:FluentWindow>

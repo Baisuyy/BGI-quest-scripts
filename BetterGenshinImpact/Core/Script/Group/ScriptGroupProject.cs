@@ -220,32 +220,14 @@ public partial class ScriptGroupProject : ObservableObject
         else if (Type == "KeyMouse")
         {
             // 加载并执行
-            var macroPath = Global.Absolute(@$"User\KeyMouseScript\{Name}");
-            if (!File.Exists(macroPath))
-            {
-                throw new FileNotFoundException(
-                    $"键鼠宏文件不存在：{Name}。脚本组里这一项指向的文件已被删除或改名，"
-                    + "打开这个脚本组把它移除，或重新导入宏文件。", macroPath);
-            }
-            var json = await File.ReadAllTextAsync(macroPath, ct);
+            var json = await File.ReadAllTextAsync(Global.Absolute(@$"User\KeyMouseScript\{Name}"), ct);
             await KeyMouseMacroPlayer.PlayMacro(runtime, json, ct, false);
         }
         else if (Type == "Pathing")
         {
             // 加载并执行
             ct.ThrowIfCancellationRequested();
-            var pathJson = Path.Combine(MapPathingViewModel.PathJsonPath, FolderName, Name);
-            if (!File.Exists(pathJson))
-            {
-                // 裸的 FileNotFoundException 只会甩一个绝对路径，用户不知道是哪个脚本组坏了。
-                // 这里把「谁引用了它」和「怎么修」都写进消息，日志与 QQ 回复里都能直接看懂。
-                throw new FileNotFoundException(
-                    $"路线文件不存在：{Name}（脚本组「{GroupInfo?.Name ?? "未命名"}」中的 {Type} 项）。"
-                    + $"查找位置：{pathJson}。"
-                    + "通常是脚本仓库更新后改名或删掉了目录；请打开该脚本组移除这一项，"
-                    + "或在「地图追踪」里重新下载路线。", pathJson);
-            }
-            var task = PathingTask.BuildFromFilePath(pathJson);
+            var task = PathingTask.BuildFromFilePath(Path.Combine(MapPathingViewModel.PathJsonPath, FolderName, Name));
             if (task == null)
             {
                 return;

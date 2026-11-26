@@ -183,12 +183,6 @@ public partial class ScriptService : IScriptService
                     _logger.LogInformation("取消执行配置组: {Msg}", e.Message);
                     throw;
                 }
-                catch (FileNotFoundException e)
-                {
-                    // 配置文件指向了不存在的路线/宏：这是可修的配置问题，不是程序故障。
-                    // 记 ERR 会让「一次运行有 1 个 ERROR」变成常态，真正需要看的错误就被稀释了。
-                    _logger.LogWarning("跳过 {Name}：{Msg}", project.Name, e.Message);
-                }
                 catch (Exception e)
                 {
                     _logger.LogDebug(e, "执行脚本时发生异常");

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using BetterGenshinImpact.Core.Plugins.Pluggables;
+using BetterGenshinImpact.GameTask.I18n;
+using BetterGenshinImpact.Service.I18n;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BetterGenshinImpact.Core.Plugins.Hosting;
@@ -49,6 +51,18 @@ public sealed partial class PluginEntry : ObservableObject
     /// </summary>
     [ObservableProperty]
     private IReadOnlyList<PluggableImplDescriptor> _implementations = [];
+
+    /// <summary>
+    /// 启用后登记的界面语言；未启用时为空。
+    /// </summary>
+    [ObservableProperty]
+    private IReadOnlyList<UiLanguagePack> _uiLanguages = [];
+
+    /// <summary>
+    /// 启用后登记的游戏语言；未启用时为空。
+    /// </summary>
+    [ObservableProperty]
+    private IReadOnlyList<GameTextPack> _gameLanguages = [];
 
     /// <summary>
     /// 等待下次启动替换的新版本号，没有时为 null。

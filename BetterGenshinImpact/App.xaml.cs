@@ -10,14 +10,12 @@ using System.Windows.Threading;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
 using BetterGenshinImpact.Core.Mask;
-using BetterGenshinImpact.Core.Mys;
 using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.ONNX;
 using BetterGenshinImpact.Core.Monitor;
 using BetterGenshinImpact.Core.Plugins.Hosting;
 using BetterGenshinImpact.Core.Plugins.Pluggables;
 using BetterGenshinImpact.Core.Script;
-using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
@@ -46,10 +44,9 @@ using BetterGenshinImpact.Service.AccountRecords;
 using BetterGenshinImpact.Service.ChildSession;
 using BetterGenshinImpact.Service.ExternalAccess;
 using BetterGenshinImpact.Service.ExternalAccess.Logging;
-using BetterGenshinImpact.Service.RemoteTask;
-using BetterGenshinImpact.Service.Search;
 using BetterGenshinImpact.Service.Guide;
 using BetterGenshinImpact.Service.Instance;
+using BetterGenshinImpact.GameTask.I18n;
 using BetterGenshinImpact.Service.I18n;
 using BetterGenshinImpact.Service.Interface;
 using BetterGenshinImpact.Service.KeyMacro;
@@ -124,9 +121,6 @@ public partial class App : Application
                 var logFolder = Path.Combine(AppContext.BaseDirectory, "log");
                 Directory.CreateDirectory(logFolder);
                 var logFile = Path.Combine(logFolder, "better-genshin-impact.log");
-                // 老版本的行首只有时分秒，新版带日期。升级后两者被写进同一个按天滚动的文件，
-                // 光看行首分不清哪段是哪个版本写的，跨午夜还会把顺序读反。
-                ArchiveLegacyLog(logFolder);
                 var instanceContext = InstanceBootstrap.Current.Context;
                 // 网页版实例带上实例名，例如 WebView(小号A):S1:P1234:T…
                 var instanceTypeLabel = instanceContext.InstanceName is { } instanceName
@@ -147,27 +141,13 @@ public partial class App : Application
                         // 原始诊断独立留档；不再在文件额外复制仅供悬浮显示的OCR摘要。
                         .Filter.ByExcluding(QuestVoiceLog.IsSummary)
                         .Enrich.WithProperty("BgiInstance", instanceIdentity)
-                        .WriteTo.Sink(new RepeatSuppressorSink(
-                            new LoggerConfiguration()
-                                .WriteTo.File(
-                                    // 一行一条：时间 / 级别 / 实例 / 来源 → 消息；异常另起，方便按行 grep。
-                                    // 行首带日期：按天滚动的文件如果只有时分秒，跨午夜后既排不出先后，
-                                    // 也没法把「任务开始后发生过什么」算准。
-                                    // 异常栈由格式器去重：同一条错误反复重试时只展开一次，见 ExceptionDedupTextFormatter。
-                                    new ExceptionDedupTextFormatter(
-                                        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext} | {Message:lj}{NewLine}"),
-                                    logFile,
-                                    rollingInterval: RollingInterval.Day,
-                                    // 一天几百万行的极端情况不至于长成一个几百 MB 打不开的文件
-                                    fileSizeLimitBytes: 64L * 1024 * 1024,
-                                    rollOnFileSizeLimit: true,
-                                    shared: true,
-                                    retainedFileCountLimit: 31,
-                                    retainedFileTimeLimit: TimeSpan.FromDays(21))
-                                .CreateLogger()),
-                            // 落盘级别可配：长时间只关心有没有报错的人可以设成 Error，
-                            // 一天几百万行 Debug 既占地方又让 grep 变慢。
-                            FileLogLevel(all)))
+                        .WriteTo.File(logFile,
+                            outputTemplate:
+                            "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}",
+                            rollingInterval: RollingInterval.Day,
+                            shared: true,
+                            retainedFileCountLimit: 31,
+                            retainedFileTimeLimit: TimeSpan.FromDays(21)))
                     .WriteTo.Console(outputTemplate:
                         "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .MinimumLevel.Debug()
@@ -176,8 +156,6 @@ public partial class App : Application
                 loggerConfiguration.WriteTo.Sink(
                     new ExternalLogSink(externalLogHub, instanceIdentity),
                     LogEventLevel.Debug);
-                // 出错就自动攒一个诊断包：日志尾部 + 环境 + 脱敏配置，反馈时直接拖出去。
-                loggerConfiguration.WriteTo.Sink(new ErrorDiagnosticsSink(), LogEventLevel.Error);
                 // 日志遮罩输出：仅当“遮罩启用且日志框可见”时才真正写入，隐藏时避免不必要的 UI 开销（#3161）。
                 // 条件改为运行时每次写入时动态判断，因此启动后通过快捷键切换 ShowLogBox 也能即时恢复日志（#3357）。
                 loggerConfiguration.WriteTo.Sink(
@@ -226,7 +204,10 @@ public partial class App : Application
                 services.AddSingleton<HardwareAccelerationViewModelFactory>();
                 services.AddSingleton<IInferenceSettingsInteraction, InferenceSettingsInteraction>();
 
-                services.AddLocalization();
+                // 游戏语言可以由插件提供，此时插件尚未加载，不在这里校验或重置配置；
+                // 不可用的游戏语言（插件未启用，或历史版本可选的 ja/ru）在取值时回退，PluginManager.Initialize() 末尾记录警告
+                services.AddSingleton(GameTextService.Instance);
+
                 var i18nService = I18nService.Instance;
                 var uiLanguage = all.OtherConfig.UiCultureInfoName switch
                 {
@@ -308,6 +289,8 @@ public partial class App : Application
                 services.AddSingleton<ChildSessionService>();
                 services.AddTransient<ChildSessionWindowViewModel>();
                 services.AddTransient<ChildSessionWindow>();
+                services.AddTransient<ChildSessionDiagnosticsWindowViewModel>();
+                services.AddTransient<ChildSessionDiagnosticsWindow>();
 
                 // Views
                 services.AddView<HomePage, HomePageViewModel>();
@@ -339,11 +322,6 @@ public partial class App : Application
                 services.AddSingleton<IStorageAreaProvider>(sp => sp.GetRequiredService<InventoryIconCache>());
                 services.AddTransient<AccountRecordsInventoryViewModel>();
                 services.AddView<MusicPage, MusicPageViewModel>();
-                // 全局搜索：顶栏输入，结果在独立页面里分组展示
-                services.AddSingleton<GlobalSearchState>();
-                services.AddSingleton<GlobalSearchService>();
-                services.AddView<SearchResultPage, SearchResultPageViewModel>();
-
                 // 自动配音：入口为实时触发页卡片，设置在独立窗口；设置模型为单例以保留草稿。
                 services.AddSingleton<RoutingCatalogStore>();
                 services.AddSingleton<QuestVoiceSettingsViewModel>();
@@ -431,29 +409,6 @@ public partial class App : Application
                 services.AddSingleton<RecognitionTemplateEditorService>();
                 services.AddSingleton<NotificationService>();
                 services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
-                // 远程任务：QQ 机器人把聊天指令转成独立任务并回传截图，只在主实例启动
-                services.AddSingleton<AiTraceStore>();
-                services.AddSingleton<MysDailyNoteClient>(sp => new MysDailyNoteClient(
-                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(),
-                    sp.GetRequiredService<ILogger<MysDailyNoteClient>>()));
-                services.AddSingleton<GenshinWikiClient>(sp => new GenshinWikiClient(
-                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
-                    sp.GetRequiredService<ILogger<GenshinWikiClient>>()));
-                // 米游社扫码绑定：网页端扫码通道拿登录态，不需要用户抄 Cookie
-                services.AddSingleton<MysPassportClient>(sp => new MysPassportClient(
-                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
-                    sp.GetRequiredService<ILogger<MysPassportClient>>()));
-                services.AddSingleton<MysBindingService>();
-                services.AddSingleton<GameOps>();
-                services.AddSingleton<AgentTasks>();
-                services.AddSingleton<RemoteTaskPlanRunner>();
-                services.AddSingleton<RemoteTaskCommandHandler>();
-                services.AddSingleton<RemoteTaskIntentResolver>();
-                services.AddSingleton<QqBotService>();
-                services.AddHostedService(sp => sp.GetRequiredService<QqBotService>());
-                // 定时任务：按时间点或树脂阈值自动触发，与手动点开始同一条执行路径
-                services.AddSingleton<RemoteScheduleService>();
-                services.AddHostedService(sp => sp.GetRequiredService<RemoteScheduleService>());
                 services.AddSingleton<NotifierManager>();
                 services.AddSingleton<IScriptService, ScriptService>();
                 // Pulonia：纯任务保持无游戏依赖；游戏能力通过统一协调器按需准备会话和输入所有权。
@@ -574,60 +529,6 @@ public partial class App : Application
     /// </summary>
     private static readonly ExceptionLogWriter _exceptionLog = new(() => Log.ForContext<App>());
 
-    /// <summary>
-    /// 把「写入日志文件的最低级别」配置映射成 Serilog 级别。
-    /// 只影响落盘；界面日志框与外部日志分发各自按自己的级别过滤。
-    /// </summary>
-    private static LogEventLevel FileLogLevel(AllConfig all) => all.CommonConfig.LogFileLevel switch
-    {
-        LogFileLevel.Error => LogEventLevel.Error,
-        LogFileLevel.Warning => LogEventLevel.Warning,
-        LogFileLevel.Information => LogEventLevel.Information,
-        _ => LogEventLevel.Debug,
-    };
-
-    /// <summary>
-    /// 把旧版本写下的当天日志改名归档，让新日志从干净文件开始。
-    /// <para>
-    /// 旧版行首是 <c>[HH:mm:ss.fff]</c>，新版是 <c>[yyyy-MM-dd HH:mm:ss.fff]</c>。
-    /// 升级当天两者会落进同一个按天滚动的文件，行首对不齐，也没法判断某段是哪个版本写的。
-    /// 只在首行确实是旧格式时动手，读不出或改名失败（多实例并发写）就原样留着，不影响日志功能。
-    /// </para>
-    /// </summary>
-    private static void ArchiveLegacyLog(string logFolder)
-    {
-        try
-        {
-            var todayFile = Path.Combine(logFolder, $"better-genshin-impact{DateTime.Now:yyyyMMdd}.log");
-            if (!File.Exists(todayFile))
-            {
-                return;
-            }
-
-            string? firstLine;
-            using (var stream = new FileStream(todayFile, FileMode.Open, FileAccess.Read,
-                       FileShare.ReadWrite | FileShare.Delete))
-            using (var reader = new StreamReader(stream))
-            {
-                firstLine = reader.ReadLine();
-            }
-
-            // 空文件或已经是带日期的格式，不用管
-            if (string.IsNullOrWhiteSpace(firstLine) || firstLine.StartsWith("[20", StringComparison.Ordinal))
-            {
-                return;
-            }
-
-            var stamp = DateTime.Now.ToString("HHmmss");
-            File.Move(todayFile,
-                Path.Combine(logFolder, $"better-genshin-impact{DateTime.Now:yyyyMMdd}.legacy-{stamp}.log"));
-        }
-        catch (Exception)
-        {
-            // 归档只是让日志更好读，失败不该挡住启动
-        }
-    }
-
     public static IServiceProvider ServiceProvider => _host.Services;
 
     public static ILogger<T> GetLogger<T>()
@@ -692,8 +593,6 @@ public partial class App : Application
                 // 宿主启动完成后实例上下文已初始化；主实例尽力清理遗留锁，失败也不影响启动。
                 TryCleanupPuloniaLockFiles();
                 await UrlProtocolHelper.RegisterAsync();
-                // 界面就绪后再问，避免弹窗被主窗口盖住
-                Dispatcher.BeginInvoke(new Action(async () => await PromptPendingUpdateAsync()));
             }
         }
         catch (Exception ex)
@@ -737,63 +636,6 @@ public partial class App : Application
             Shutdown();
         }
 
-    }
-
-    /// <summary>
-    ///     处理上次留下的更新：脚本失败要报告原因，等着装的要问一句。
-    ///     <para>
-    ///         增量更新需要进程退出后由脚本覆盖文件，所以「下载完先不重启」的用户下次启动时才会走到这里。
-    ///     </para>
-    /// </summary>
-    private async Task PromptPendingUpdateAsync()
-    {
-        try
-        {
-            if (SpecialPatch.ConsumeLastError() is { Length: > 0 } lastError)
-            {
-                await ThemedMessageBox.WarningAsync(
-                    $"上次更新没有完成：{lastError}\n\n可以重新检查更新，或下载完整包覆盖安装。", "更新未完成");
-            }
-
-            if (!SpecialPatch.IsPending || SpecialPatch.ReadPending() is not { } manifest)
-            {
-                return;
-            }
-
-            // 目标版本就是当前版本，说明文件已经换过、脚本只是没删掉标记（比如启动时报错前）
-            string current = (Global.Version ?? string.Empty).Split('+')[0];
-            if (string.Equals(manifest.To, current, StringComparison.OrdinalIgnoreCase))
-            {
-                SpecialPatch.ClearPending();
-                return;
-            }
-
-            var restart = await ThemedMessageBox.QuestionAsync(
-                $"特别版 {manifest.To} 的更新已经下载好了（{manifest.Files.Count} 个文件），需要重启才能生效。\n\n" +
-                "现在重启？（会先关闭当前窗口，几秒后自动打开新版）",
-                "更新待安装", MessageBoxButton.YesNo);
-
-            if (restart != MessageBoxResult.Yes)
-            {
-                return;
-            }
-
-            if (SpecialPatch.StartApplyAndRestart(App.GetLogger<App>()))
-            {
-                App.GetService<IConfigService>()?.Save();
-                Current.Shutdown();
-            }
-            else
-            {
-                await ThemedMessageBox.WarningAsync(
-                    "无法启动更新脚本，可能被安全软件拦截。更新文件已解压到 update\\staging，可手动覆盖。", "更新失败");
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine(e);
-            ConsoleHelper.WriteError($"处理待安装更新失败：{e.Message}");
-        }
     }
 
     /// <summary>尽力执行上次登记、推迟到本次启动的存储清理；失败时只记录日志，不影响 BetterGI 启动。</summary>
@@ -846,6 +688,15 @@ public partial class App : Application
         // 先通知当前运行退出，再停止宿主服务，避免任务在依赖项释放后继续执行。
         _host.Services.GetService<TaskStopService>()?.StopAll(TaskStopReason.ApplicationShutdown);
 
+        // 排空触发器在途 tick：本方法 finally 末尾会运行期销毁 ncnn Vulkan 全局实例，
+        // 若此时仍有 ncnn 推理在跑，拆卸期 atexit 的 destroy_gpu_instance 会进入 Intel ICD（igvk64）
+        // 的 loader-lock 路径并 fail-fast（0xc0000409）。TaskTriggerDispatcher 不是 hosted service，
+        // _host.StopAsync() 不会停它的 timer，必须显式同步停表并借同一把 _locker 等待上一帧识别结束。
+        // 必须在第一个 await 之前同步完成（async void 的续体排回已停止的 Dispatcher 会死锁）。
+        var triggerDispatcher = _host.Services.GetService<TaskTriggerDispatcher>();
+        try { triggerDispatcher?.StopTimer(); } catch { /* 退出路径不抛 */ }
+        try { triggerDispatcher?.PauseForInference().Dispose(); } catch { }
+
         // 在推理运行时、日志和临时文件清理之前排空配音任务；退出可以关闭本地 HTTP。
         try
         {
@@ -860,18 +711,6 @@ public partial class App : Application
         try
         {
             _host.Services.GetService<IConfigService>()?.Flush();
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
-
-        // 自动上传模式下，退出前把这次运行的日志发出去。最多等 15 秒：
-        // 8MB 尾部脱敏压缩后通常只剩 1～2MB，宽带 3～5 秒传完；15 秒覆盖到慢速上行，
-        // 又不至于让「点了退出却不动」的体感太长。到点没传完就放弃，日志还在本地。
-        try
-        {
-            await Core.Special.LogUploader.UploadBeforeExitAsync(TimeSpan.FromSeconds(15));
         }
         catch (Exception ex)
         {
@@ -914,6 +753,11 @@ public partial class App : Application
                 }
                 finally
                 {
+                    // 运行期销毁 ncnn Vulkan 全局实例（ncnn 官方要求的退出前调用）。
+                    // 仅在 shim 已加载过时执行；导出缺失视为运行库版本错配，记调试日志后跳过。
+                    try { Core.Recognition.Ncnn.NcnnShim.TryDestroyGpuInstance(); }
+                    catch (Exception ex) { Debug.WriteLine(ex); }
+
                     // 释放控制台窗口
                     ConsoleHelper.FreeConsoleWindow();
                 }
@@ -934,6 +778,36 @@ public partial class App : Application
 
         //非UI线程未捕获异常处理事件(例如自己创建的一个子线程)
         AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
+
+        //进程退出兜底：销毁 ncnn Vulkan 全局实例。
+        //OnExit 是 async void，首个 await 之后主线程立即返回、CLR 关停不等待续体，
+        //收尾段落可能整段跑不到（实测 g_shutdown 仍为 false）；ProcessExit 在 CLR 关停阶段、
+        //早于任何 DLL 卸载时同步执行，是唯一可靠的退出点。
+        AppDomain.CurrentDomain.ProcessExit += OnProcessExitDestroyNcnn;
+    }
+
+    /// <summary>
+    ///     退出阶段兜底：销毁 ncnn Vulkan 全局实例，让 ncnn 注册的 atexit 钩子在
+    ///     <c>DLL_PROCESS_DETACH</c> 时走 <c>created == 0</c> 早退，不再进驱动拆卸路径。
+    ///     <para>
+    ///         Vulkan ICD（igvk64.dll）比 ncnn_shim.dll 后加载，因此在 <c>LdrShutdownProcess</c>
+    ///         中先卸载；此后 ncnn 的 atexit 钩子再调 vkDestroyInstance 会打到已被拆除的驱动状态，
+    ///         驱动抛 C++ 异常而拆卸期没有可用的异常处理器，最终 __fastfail(7)
+    ///         （0xc0000409，表现为关闭时"闪退"并留下 CrashDumps）。
+    ///     </para>
+    ///     <see cref="Core.Recognition.Ncnn.NcnnShim.TryDestroyGpuInstance" /> 幂等且不抛异常，
+    ///     与 OnExit 末尾的调用重复无害（ncnn 侧 created==0 早退）。
+    /// </summary>
+    private static void OnProcessExitDestroyNcnn(object? sender, EventArgs e)
+    {
+        try
+        {
+            Core.Recognition.Ncnn.NcnnShim.TryDestroyGpuInstance();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
     }
 
     private static void TaskSchedulerUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)

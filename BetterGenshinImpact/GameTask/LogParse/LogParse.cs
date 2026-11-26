@@ -17,12 +17,8 @@ namespace BetterGenshinImpact.GameTask.LogParse
     {
         private static readonly string _configPath = Global.Absolute(@"log\logparse\config.json");
         private static readonly string _assets_dir = Global.Absolute($@"GameTask\LogParse\Assets");
-        /// <summary>
-        ///     行首：<c>[2026-11-18 12:34:56.789] [WRN] [实例]</c>。
-        ///     日期段可选——7.7 起落盘行加了日期，旧日志没有，两种都要能读。
-        /// </summary>
         private static readonly Regex LogHeaderRegex = new(
-            @"^\[(?:\d{4}-\d{2}-\d{2} )?\d{2}:\d{2}:\d{2}\.\d+\] \[[^\]]+\](?: \[(?<Instance>[A-Za-z][A-Za-z0-9]*:S\d+:P\d+:T\d+)\])?",
+            @"^\[\d{2}:\d{2}:\d{2}\.\d+\] \[[^\]]+\](?: \[(?<Instance>[A-Za-z][A-Za-z0-9]*:S\d+:P\d+:T\d+)\])?",
             RegexOptions.Compiled | RegexOptions.CultureInvariant);
         // 添加一个静态事件用于通知日志的生成状态
         public static event Action<string> HtmlGenerationStatusChanged = delegate { };
@@ -239,12 +235,10 @@ namespace BetterGenshinImpact.GameTask.LogParse
                 return null;
             }
 
-            // 新格式行里自带日期，旧格式只有时分秒、要借文件名上的日期补
-            (bool, List<string>) result = ParseBgiLine(@"\[(?:(\d{4}-\d{2}-\d{2}) )?(\d{2}:\d{2}:\d{2})\.\d+\]", list[index].Item1);
+            (bool, List<string>) result = ParseBgiLine(@"\[(\d{2}:\d{2}:\d{2})\.\d+\]", list[index].Item1);
             if (result.Item1)
             {
-                var day = string.IsNullOrEmpty(result.Item2[1]) ? logrq : result.Item2[1];
-                DateTime dateTime = DateTime.ParseExact(day + " " + result.Item2[2], "yyyy-MM-dd HH:mm:ss", null);
+                DateTime dateTime = DateTime.ParseExact(logrq + " " + result.Item2[1], "yyyy-MM-dd HH:mm:ss", null);
                 return dateTime;
             }
 

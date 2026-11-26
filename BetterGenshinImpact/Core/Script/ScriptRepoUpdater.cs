@@ -1893,12 +1893,6 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
 
     public string FindCenterRepoPath()
     {
-        // 目录不存在时要给可读原因，别让 Directory.GetFiles 抛底层异常
-        if (!Directory.Exists(CenterRepoPath))
-        {
-            throw new DirectoryNotFoundException($"本地脚本仓库尚未同步：{CenterRepoPath}");
-        }
-
         // 查找 repo.json 文件
         var repoJsonPath = Path.Combine(CenterRepoPath, "repo.json");
         string? repoJsonDir = null;
@@ -2598,11 +2592,7 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
         {
             // 获取所有可用路径
             var allAvailablePaths = new HashSet<string>();
-            // 本地仓库还没同步过时这里不能直接枚举：会抛 DirectoryNotFoundException，
-            // 用户看到的就是「打开脚本仓库报错」。缺目录就跳过父节点推断。
-            string? repoJsonPath = Directory.Exists(CenterRepoPath)
-                ? Directory.GetFiles(CenterRepoPath, "repo.json", SearchOption.AllDirectories).FirstOrDefault()
-                : null;
+            var repoJsonPath = Directory.GetFiles(CenterRepoPath, "repo.json", SearchOption.AllDirectories).FirstOrDefault();
             if (!string.IsNullOrEmpty(repoJsonPath))
             {
                 var jsonContent = File.ReadAllText(repoJsonPath);
@@ -2988,33 +2978,6 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
     public void OpenLocalRepoInWebView()
     {
         UpdateSubscribedScriptPaths();
-
-        // 从没同步成功过时，仓库页只能列出空列表，看着还是「打不开」。
-        // 后台补一次同步，不阻塞开窗；失败给出可读提示，不让异常冒到界面。
-        if (!Directory.Exists(CenterRepoPath))
-        {
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    var url = ResolveRepoUrl(Config.ScriptConfig);
-                    if (string.IsNullOrEmpty(url))
-                    {
-                        return;
-                    }
-
-                    _logger.LogInformation("本地脚本仓库不存在，打开仓库页时后台同步一次：{Url}", url);
-                    await UpdateCenterRepoByGit(url, null);
-                    _logger.LogInformation("脚本仓库同步完成：{Path}", CenterRepoPath);
-                    UIDispatcherHelper.Invoke(() => Toast.Success("脚本仓库已同步，重新打开可看到脚本列表"));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "打开脚本仓库时后台同步失败");
-                    UIDispatcherHelper.Invoke(() => Toast.Warning("脚本仓库同步失败，请检查网络或在设置里手动更新"));
-                }
-            });
-        }
         if (_webWindow is not { IsVisible: true })
         {
             var scriptConfig = Config.ScriptConfig;
@@ -3084,16 +3047,6 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
             _webWindow.Panel!.OnWebViewInitializedAction = () =>
             {
                 var assetsPath = Global.Absolute(@"Assets\Web\ScriptRepo");
-
-                // 特别版曾经漏打前端资源，SetVirtualHostNameToFolderMapping 会抛 0x80070003，
-                // 窗口一片空白，看着就是「脚本仓库打不开」。缺资源时先给说明页，别让异常冒到面板层。
-                if (!File.Exists(Path.Combine(assetsPath, "index.html")))
-                {
-                    _logger.LogWarning("脚本仓库页面资源缺失：{Path}，改为显示说明页", assetsPath);
-                    _webWindow.Panel!.NavigateToHtml(BuildRepoNotReadyPage(assetsPath, CenterRepoPath));
-                    return;
-                }
-
                 _webWindow.Panel!.WebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
                     "bettergi.local",
                     assetsPath,
@@ -3114,62 +3067,6 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
         {
             _webWindow.Activate();
         }
-    }
-
-    /// <summary>
-    /// 脚本仓库页缺少前端资源、或本地仓库还没同步时显示的说明页。
-    /// 页面本身不依赖任何外部资源，断网也能看。
-    /// </summary>
-    private static string BuildRepoNotReadyPage(string assetsPath, string repoPath)
-    {
-        var hasPage = File.Exists(Path.Combine(assetsPath, "index.html"));
-        var hasRepo = Directory.Exists(repoPath);
-
-        static string Mark(bool ok) => ok
-            ? "<span class=\"ok\">正常</span>"
-            : "<span class=\"bad\">缺失</span>";
-
-        return $$"""
-        <!doctype html>
-        <html lang="zh-CN"><head><meta charset="utf-8">
-        <title>脚本仓库未就绪</title>
-        <style>
-          :root { color-scheme: dark; }
-          body { margin:0; padding:32px 36px; background:#1b1b1f; color:#e8e8ea;
-                 font:14px/1.7 "Microsoft YaHei UI", system-ui, sans-serif; }
-          h1 { font-size:19px; margin:0 0 6px; }
-          p.sub { margin:0 0 22px; color:#9a9aa2; }
-          table { border-collapse:collapse; margin:0 0 22px; }
-          td { padding:5px 14px 5px 0; vertical-align:top; }
-          td.k { color:#9a9aa2; white-space:nowrap; }
-          code { background:#26262b; padding:2px 6px; border-radius:4px;
-                 font-family:Consolas, monospace; font-size:12.5px; color:#cfd3d8; }
-          .ok { color:#6ddc8f; } .bad { color:#ff8a8a; }
-          ol { margin:0; padding-left:20px; }
-          li { margin:6px 0; }
-          .note { margin-top:22px; padding:12px 14px; background:#232329;
-                  border-left:3px solid #4cc2ff; border-radius:0 6px 6px 0; color:#b9bcc4; }
-        </style></head><body>
-        <h1>脚本仓库页面未就绪</h1>
-        <p class="sub">本地文件齐了才能列出可订阅的脚本。下面是检查结果。</p>
-        <table>
-          <tr><td class="k">页面资源</td><td>{{Mark(hasPage)}}<br><code>{{assetsPath}}</code></td></tr>
-          <tr><td class="k">本地仓库</td><td>{{Mark(hasRepo)}}<br><code>{{repoPath}}</code></td></tr>
-        </table>
-        <ol>
-          <li><b>页面资源缺失</b>：说明安装包不完整。用最新特别版安装包覆盖安装，
-              或把官方的 <code>Assets\Web\ScriptRepo</code> 目录复制到上面那个路径。</li>
-          <li><b>本地仓库缺失</b>：打开「设置 → 通用」，点一次「更新脚本仓库」；
-              网络不通时可用同页的「手动导入本地脚本仓库（zip）」，仓库 zip 可到
-              <a href="https://cnb.cool/bettergi/bettergi-scripts-list" style="color:#4cc2ff">cnb.cool</a> 下载。</li>
-          <li>两者都正常后，关掉本窗口重新打开「脚本仓库」。</li>
-        </ol>
-        <div class="note">
-          国内直连 GitHub 经常超时。特别版默认走 CNB 源，设置里可以切换渠道；
-          切换后首次同步需要下载约几十 MB，请耐心等待进度条走完。
-        </div>
-        </body></html>
-        """;
     }
 
     public void OpenScriptRepoWindow()
@@ -3391,9 +3288,7 @@ public partial class ScriptRepoUpdater : Singleton<ScriptRepoUpdater>
 
                     if (matchedFiles.Count == 0)
                     {
-                        // 仓库侧的 manifest 声明了通配符但本地没匹配到，用户改不了也修不了，
-                        // 每次启动刷若干条 WRN 只会让人以为出了问题，降级到 Debug 备用。
-                        _logger.LogDebug("仓库同步：{SavedFile} 在本地没有匹配到文件，跳过", savedFile);
+                        _logger.LogWarning($"没有找到匹配的文件: {savedFile}");
                     }
                 }
             }

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -19,11 +18,11 @@ using BetterGenshinImpact.Core.Recognition;
 using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.OCR.Paddle;
 using BetterGenshinImpact.Core.Script;
-using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.AutoTrackPath;
 using BetterGenshinImpact.GameTask.Common.Element.Assets;
 using BetterGenshinImpact.GameTask.Common.Job;
+using BetterGenshinImpact.GameTask.I18n;
 using BetterGenshinImpact.GameTask.LogParse;
 using BetterGenshinImpact.Helpers;
 using BetterGenshinImpact.Helpers.Http;
@@ -46,7 +45,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
 using Microsoft.Win32;
 using Wpf.Ui;
 
@@ -61,6 +59,11 @@ public partial class CommonSettingsPageViewModel : ViewModel
     private readonly CustomHtmlMaskService _customHtmlMaskService;
     private readonly RecognitionTemplateEditorService _recognitionTemplateEditorService;
     private readonly I18nService _i18nService;
+
+    /// <summary>
+    /// 游戏文本服务，提供可选的游戏语言（内置语言和已启用插件提供的语言）。
+    /// </summary>
+    private readonly GameTextService _gameTextService;
 
     /// <summary>
     /// 外部访问令牌生成与校验服务。
@@ -131,7 +134,7 @@ public partial class CommonSettingsPageViewModel : ViewModel
         RecognitionTemplateEditorService recognitionTemplateEditorService, I18nService i18nService,
         ExternalAccessState externalAccessState, ExternalAccessTokenService externalAccessTokenService,
         IStorageService storageService, Func<StorageManagementWindow> storageManagementWindowFactory,
-        NetworkSettingsViewModel networkSettings, PluggableRegistry pluggables)
+        NetworkSettingsViewModel networkSettings, PluggableRegistry pluggables, GameTextService gameTextService)
     {
         NetworkSettings = networkSettings;
         // OCR 模型是可插拔能力：可选项为内置的 PP-OCRv6 和已启用的 OCR 插件，与插件页“功能选择”保持同步
@@ -148,6 +151,7 @@ public partial class CommonSettingsPageViewModel : ViewModel
         _customHtmlMaskService = customHtmlMaskService;
         _recognitionTemplateEditorService = recognitionTemplateEditorService;
         _i18nService = i18nService;
+        _gameTextService = gameTextService;
         ExternalAccessState = externalAccessState;
         _externalAccessTokenService = externalAccessTokenService;
         Config.ExternalAccessConfig.PropertyChanged += (_, args) =>
@@ -163,6 +167,11 @@ public partial class CommonSettingsPageViewModel : ViewModel
         OverlayStyleSettingGroups = OverlayStyleSettingGroup.Create(Config.MaskWindowConfig, OnOverlayStyleChanged);
         InitializeCountries();
         InitializeMiyousheCookie();
+        // 界面语言、游戏语言列表随插件启用、停用变化
+        RebuildUiLanguageOptions();
+        _i18nService.LanguagesChanged += (_, _) => RebuildUiLanguageOptions();
+        RebuildGameLanguageOptions();
+        _gameTextService.LanguagesChanged += (_, _) => RebuildGameLanguageOptions();
     }
 
     public AllConfig Config { get; set; }
@@ -202,9 +211,36 @@ public partial class CommonSettingsPageViewModel : ViewModel
 
     public ObservableCollection<string> MapPathingTypes { get; } = ["SIFT", "TemplateMatch"];
 
-    [ObservableProperty] private FrozenDictionary<string, string> _languageDict =
-        new[] { "zh-Hans", "zh-Hant", "en", "ja", "ru", "it"  }
-            .ToFrozenDictionary(c => c, c => CultureInfoNameToKVPConverter.GetDisplayName(c));
+    /// <summary>
+    /// 原神游戏语言的可选项，与界面语言无关：内置游戏语言和已启用插件提供的游戏语言（如意大利语插件 lang_it）；
+    /// 保存的语言不可用时末尾多一项“（不可用）”。只列出有游戏文本的语言，见 <see cref="GameTextService.Languages"/>。
+    /// </summary>
+    public ObservableCollection<GameLanguageOption> GameLanguageOptions { get; } = [];
+
+    /// <summary>
+    /// 当前选中的游戏语言。用户选择时保存配置，下次启动任务时生效。
+    /// </summary>
+    [ObservableProperty] private GameLanguageOption? _selectedGameLanguage;
+
+    /// <summary>
+    /// 正在重建游戏语言列表，期间的选中变化不写配置。
+    /// </summary>
+    private bool _rebuildingGameLanguages;
+
+    /// <summary>
+    /// 界面语言的可选项：内置语言和已启用插件提供的语言；保存的语言不可用时末尾多一项“（不可用）”。
+    /// </summary>
+    public ObservableCollection<UiLanguageOption> UiLanguageOptions { get; } = [];
+
+    /// <summary>
+    /// 当前选中的界面语言。用户选择时保存配置并切换语言。
+    /// </summary>
+    [ObservableProperty] private UiLanguageOption? _selectedUiLanguage;
+
+    /// <summary>
+    /// 正在重建界面语言列表，期间的选中变化不写配置。
+    /// </summary>
+    private bool _rebuildingUiLanguages;
 
     public string SelectedCountry
     {
@@ -470,6 +506,9 @@ public partial class CommonSettingsPageViewModel : ViewModel
         _ = RefreshStorageSummaryAsync(force: false);
         // 插件可能刚在插件页启用或停用，按注册表的当前状态刷新 OCR 模型列表
         OcrModel.Refresh();
+        // 切换语言后去掉之前的“（不可用）”项
+        RebuildUiLanguageOptions();
+        RebuildGameLanguageOptions();
     }
 
     /// <summary>
@@ -522,104 +561,6 @@ public partial class CommonSettingsPageViewModel : ViewModel
         }
 
         Process.Start("explorer.exe", path);
-    }
-
-    /// <summary>
-    /// 写入日志文件的详细程度。改完要重启才生效——Serilog 的级别在启动时就定死了。
-    /// </summary>
-    public int SelectedLogFileLevel
-    {
-        get => (int)Config.CommonConfig.LogFileLevel;
-        set
-        {
-            if (value < 0 || value > 3 || SelectedLogFileLevel == value)
-            {
-                return;
-            }
-
-            Config.CommonConfig.LogFileLevel = (LogFileLevel)value;
-            OnPropertyChanged();
-        }
-    }
-
-    /// <summary>
-    /// 日志上传方式。0 关闭 / 1 仅手动 / 2 自动。
-    /// </summary>
-    public int SelectedLogUploadMode
-    {
-        get => (int)Config.CommonConfig.LogUploadMode;
-        set
-        {
-            if (value < 0 || value > 2 || SelectedLogUploadMode == value)
-            {
-                return;
-            }
-
-            Config.CommonConfig.LogUploadMode = (LogUploadMode)value;
-            OnPropertyChanged();
-        }
-    }
-
-    /// <summary>上传进行中：按钮置灰，避免连点发两份。</summary>
-    [ObservableProperty]
-    private bool _isLogUploading;
-
-    /// <summary>
-    /// 上传当前日志。走的是和自动模式同一条链路：脱敏 → 压缩 → 签名 → POST。
-    /// </summary>
-    [RelayCommand]
-    public async Task OnUploadLog()
-    {
-        if (IsLogUploading)
-        {
-            return;
-        }
-
-        if (Config.CommonConfig.LogUploadMode == LogUploadMode.Off)
-        {
-            _ = ThemedMessageBox.ShowAsync("日志上传已关闭。要上传请先把上面的选项改成「仅手动」或「自动」。",
-                "日志上传", MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Information);
-            return;
-        }
-
-        IsLogUploading = true;
-        try
-        {
-            var r = await LogUploader.UploadLatestAsync("manual");
-            if (r.Ok)
-            {
-                _ = ThemedMessageBox.ShowAsync(
-                    $"日志已上传（编号 {r.Id}）。服务端已经收到，不用再发一次。",
-                    "日志上传", MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Success);
-            }
-            else
-            {
-                _ = ThemedMessageBox.ShowAsync(
-                    $"没传上去：{r.Message}\n\n网络不通的时候不影响游戏和任务，日志仍在本地 log 目录里。",
-                    "日志上传", MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Warning);
-            }
-        }
-        finally
-        {
-            IsLogUploading = false;
-        }
-    }
-
-    /// <summary>
-    /// 手动生成一个诊断包并打开所在目录。出错时也会自动生成，这里给的是「现在就想发一个」的入口。
-    /// </summary>
-    [RelayCommand]
-    public void OnBuildDiagnostics()    {
-        var path = Core.Special.SpecialDiagnostics.Build("用户手动生成");
-        if (path == null)
-        {
-            _ = ThemedMessageBox.ShowAsync("诊断包生成失败，请直接打开日志目录手动反馈。", "生成诊断包",
-                MessageBoxButton.OK, ThemedMessageBox.MessageBoxIcon.Error);
-            return;
-        }
-
-        // 直接打开目录比弹一个「成功了」更省事：用户下一步就是把 zip 拖出去。
-        Core.Special.SpecialDiagnostics.OpenFolder();
     }
 
     [RelayCommand]
@@ -698,17 +639,118 @@ public partial class CommonSettingsPageViewModel : ViewModel
     //         new Uri("https://github.com/babalae/better-genshin-impact/actions/workflows/publish.yml"));
     // }
 
-    [RelayCommand]
-    private void OnUiLanguageSelectionChanged(object? value)
+    /// <summary>
+    /// 用户选择界面语言时保存配置并切换。重建列表时的选中变化、清空列表时的 null 不处理。
+    /// </summary>
+    partial void OnSelectedUiLanguageChanged(UiLanguageOption? value)
     {
-        if (value is not KeyValuePair<string, string> language)
+        if (_rebuildingUiLanguages || value is null
+            || string.Equals(value.Code, Config.OtherConfig.UiCultureInfoName, StringComparison.OrdinalIgnoreCase))
         {
             return;
         }
 
-        Config.OtherConfig.UiCultureInfoName = language.Key;
-        _i18nService.ChangeLanguage(language.Key);
+        Config.OtherConfig.UiCultureInfoName = value.Code;
+        _i18nService.ChangeLanguage(value.Code);
         _configService.Save();
+    }
+
+    /// <summary>
+    /// 按多语言服务的当前语言列表重建界面语言下拉框，并重新选中保存的语言。
+    /// 保存的语言不可用（提供它的插件未安装或未启用）时追加一项“（不可用）”，否则下拉框会显示空白。
+    /// </summary>
+    private void RebuildUiLanguageOptions()
+    {
+        _rebuildingUiLanguages = true;
+        try
+        {
+            var saved = Config.OtherConfig.UiCultureInfoName;
+            // 先清空选中项：选项是值相等的记录，重建后赋相同的值不会触发变化通知，下拉框会显示空白
+            SelectedUiLanguage = null;
+            UiLanguageOptions.Clear();
+            foreach (var language in _i18nService.Languages)
+            {
+                UiLanguageOptions.Add(language);
+            }
+
+            var selected = UiLanguageOptions.FirstOrDefault(l => string.Equals(l.Code, saved, StringComparison.OrdinalIgnoreCase));
+            if (selected is null && !string.IsNullOrWhiteSpace(saved))
+            {
+                selected = new UiLanguageOption(saved,
+                    string.Format(I18nService.Instance.Translate("{0}（不可用）"), GetNativeLanguageName(saved)));
+                UiLanguageOptions.Add(selected);
+            }
+
+            SelectedUiLanguage = selected;
+        }
+        finally
+        {
+            _rebuildingUiLanguages = false;
+        }
+    }
+
+    /// <summary>
+    /// 用户选择游戏语言时保存配置。重建列表时的选中变化、清空列表时的 null 不处理。
+    /// </summary>
+    partial void OnSelectedGameLanguageChanged(GameLanguageOption? value)
+    {
+        if (_rebuildingGameLanguages || value is null
+            || string.Equals(value.Code, Config.OtherConfig.GameCultureInfoName, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        Config.OtherConfig.GameCultureInfoName = value.Code;
+        _configService.Save();
+    }
+
+    /// <summary>
+    /// 按游戏文本服务的当前语言列表重建游戏语言下拉框，并重新选中保存的语言。
+    /// 保存的语言不可用（提供它的插件未安装或未启用，或是历史版本可选但没有游戏文本的语言）时追加一项“（不可用）”。
+    /// </summary>
+    private void RebuildGameLanguageOptions()
+    {
+        _rebuildingGameLanguages = true;
+        try
+        {
+            var saved = Config.OtherConfig.GameCultureInfoName;
+            // 先清空选中项：选项是值相等的记录，重建后赋相同的值不会触发变化通知，下拉框会显示空白
+            SelectedGameLanguage = null;
+            GameLanguageOptions.Clear();
+            foreach (var language in _gameTextService.Languages)
+            {
+                GameLanguageOptions.Add(language);
+            }
+
+            var selected = GameLanguageOptions.FirstOrDefault(l => string.Equals(l.Code, saved, StringComparison.OrdinalIgnoreCase));
+            if (selected is null && !string.IsNullOrWhiteSpace(saved))
+            {
+                selected = new GameLanguageOption(saved,
+                    string.Format(I18nService.Instance.Translate("{0}（不可用）"), GetNativeLanguageName(saved)));
+                GameLanguageOptions.Add(selected);
+            }
+
+            SelectedGameLanguage = selected;
+        }
+        finally
+        {
+            _rebuildingGameLanguages = false;
+        }
+    }
+
+    /// <summary>
+    /// 语言的自称，如 it → italiano；代码不是 .NET 认识的文化名时返回代码本身。
+    /// </summary>
+    private static string GetNativeLanguageName(string code)
+    {
+        try
+        {
+            return CultureInfo.GetCultureInfo(code).NativeName;
+        }
+        catch (CultureNotFoundException)
+        {
+            return code;
+        }
     }
 
     // 切换游戏语言不再重建 OCR：OCR 模型与游戏语言无关，由“OCR 配置”中的模型选择决定

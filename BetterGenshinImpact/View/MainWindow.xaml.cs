@@ -1,6 +1,5 @@
 using BetterGenshinImpact.Helpers.DpiAwareness;
-using BetterGenshinImpact.Service.Instance;
-using BetterGenshinImpact.Service.Interface;
+using BetterGenshinImpact.View.Controls;
 using BetterGenshinImpact.ViewModel;
 using Microsoft.Extensions.Logging;
 using System;
@@ -9,22 +8,19 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.Helpers.Ui;
-using BetterGenshinImpact.Service.Search;
 using BetterGenshinImpact.View.Behavior;
-using BetterGenshinImpact.View.Pages;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions;
 using Wpf.Ui.Controls;
-using Wpf.Ui.Tray.Controls;
 
 namespace BetterGenshinImpact.View;
 
 public partial class MainWindow : FluentWindow, INavigationWindow
 {
     private readonly ILogger<MainWindow> _logger = App.GetLogger<MainWindow>();
+    private TrayIcon? _trayIcon;
     private ScrollViewer? _currentScrollViewer;
     private double _targetOffset;
     private double _inputVelocity;
@@ -56,64 +52,8 @@ public partial class MainWindow : FluentWindow, INavigationWindow
         Application.Current.MainWindow = this;
 
         AddHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler(OnGlobalPreviewMouseWheel), true);
-        // Ctrl+K 直接聚焦顶栏搜索框，和浏览器/编辑器里的习惯一致
-        PreviewKeyDown += OnWindowPreviewKeyDown;
 
         Loaded += (s, e) => Activate();
-    }
-
-    /// <summary>
-    /// Ctrl+K 聚焦搜索框；Esc 在搜索框里时清空。
-    /// </summary>
-    private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
-    {
-        if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
-        {
-            GlobalSearchBox.Focus();
-            GlobalSearchBox.SelectAll();
-            e.Handled = true;
-        }
-    }
-
-    /// <summary>
-    /// 顶栏搜索框：回车提交，Esc 清空。
-    /// </summary>
-    private void OnGlobalSearchKeyDown(object sender, KeyEventArgs e)
-    {
-        switch (e.Key)
-        {
-            case Key.Enter:
-                SubmitGlobalSearch();
-                e.Handled = true;
-                break;
-            case Key.Escape:
-                GlobalSearchBox.Text = string.Empty;
-                e.Handled = true;
-                break;
-        }
-    }
-
-    /// <summary>
-    /// 把关键词交给搜索结果页，再导航过去。
-    /// <para>
-    /// 导航只接受页面类型，带不了参数，关键词走 <see cref="Service.Search.GlobalSearchState"/>。
-    /// </para>
-    /// </summary>
-    private void SubmitGlobalSearch()
-    {
-        var keyword = GlobalSearchBox.Text?.Trim();
-        if (string.IsNullOrEmpty(keyword))
-        {
-            return;
-        }
-
-        var state = App.GetService<GlobalSearchState>();
-        if (state != null)
-        {
-            state.Query = keyword;
-        }
-
-        Navigate(typeof(SearchResultPage));
     }
 
     private void OnGlobalPreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -298,64 +238,43 @@ public partial class MainWindow : FluentWindow, INavigationWindow
     {
         base.OnSourceInitialized(e);
         WindowHelper.TryApplySystemBackdrop(this);
+        _trayIcon = new TrayIcon((ContextMenu)FindResource("TrayMenu"), OnNotifyIconLeftDoubleClick,
+            ViewModel.InstanceIconSource, ViewModel.TrayTooltipText);
+        ViewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
     /// <summary>
-    /// 是否已经请求真正退出。退出流程会先置位，再关闭窗口，避免被保活逻辑拦下来。
+    /// 托盘图标和提示文本随实例身份（是否显示角标、已连接子实例）变化。
     /// </summary>
-    private static bool _exitRequested;
-
-    /// <summary>
-    /// 声明本次关闭是退出而不是最小化，供退出流程调用。
-    /// </summary>
-    public static void RequestExit() => _exitRequested = true;
-
-    /// <summary>
-    /// 关闭窗口时按配置留在托盘：窗口隐藏、进程存活，QQ 机器人与任务调度都不中断。
-    /// </summary>
-    protected override void OnClosing(CancelEventArgs e)
+    private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (!_exitRequested && ShouldKeepAliveInTray())
+        if (e.PropertyName is not (null or "" or nameof(MainWindowViewModel.InstanceIconSource) or nameof(MainWindowViewModel.TrayTooltipText)))
         {
-            e.Cancel = true;
-            Hide();
-            _logger.LogInformation("主窗体已隐藏到托盘，后台保活中");
             return;
         }
 
-        base.OnClosing(e);
-    }
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.InvokeAsync(() => OnViewModelPropertyChanged(sender, e));
+            return;
+        }
 
-    /// <summary>
-    /// 判断是否应当保活：主实例 + 已开启后台保活。
-    /// <para>
-    /// 分身实例不常驻，否则关掉主程序后托盘里会残留多个进程，还各自抢着连 QQ 网关。
-    /// </para>
-    /// </summary>
-    private static bool ShouldKeepAliveInTray()
-    {
-        try
-        {
-            var keepAlive = App.GetService<IConfigService>()?.Get().RemoteTaskConfig.KeepAliveInTray == true;
-            return keepAlive && App.GetService<InstanceService>()?.Context.IsRoot == true;
-        }
-        catch (Exception)
-        {
-            // 启动早期服务还没就绪时按不保活处理，行为与旧版本一致。
-            return false;
-        }
+        _trayIcon?.Update(ViewModel.InstanceIconSource, ViewModel.TrayTooltipText);
     }
 
     protected override void OnClosed(EventArgs e)
     {
         _logger.LogDebug("主窗体退出");
+        ViewModel.PropertyChanged -= OnViewModelPropertyChanged;
+        _trayIcon?.Dispose();
+        _trayIcon = null;
         CompositionTarget.Rendering -= OnCompositionTargetRendering;
         RemoveHandler(PreviewMouseWheelEvent, new MouseWheelEventHandler(OnGlobalPreviewMouseWheel));
         base.OnClosed(e);
         _ = App.GetService<NotifyIconViewModel>()?.ExitAsync();
     }
 
-    private void OnNotifyIconLeftDoubleClick(NotifyIcon sender, RoutedEventArgs e)
+    private void OnNotifyIconLeftDoubleClick()
     {
         App.GetService<NotifyIconViewModel>()?.ShowOrHide();
     }

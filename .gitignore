@@ -17,8 +17,6 @@ Build/*
 !Build/Scripts/
 Build/Scripts/*
 !Build/Scripts/i18n-sync.ps1
-# 特别版的 Kachina 打包配置，流水线要读，必须进版本库
-!Build/kachina.special.config.json
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/

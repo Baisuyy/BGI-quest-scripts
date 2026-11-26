@@ -200,23 +200,11 @@ public partial class PathExecutor
         await _runtime.Delay(100, ct);
         Navigation.WarmUp(task.Info.MapMatchMethod); // 提前加载地图特征点
 
-        // 断点续跑：让「跑到第 12 条路线时被停掉」不用从第 1 条重来。
-        // 段级跳过永远安全；点级续跑要确认人还站在断点附近，否则会跳过段首那次传送。
-        var (resumeSegment, resumePoint) = await ResolveResumeAsync(task, waypointsList);
-        if (resumeSegment > 0 || resumePoint > 0)
+        foreach (var waypoints in waypointsList) // 按传送点分割的路径
         {
-            Logger.LogInformation("从上次断点继续：跳过 {Done} 段，第 {Seg} 段从第 {Point} 点开始",
-                resumeSegment, resumeSegment + 1, resumePoint + 1);
-        }
-
-        for (var segIndex = resumeSegment; segIndex < waypointsList.Count; segIndex++) // 按传送点分割的路径
-        {
-            var waypoints = waypointsList[segIndex];
             var segmentCompleted = false;
             string? segmentError = null;
-            CurWaypoints = (segIndex, waypoints);
-            // 只有续跑的第一段才可能从句中点开始，后面的段都从头走。
-            var startPoint = segIndex == resumeSegment ? resumePoint : 0;
+            CurWaypoints = (waypointsList.FindIndex(wps => wps == waypoints), waypoints);
             for (var i = 0; i < RetryTimes; i++)
             {
                 try
@@ -229,12 +217,9 @@ public partial class PathExecutor
                         Navigation.SetPrevPosition((float)waypoints[0].X, (float)waypoints[0].Y);
                     }
 
-                    for (var pointIndex = startPoint; pointIndex < waypoints.Count; pointIndex++) // 一条路径
+                    foreach (var waypoint in waypoints) // 一条路径
                     {
-                        var waypoint = waypoints[pointIndex];
-                        // 先记账再走：程序被强杀时，最后落盘的位置就是该接着走的位置。
-                        PathProgressStore.Note(task, segIndex, pointIndex, waypointsList.Count);
-                        CurWaypoint = (pointIndex, waypoint);
+                        CurWaypoint = (waypoints.FindIndex(wps => wps == waypoint), waypoint);
                         TryCloseSkipOtherOperations();
                         await RecoverWhenLowHp(waypoint); // 低血量恢复
 
@@ -359,85 +344,8 @@ public partial class PathExecutor
                 firstFailure ??= segmentError ?? "重试耗尽，当前路径段未完整执行。";
         }
         var isSuccess = allSegmentsCompleted && waypointsList.Count > 0 && !ct.IsCancellationRequested;
-        if (isSuccess)
-        {
-            // 整条走完才清账；中途停下的进度要留着下次接着跑。
-            PathProgressStore.MarkCompleted(task, waypointsList.Count);
-        }
-
         return new PathingResult(isSuccess, _successFightCount, isSuccess ? null
             : firstFailure ?? (ct.IsCancellationRequested ? "地图追踪被取消。" : "地图追踪路线未完整执行。"));
-    }
-
-    /// <summary>判定「人还站在断点附近」的最大距离（地图图像坐标，约等于米）。</summary>
-    private const double ResumeSnapDistance = 30;
-
-    /// <summary>
-    /// 断点续跑的落点判定。
-    /// <para>
-    /// 段级跳过不需要额外条件：段首一般就是传送点，重新传送一次位置是确定的。
-    /// 点级续跑只在「当前位置离断点足够近」时才做——离得远说明人物已经被传送、
-    /// 或者这是另一次独立运行，硬跳过去会把人留在半路上。
-    /// </para>
-    /// </summary>
-    private async Task<(int Segment, int Point)> ResolveResumeAsync(PathingTask task,
-        List<List<WaypointForTrack>> waypointsList)
-    {
-        if (!_config.CommonConfig.PathingResumeEnabled)
-        {
-            return (0, 0);
-        }
-
-        var record = PathProgressStore.GetResumable(task);
-        if (record == null)
-        {
-            return (0, 0);
-        }
-
-        var segment = Math.Clamp(record.Segment, 0, Math.Max(0, waypointsList.Count - 1));
-        var points = waypointsList[segment];
-        if (points.Count == 0)
-        {
-            return (0, 0);
-        }
-
-        var point = Math.Clamp(record.Point, 0, points.Count - 1);
-
-        if (segment <= 0 && point <= 0)
-        {
-            return (0, 0);
-        }
-
-        // 段首一般就是传送点。不到位就重跑整段，代价只是几十秒，比落在半路强。
-        if (point <= 0)
-        {
-            return (segment, 0);
-        }
-
-        try
-        {
-            using var screen = _runtime.CaptureToRectArea();
-            var current = Navigation.GetPosition(screen, points[point].MapName, points[point].MapMatchMethod);
-            if (current is { X: 0, Y: 0 })
-            {
-                return (segment, 0);
-            }
-
-            if (Navigation.GetDistance(points[point], current) <= ResumeSnapDistance)
-            {
-                return (segment, point);
-            }
-
-            Logger.LogWarning("上次停在第 {Seg} 段第 {Point} 点，但人物已不在附近（偏差 {Distance:F0}），改为从该段段首重跑",
-                segment + 1, point + 1, Navigation.GetDistance(points[point], current));
-        }
-        catch (Exception e)
-        {
-            Logger.LogDebug(e, "续跑时读取当前位置失败，退回段首");
-        }
-
-        await Task.CompletedTask;
-        return (segment, 0);
     }
 
     private bool IsTargetPoint(WaypointForTrack waypoint)
@@ -467,8 +375,15 @@ public partial class PathExecutor
         // 切换队伍前判断是否全队死亡 // 可能队伍切换失败导致的死亡
         if (Bv.ClickIfInReviveModal(ra))
         {
-            await Bv.WaitForMainUi(_runtime, ct); // 等待主界面加载完成
-            Logger.LogInformation("复苏完成");
+            if (await Bv.WaitForMainUi(_runtime, ct))
+            {
+                Logger.LogInformation("复苏完成");
+            }
+            else
+            {
+                Logger.LogWarning("复苏未生效，界面未回到主界面");
+            }
+
             await _runtime.Delay(4000, ct);
             // 血量肯定不满，直接去七天神像回血
             await TpStatueOfTheSeven();
@@ -792,8 +707,15 @@ public partial class PathExecutor
         }
         else if (Bv.ClickIfInReviveModal(region))
         {
-            await Bv.WaitForMainUi(_runtime, ct); // 等待主界面加载完成
-            Logger.LogInformation("复苏完成");
+            if (await Bv.WaitForMainUi(_runtime, ct))
+            {
+                Logger.LogInformation("复苏完成");
+            }
+            else
+            {
+                Logger.LogWarning("复苏未生效，界面未回到主界面");
+            }
+
             await _runtime.Delay(4000, ct);
             // 血量肯定不满，直接去七天神像回血
             await TpStatueOfTheSeven();
@@ -921,7 +843,9 @@ public partial class PathExecutor
         // 按下w，一直走
         InputHub.Foreground.SimulateAction(GIActions.MoveForward, KeyType.KeyDown);
         // 赶路帧间隔：始终使用配置值（5-150 钳制），不依赖是否配置赶路角色（空选也可用）
-        var hurryFrameInterval = Math.Clamp(PartyConfig.HurryOnFrameInterval, 5, 150);
+        // 选瓦雷莎时钳制上限 50ms：夜魂疾冲的 E 窗口检测依赖高频帧，间隔再大也不生效
+        var hurryFrameIntervalUpper = _hurryOnAvatar == "瓦雷莎" ? 50 : 150;
+        var hurryFrameInterval = Math.Clamp(PartyConfig.HurryOnFrameInterval, 5, hurryFrameIntervalUpper);
         while (!ct.IsCancellationRequested)
         {
             if (!InputHub.Foreground.IsKeyDown(GIActions.MoveForward.ToActionKey().ToVK()))

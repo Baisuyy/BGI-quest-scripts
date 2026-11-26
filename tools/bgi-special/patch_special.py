@@ -14,12 +14,15 @@
 8. App.xaml.cs                   —— 注册「AI 助手」页（模型配置 + 本地助手）
 9. MainWindow.xaml               —— 侧边栏加「AI 助手」入口
 10. ApplicationHostService       —— 启动时注册助手小面板的全局快捷键
+11. BetterGenshinImpact.csproj   —— 补回特别版文件依赖、上游没有的 NuGet 包
+12. DownloadCategory.cs          —— 补回特别版增量包用的下载分类 SpecialUpdate
 
 每一处都先判断是否已存在（幂等），锚点找不到就返回非 0，由 workflow 报警并开 issue。
 新增文件（Core/Ai 等）不在这里处理，由 sync_source.py 的 KEEP 清单保留。
 """
 
 import pathlib
+import re
 import sys
 
 ROOT = pathlib.Path.cwd()
@@ -32,6 +35,95 @@ SETTINGS_VM = "BetterGenshinImpact/ViewModel/Pages/TaskSettingsPageViewModel.cs"
 UPDATE_SERVICE = "BetterGenshinImpact/Service/UpdateService.cs"
 MAIN_WINDOW = "BetterGenshinImpact/View/MainWindow.xaml"
 APP_HOST = "BetterGenshinImpact/Service/ApplicationHostService.cs"
+CSPROJ = "BetterGenshinImpact/BetterGenshinImpact.csproj"
+DOWNLOAD_CATEGORY = "BetterGenshinImpact/Infrastructure/Network/Download/DownloadCategory.cs"
+
+# ---------------------------------------------------------------- 11. NuGet 包
+#
+# csproj 跟随上游整体覆盖，特别版新增文件依赖、上游没有的包会一起被冲掉，
+# 表现为编译期 CS0246（例如 MysQrCode 找不到 QRCoder）。这里按名字补齐，
+# 已存在就跳过；版本只在第一次引入时锁定，之后要升级直接改这里。
+EXTRA_PACKAGES = (
+    ("Microsoft.Extensions.Localization", "10.0.12"),
+    ("QRCoder", "1.6.0"),
+    ("WPF-UI.Tray", "4.3.0"),
+)
+
+
+def ensure_packages() -> None:
+    path = ROOT / CSPROJ
+    if not path.is_file():
+        print(f"[x] 找不到 {CSPROJ}", file=sys.stderr)
+        raise SystemExit(2)
+
+    text = path.read_text(encoding="utf-8")
+    missing = [(name, version) for name, version in EXTRA_PACKAGES
+               if f'Include="{name}"' not in text]
+    if not missing:
+        print("[=] NuGet 包：齐全，跳过")
+        return
+
+    # 插在最后一条 PackageReference 之后，缩进跟随该行
+    last = None
+    for last in re.finditer(r"[ \t]*<PackageReference [^>]*/>[ \t]*\r?\n", text):
+        pass
+    if last is None:
+        print(f"[x] {CSPROJ} 里找不到 PackageReference，上游结构可能已改动", file=sys.stderr)
+        raise SystemExit(3)
+
+    indent = re.match(r"[ \t]*", last.group(0)).group(0)
+    block = "".join(f'{indent}<PackageReference Include="{name}" Version="{version}" />\n'
+                    for name, version in missing)
+    path.write_text(text[: last.end()] + block + text[last.end():], encoding="utf-8")
+    print(f"[+] 补回 NuGet 包：{', '.join(name for name, _ in missing)}")
+
+
+# ---------------------------------------------------------------- 12. 下载分类
+#
+# 上游把 DownloadCategories 从枚举改成了 record 列表，特别版增量包用的
+# SpecialUpdate 不在里面，SpecialUpdater 会以 CS0117 编译失败。
+CATEGORY_BLOCK = '''    /// <summary>
+    /// 特别版增量包，安装完成后自动删除，留下的通常是未完成或校验失败的下载
+    /// </summary>
+    public static readonly DownloadCategory SpecialUpdate = new("special-update", "特别版增量包",
+        "特别版更新的增量包，安装完成后自动删除");
+
+'''
+
+
+def patch_download_category() -> None:
+    path = ROOT / DOWNLOAD_CATEGORY
+    if not path.is_file():
+        print(f"[x] 找不到 {DOWNLOAD_CATEGORY}", file=sys.stderr)
+        raise SystemExit(2)
+
+    text = path.read_text(encoding="utf-8")
+    if "SpecialUpdate" in text:
+        print("[=] 特别版下载分类：已存在，跳过")
+        return
+
+    all_match = re.search(
+        r"(public static IReadOnlyList<DownloadCategory> All \{ get; \} = \[)([^\]]*)(\];)", text)
+    if all_match is None:
+        print(f"[x] {DOWNLOAD_CATEGORY} 里找不到 All 列表，上游结构可能已改动", file=sys.stderr)
+        raise SystemExit(3)
+
+    items = all_match.group(2).strip()
+    if not items.endswith(","):
+        items += ","
+
+    comment = text.rfind("    /// <summary>", 0, all_match.start())
+    if comment == -1:
+        print(f"[x] {DOWNLOAD_CATEGORY} 里找不到 All 的注释块", file=sys.stderr)
+        raise SystemExit(3)
+
+    text = (text[:comment]
+            + CATEGORY_BLOCK
+            + text[comment:all_match.start()]
+            + all_match.group(1) + f"{items} SpecialUpdate" + all_match.group(3)
+            + text[all_match.end():])
+    path.write_text(text, encoding="utf-8")
+    print("[+] 特别版下载分类 SpecialUpdate")
 
 # ---------------------------------------------------------------- 1. 脚本宿主
 
@@ -232,6 +324,8 @@ def patch_page() -> bool:
 
 
 def main() -> int:
+    ensure_packages()
+    patch_download_category()
     patch(ENGINE_EXTEND, 'AddHostObject("ocr"', HOST_ANCHOR,
           HOST_ANCHOR + HOST_BLOCK, "脚本宿主 ocr/quest/ai")
     patch(APP, "services.AddSingleton<AiKernel>();", APP_ANCHOR,

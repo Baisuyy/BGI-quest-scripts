@@ -177,12 +177,6 @@ public abstract class StateMachineBase<TState, TContext> where TState : struct, 
     protected abstract ILogger Logger { get; }
 
     /// <summary>
-    /// 前几次重试按 INFO 记录：交互被动画吃掉、点歪一格都会走一次重试，
-    /// 而且多半一次就恢复。把它们记成 WRN 会让「最终成功」的任务看起来像出了故障。
-    /// </summary>
-    private const int QuietRetries = 2;
-
-    /// <summary>
     /// 状态机所属的运行环境，状态检测截图与循环等待都只使用它
     /// </summary>
     private readonly GameRuntime _runtime;
@@ -655,17 +649,8 @@ public abstract class StateMachineBase<TState, TContext> where TState : struct, 
                 throw new InvalidOperationException($"状态 {CurrentState} 重试超时达到上限 {retryPolicy.value} ms");
             }
 
-            if (CurrentStateRetryCount <= QuietRetries)
-            {
-                Logger.LogInformation("状态 {State} {Reason}，在重试超时窗口内继续重试（第 {Count} 次，已用 {Elapsed}/{Max} ms）",
-                    CurrentState, reason, CurrentStateRetryCount, elapsedMilliseconds, retryPolicy.value);
-            }
-            else
-            {
-                Logger.LogWarning("状态 {State} {Reason}，在重试超时窗口内继续重试（第 {Count} 次，已用 {Elapsed}/{Max} ms）",
-                    CurrentState, reason, CurrentStateRetryCount, elapsedMilliseconds, retryPolicy.value);
-            }
-
+            Logger.LogWarning("状态 {State} {Reason}，将在重试超时窗口内继续重试（第 {Count} 次，已用 {Elapsed}/{Max} ms）",
+                CurrentState, reason, CurrentStateRetryCount, elapsedMilliseconds, retryPolicy.value);
             return;
         }
 
@@ -676,19 +661,8 @@ public abstract class StateMachineBase<TState, TContext> where TState : struct, 
             throw new InvalidOperationException($"状态 {CurrentState} 重试次数达到上限 {retryPolicy.value}");
         }
 
-        // 重试是设计好的自愈手段，前两次几乎总能过去（点歪一下、动画吃掉一次交互）。
-        // 记 WRN 会让「最终成功」的任务在日志里看着像出了事，也会把真正的故障埋掉；
-        // 从第 3 次起才说明它确实在同一个状态上反复卡住。
-        if (CurrentStateRetryCount <= QuietRetries)
-        {
-            Logger.LogInformation("状态 {State} {Reason}，重试当前状态（第 {Count}/{Max} 次）",
-                CurrentState, reason, CurrentStateRetryCount, retryPolicy.value);
-        }
-        else
-        {
-            Logger.LogWarning("状态 {State} {Reason}，将重试当前状态（第 {Count}/{Max} 次）",
-                CurrentState, reason, CurrentStateRetryCount, retryPolicy.value);
-        }
+        Logger.LogWarning("状态 {State} {Reason}，将重试当前状态（第 {Count}/{Max} 次）",
+            CurrentState, reason, CurrentStateRetryCount, retryPolicy.value);
     }
 
     #endregion
@@ -982,8 +956,7 @@ public abstract class StateMachineBase<TState, TContext> where TState : struct, 
 
         if (sourceVisibleStopwatch.ElapsedMilliseconds >= timeout)
         {
-            // 只说明「为什么会出现下面那条重试」，本身不是故障；真正的可见性由 RecordStateRetry 分级承担。
-            Logger.LogDebug("源状态 {State} 持续可见超过 {Timeout} ms，触发当前状态重试，期望任一：{Expected}",
+            Logger.LogWarning("源状态 {State} 持续可见超过 {Timeout} ms，触发当前状态重试，期望任一：{Expected}",
                 sourceState, timeout, string.Join(",", transitionTargetStates));
             return new StateTransitionWaitResult(StateTransitionWaitStatus.RetryCurrentState);
         }
