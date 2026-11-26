@@ -78,8 +78,10 @@ internal static partial class PluginCompatibility
             return $"插件基于旧版本 BetterGI（{manifest.SdkVersion}）编译，请更新插件";
         }
 
-        // 开发版等无法解析版本号的主程序跳过以下比较
-        if (!TryParse(Global.Version, out var host))
+        // 开发版等无法解析版本号的主程序跳过以下比较。
+        // 特别版的版本号带 -special 后缀，SemVer 里它低于同版本号的正式版，
+        // 不剥掉的话用官方 SDK（sdk_version 0.67.0）编译的插件会被判成「需要更高版本」而装不上。
+        if (!TryParse(Global.StripSpecialSuffix(Global.Version), out var host))
         {
             return null;
         }

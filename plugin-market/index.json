@@ -4,7 +4,7 @@
   "plugins": [
     // 收录插件时把下面这段取消注释、填好再提交。字段说明见同目录 README.md。
     // {
-    //   "id": "ppocr-v5",
+    //   "id": "ppocr_v5",
     //   "name": "PaddleOCR V5 中文",
     //   "version": "1.0.0",
     //   "description": "PP-OCRv5 检测与中文识别模型，也能识别英文和日文。",
@@ -12,7 +12,7 @@
     //   "homepage": "https://github.com/xxx/yyy",
     //   "categories": ["OCR 模型"],
     //   "tags": ["ocr", "识别", "文字"],
-    //   "download_url": "https://github.com/xxx/yyy/releases/download/v1.0.0/ppocr-v5-1.0.0.zip",
+    //   "download_url": "https://github.com/xxx/yyy/releases/download/v1.0.0/ppocr_v5-1.0.0.zip",
     //   "sha256": "把安装包的 sha256sum 结果填在这里",
     //   "size": 5242880,
     //   "min_host_version": "0.67.0",

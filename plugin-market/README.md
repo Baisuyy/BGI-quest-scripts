@@ -28,7 +28,7 @@ https://raw.githubusercontent.com/Baisuyy/BGI-quest-scripts/bgi-special/plugin-m
 
 | 字段 | 必填 | 说明 |
 | --- | --- | --- |
-| `id` | 是 | 插件标识，和 `plugin.json` 里的 `id` 一致；已安装判定按它对 |
+| `id` | 是 | 插件标识，和 `plugin.json` 里的 `id` 一致；已安装判定按它对。只能用小写字母、数字、下划线 |
 | `name` | 是 | 显示名称 |
 | `version` | 是 | 最新版本，Semver。已装版本更低时显示「更新」 |
 | `description` | 否 | 简介，卡片上最多显示两行 |
