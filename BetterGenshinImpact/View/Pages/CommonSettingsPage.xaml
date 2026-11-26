@@ -10,6 +10,7 @@
       xmlns:media="clr-namespace:System.Windows.Media;assembly=PresentationCore"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:i18n="clr-namespace:BetterGenshinImpact.Service.I18n"
+      xmlns:controls="clr-namespace:BetterGenshinImpact.View.Controls"
       xmlns:pageView="clr-namespace:BetterGenshinImpact.View.Pages.View"
       Title="CommonSettingsPage"
       d:DataContext="{d:DesignInstance Type=pages:CommonSettingsPageViewModel}"
@@ -248,6 +249,8 @@
                 </Grid>
             </StackPanel>
         </ui:CardExpander>
+
+        <controls:SpecialSettingsCards />
 
         <!-- 网络与代理：卡片标题右侧显示当前模式，内容由 NetworkSettingsView 提供 -->
         <ui:CardExpander Margin="0,0,0,12"

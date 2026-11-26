@@ -576,6 +576,170 @@ def patch_plugin_market() -> None:
           "注册插件市场")
 
 
+# ---------------------------------------------------------------- 16. 特别版设置卡片
+#
+# 日志（落盘级别/诊断包/上传）与远程任务（QQ 机器人、米游社绑定）这两张卡片放在
+# View/Controls/SpecialSettingsCards.xaml 里，页面只需要一行引用。
+# 上游每次同步都会覆盖 CommonSettingsPage.xaml，所以这一行由本脚本补回。
+SETTINGS_PAGE_COMMON = "BetterGenshinImpact/View/Pages/CommonSettingsPage.xaml"
+CARD_CONTROLS = "BetterGenshinImpact/View/Controls/SpecialSettingsCards.xaml"
+
+
+def patch_special_settings_cards() -> None:
+    path = ROOT / SETTINGS_PAGE_COMMON
+    if not path.is_file():
+        print(f"[x] 找不到 {SETTINGS_PAGE_COMMON}", file=sys.stderr)
+        raise SystemExit(2)
+
+    text = path.read_text(encoding="utf-8")
+    if "<controls:SpecialSettingsCards" not in text:
+        anchor = "        <!-- 网络与代理：卡片标题右侧显示当前模式，内容由 NetworkSettingsView 提供 -->"
+        if anchor not in text:
+            print("[x] 设置页：没有找到「网络与代理」卡片锚点，上游结构可能已改动", file=sys.stderr)
+            raise SystemExit(3)
+        text = text.replace(anchor, "        <controls:SpecialSettingsCards />\n\n" + anchor, 1)
+        print("[+] 设置页插入特别版卡片")
+
+    if 'xmlns:controls="clr-namespace:BetterGenshinImpact.View.Controls"' not in text:
+        ua = '      xmlns:pageView="clr-namespace:BetterGenshinImpact.View.Pages.View"'
+        if ua not in text:
+            print("[x] 设置页：没有找到 xmlns 锚点", file=sys.stderr)
+            raise SystemExit(3)
+        text = text.replace(
+            ua, '      xmlns:controls="clr-namespace:BetterGenshinImpact.View.Controls"\n' + ua, 1)
+        print("[+] 设置页补充 controls 命名空间")
+
+    path.write_text(text, encoding="utf-8")
+
+
+# ---------------------------------------------------------------- 17. 远程任务与日志接线
+#
+# 远程任务（QQ 机器人）、米游社扫码、日志增强都注册在 App.xaml.cs 里，是上游文件。
+REMOTE_TASK_ANCHOR = """                services.AddSingleton<NotificationService>();
+                services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
+"""
+REMOTE_TASK_BLOCK = """                // 远程任务：QQ 机器人把聊天指令转成独立任务并回传截图，只在主实例启动
+                services.AddSingleton<AiTraceStore>();
+                services.AddSingleton<MysDailyNoteClient>(sp => new MysDailyNoteClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(),
+                    sp.GetRequiredService<ILogger<MysDailyNoteClient>>()));
+                services.AddSingleton<GenshinWikiClient>(sp => new GenshinWikiClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
+                    sp.GetRequiredService<ILogger<GenshinWikiClient>>()));
+                // 米游社扫码绑定：网页端扫码通道拿登录态，不需要用户抄 Cookie
+                services.AddSingleton<MysPassportClient>(sp => new MysPassportClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
+                    sp.GetRequiredService<ILogger<MysPassportClient>>()));
+                services.AddSingleton<MysBindingService>();
+                services.AddSingleton<GameOps>();
+                services.AddSingleton<AgentTasks>();
+                services.AddSingleton<RemoteTaskPlanRunner>();
+                services.AddSingleton<RemoteTaskCommandHandler>();
+                services.AddSingleton<RemoteTaskIntentResolver>();
+                services.AddSingleton<QqBotService>();
+                services.AddHostedService(sp => sp.GetRequiredService<QqBotService>());
+                // 定时任务：按时间点或树脂阈值自动触发，与手动点开始同一条执行路径
+                services.AddSingleton<RemoteScheduleService>();
+                services.AddHostedService(sp => sp.GetRequiredService<RemoteScheduleService>());
+"""
+
+FILE_SINK_PATTERN = re.compile(
+    r"[ \t]*\.WriteTo\.File\(logFile,.*?retainedFileTimeLimit: TimeSpan\.FromDays\(21\)\)\)",
+    re.S)
+
+FILE_SINK_BLOCK = """                        .WriteTo.Sink(new RepeatSuppressorSink(
+                            new LoggerConfiguration()
+                                .WriteTo.File(
+                                    // 一行一条：时间 / 级别 / 实例 / 来源 → 消息；异常另起，方便按行 grep。
+                                    // 行首带日期：按天滚动的文件如果只有时分秒，跨午夜后既排不出先后，
+                                    // 也没法把「任务开始后发生过什么」算准。
+                                    // 异常栈由格式器去重：同一条错误反复重试时只展开一次，见 ExceptionDedupTextFormatter。
+                                    new ExceptionDedupTextFormatter(
+                                        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext} | {Message:lj}{NewLine}"),
+                                    logFile,
+                                    rollingInterval: RollingInterval.Day,
+                                    // 一天几百万行的极端情况不至于长成一个几百 MB 打不开的文件
+                                    fileSizeLimitBytes: 64L * 1024 * 1024,
+                                    rollOnFileSizeLimit: true,
+                                    shared: true,
+                                    retainedFileCountLimit: 31,
+                                    retainedFileTimeLimit: TimeSpan.FromDays(21))
+                                .CreateLogger()),
+                            // 落盘级别可配：长时间只关心有没有报错的人可以设成 Error，
+                            // 一天几百万行 Debug 既占地方又让 grep 变慢。
+                            SpecialLogging.FileLogLevel(all)))"""
+
+
+def patch_remote_task_and_logging() -> None:
+    path = ROOT / APP
+    if not path.is_file():
+        print(f"[x] 找不到 {APP}", file=sys.stderr)
+        raise SystemExit(2)
+
+    text = path.read_text(encoding="utf-8")
+
+    # 1) 远程任务 + 米游社：整块注册
+    if "AddSingleton<QqBotService>" not in text:
+        if REMOTE_TASK_ANCHOR not in text:
+            print("[x] App：没有找到 NotificationService 注册锚点", file=sys.stderr)
+            raise SystemExit(3)
+        text = text.replace(REMOTE_TASK_ANCHOR, REMOTE_TASK_ANCHOR + REMOTE_TASK_BLOCK, 1)
+        print("[+] 注册远程任务与米游社服务")
+
+    # 2) 日志：归档旧文件
+    if "SpecialLogging.ArchiveLegacyLog" not in text:
+        anchor = '                var logFile = Path.Combine(logFolder, "better-genshin-impact.log");\n'
+        if anchor not in text:
+            print("[x] App：没有找到 logFile 锚点", file=sys.stderr)
+            raise SystemExit(3)
+        text = text.replace(anchor, anchor +
+                            "                // 旧版本行首只有时分秒，和带日期的新格式混在一个文件里读不出先后\n"
+                            "                SpecialLogging.ArchiveLegacyLog(logFolder);\n", 1)
+        print("[+] 日志归档调用")
+
+    # 3) 日志：文件 sink 换成「抑制重复 + 异常去重 + 可配级别」
+    if "RepeatSuppressorSink" not in text:
+        replaced, count = FILE_SINK_PATTERN.subn(FILE_SINK_BLOCK, text)
+        if count:
+            text = replaced
+            print("[+] 日志文件 sink 增强")
+        else:
+            # 不中断同步：日志格式退化不影响功能，但要让人看见
+            print("[!] App：日志文件 sink 锚点没匹配上，落盘格式退回上游默认（去重与级别配置失效）",
+                  file=sys.stderr)
+
+    # 4) 出错自动攒诊断包
+    if "ErrorDiagnosticsSink" not in text:
+        anchor = """                loggerConfiguration.WriteTo.Sink(
+                    new ExternalLogSink(externalLogHub, instanceIdentity),
+                    LogEventLevel.Debug);
+"""
+        if anchor in text:
+            text = text.replace(
+                anchor, anchor +
+                "                // 出错就自动攒一个诊断包：日志尾部 + 环境 + 脱敏配置，反馈时直接拖出去。\n"
+                "                loggerConfiguration.WriteTo.Sink(new ErrorDiagnosticsSink(), LogEventLevel.Error);\n", 1)
+            print("[+] 诊断包 sink")
+        else:
+            print("[!] App：没有找到 ExternalLogSink 锚点，诊断包 sink 未接入", file=sys.stderr)
+
+    # 5) using
+    for need, after in (
+        ("using BetterGenshinImpact.Core.Special;", "using BetterGenshinImpact.Core.Script;"),
+        ("using BetterGenshinImpact.Core.Mys;", "using BetterGenshinImpact.Core.Config;"),
+        ("using BetterGenshinImpact.Service.RemoteTask;", "using BetterGenshinImpact.Service.Notification;"),
+    ):
+        if need in text:
+            continue
+        if after not in text:
+            print(f"[!] App：缺少 using 锚点 {after}，{need} 未补", file=sys.stderr)
+            continue
+        text = text.replace(after, after + "\n" + need, 1)
+        print(f"[+] {need}")
+
+    path.write_text(text, encoding="utf-8")
+
+
 def main() -> int:
     ensure_packages()
     patch_download_category()
@@ -599,6 +763,8 @@ def main() -> int:
     patch_global_search()
     patch_version_requirement()
     patch_plugin_market()
+    patch_special_settings_cards()
+    patch_remote_task_and_logging()
 
     # EngineExtend / App / VM 需要引用 Core.Ai 里的 AiKernel
     for rel, anchor, line in (

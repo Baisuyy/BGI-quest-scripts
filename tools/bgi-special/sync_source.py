@@ -49,6 +49,10 @@ KEEP = (
     "BetterGenshinImpact/GameTask/AutoPathing/PathExecutor.Ai.cs",
     "BetterGenshinImpact/View/Controls/AiSettingsCard.xaml",
     "BetterGenshinImpact/View/Controls/AiSettingsCard.xaml.cs",
+    # 设置页的特别版卡片（日志 / 远程任务 / 米游社绑定）
+    "BetterGenshinImpact/View/Controls/SpecialSettingsCards.xaml",
+    "BetterGenshinImpact/View/Controls/SpecialSettingsCards.xaml.cs",
+    "BetterGenshinImpact/ViewModel/Pages/CommonSettingsPageViewModel.Special.cs",
     # AI 助手页（模型配置 + 本地助手）
     "BetterGenshinImpact/View/Pages/AiSettingsPage.xaml",
     "BetterGenshinImpact/View/Pages/AiSettingsPage.xaml.cs",

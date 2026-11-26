@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Threading;
 using BetterGenshinImpact.Core.Ai;
 using BetterGenshinImpact.Core.Config;
+using BetterGenshinImpact.Core.Mys;
 using BetterGenshinImpact.Core.Mask;
 using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.ONNX;
@@ -17,6 +18,7 @@ using BetterGenshinImpact.Core.Plugins.Hosting;
 using BetterGenshinImpact.Core.Plugins.Market;
 using BetterGenshinImpact.Core.Plugins.Pluggables;
 using BetterGenshinImpact.Core.Script;
+using BetterGenshinImpact.Core.Special;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.SoloTask;
 using BetterGenshinImpact.GameTask.SoloTask.Execution;
@@ -53,6 +55,7 @@ using BetterGenshinImpact.Service.I18n;
 using BetterGenshinImpact.Service.Interface;
 using BetterGenshinImpact.Service.KeyMacro;
 using BetterGenshinImpact.Service.Notification;
+using BetterGenshinImpact.Service.RemoteTask;
 using BetterGenshinImpact.Service.Notifier;
 using BetterGenshinImpact.View;
 using BetterGenshinImpact.View.Mask;
@@ -123,6 +126,9 @@ public partial class App : Application
                 var logFolder = Path.Combine(AppContext.BaseDirectory, "log");
                 Directory.CreateDirectory(logFolder);
                 var logFile = Path.Combine(logFolder, "better-genshin-impact.log");
+                // 老版本的行首只有时分秒，新版带日期。升级后两者被写进同一个按天滚动的文件，
+                // 光看行首分不清哪段是哪个版本写的，跨午夜还会把顺序读反。
+                SpecialLogging.ArchiveLegacyLog(logFolder);
                 var instanceContext = InstanceBootstrap.Current.Context;
                 // 网页版实例带上实例名，例如 WebView(小号A):S1:P1234:T…
                 var instanceTypeLabel = instanceContext.InstanceName is { } instanceName
@@ -143,13 +149,27 @@ public partial class App : Application
                         // 原始诊断独立留档；不再在文件额外复制仅供悬浮显示的OCR摘要。
                         .Filter.ByExcluding(QuestVoiceLog.IsSummary)
                         .Enrich.WithProperty("BgiInstance", instanceIdentity)
-                        .WriteTo.File(logFile,
-                            outputTemplate:
-                            "[{Timestamp:HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext}{NewLine}{Message}{NewLine}{Exception}{NewLine}",
-                            rollingInterval: RollingInterval.Day,
-                            shared: true,
-                            retainedFileCountLimit: 31,
-                            retainedFileTimeLimit: TimeSpan.FromDays(21)))
+                        .WriteTo.Sink(new RepeatSuppressorSink(
+                            new LoggerConfiguration()
+                                .WriteTo.File(
+                                    // 一行一条：时间 / 级别 / 实例 / 来源 → 消息；异常另起，方便按行 grep。
+                                    // 行首带日期：按天滚动的文件如果只有时分秒，跨午夜后既排不出先后，
+                                    // 也没法把「任务开始后发生过什么」算准。
+                                    // 异常栈由格式器去重：同一条错误反复重试时只展开一次，见 ExceptionDedupTextFormatter。
+                                    new ExceptionDedupTextFormatter(
+                                        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff}] [{Level:u3}] [{BgiInstance}] {SourceContext} | {Message:lj}{NewLine}"),
+                                    logFile,
+                                    rollingInterval: RollingInterval.Day,
+                                    // 一天几百万行的极端情况不至于长成一个几百 MB 打不开的文件
+                                    fileSizeLimitBytes: 64L * 1024 * 1024,
+                                    rollOnFileSizeLimit: true,
+                                    shared: true,
+                                    retainedFileCountLimit: 31,
+                                    retainedFileTimeLimit: TimeSpan.FromDays(21))
+                                .CreateLogger()),
+                            // 落盘级别可配：长时间只关心有没有报错的人可以设成 Error，
+                            // 一天几百万行 Debug 既占地方又让 grep 变慢。
+                            SpecialLogging.FileLogLevel(all)))
                     .WriteTo.Console(outputTemplate:
                         "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
                     .MinimumLevel.Debug()
@@ -158,6 +178,8 @@ public partial class App : Application
                 loggerConfiguration.WriteTo.Sink(
                     new ExternalLogSink(externalLogHub, instanceIdentity),
                     LogEventLevel.Debug);
+                // 出错就自动攒一个诊断包：日志尾部 + 环境 + 脱敏配置，反馈时直接拖出去。
+                loggerConfiguration.WriteTo.Sink(new ErrorDiagnosticsSink(), LogEventLevel.Error);
                 // 日志遮罩输出：仅当“遮罩启用且日志框可见”时才真正写入，隐藏时避免不必要的 UI 开销（#3161）。
                 // 条件改为运行时每次写入时动态判断，因此启动后通过快捷键切换 ShowLogBox 也能即时恢复日志（#3357）。
                 loggerConfiguration.WriteTo.Sink(
@@ -417,6 +439,29 @@ public partial class App : Application
                 services.AddSingleton<RecognitionTemplateEditorService>();
                 services.AddSingleton<NotificationService>();
                 services.AddHostedService(sp => sp.GetRequiredService<NotificationService>());
+                // 远程任务：QQ 机器人把聊天指令转成独立任务并回传截图，只在主实例启动
+                services.AddSingleton<AiTraceStore>();
+                services.AddSingleton<MysDailyNoteClient>(sp => new MysDailyNoteClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(),
+                    sp.GetRequiredService<ILogger<MysDailyNoteClient>>()));
+                services.AddSingleton<GenshinWikiClient>(sp => new GenshinWikiClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
+                    sp.GetRequiredService<ILogger<GenshinWikiClient>>()));
+                // 米游社扫码绑定：网页端扫码通道拿登录态，不需要用户抄 Cookie
+                services.AddSingleton<MysPassportClient>(sp => new MysPassportClient(
+                    sp.GetRequiredService<IHttpClientFactory>().CreateClient(HttpClientNames.GameApi),
+                    sp.GetRequiredService<ILogger<MysPassportClient>>()));
+                services.AddSingleton<MysBindingService>();
+                services.AddSingleton<GameOps>();
+                services.AddSingleton<AgentTasks>();
+                services.AddSingleton<RemoteTaskPlanRunner>();
+                services.AddSingleton<RemoteTaskCommandHandler>();
+                services.AddSingleton<RemoteTaskIntentResolver>();
+                services.AddSingleton<QqBotService>();
+                services.AddHostedService(sp => sp.GetRequiredService<QqBotService>());
+                // 定时任务：按时间点或树脂阈值自动触发，与手动点开始同一条执行路径
+                services.AddSingleton<RemoteScheduleService>();
+                services.AddHostedService(sp => sp.GetRequiredService<RemoteScheduleService>());
                 services.AddSingleton<NotifierManager>();
                 services.AddSingleton<IScriptService, ScriptService>();
                 // Pulonia：纯任务保持无游戏依赖；游戏能力通过统一协调器按需准备会话和输入所有权。
