@@ -459,24 +459,38 @@
             </ui:TitleBar.Icon>
             <ui:TitleBar.Header>
                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <b:Interaction.Behaviors>
-                        <behavior:WindowDragBehavior />
-                    </b:Interaction.Behaviors>
-                    <TextBlock VerticalAlignment="Center"
-                               Text="{Binding Title, Mode=OneWay}" />
-                    <Border Height="22"
-                            Margin="8,0,0,0"
-                            Padding="8,0"
-                            VerticalAlignment="Center"
-                            Background="{Binding InstanceAccentBrush, Mode=OneWay}"
-                            CornerRadius="11"
-                            Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <b:Interaction.Behaviors>
+                            <behavior:WindowDragBehavior />
+                        </b:Interaction.Behaviors>
                         <TextBlock VerticalAlignment="Center"
-                                   FontSize="12"
-                                   FontWeight="SemiBold"
-                                   Foreground="White"
-                                   Text="{Binding InstanceTagText, Mode=OneWay}" />
-                    </Border>
+                                   Text="{Binding Title, Mode=OneWay}" />
+                        <Border Height="22"
+                                Margin="8,0,0,0"
+                                Padding="8,0"
+                                VerticalAlignment="Center"
+                                Background="{Binding InstanceAccentBrush, Mode=OneWay}"
+                                CornerRadius="11"
+                                Visibility="{Binding IsInstanceIdentityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock VerticalAlignment="Center"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="White"
+                                       Text="{Binding InstanceTagText, Mode=OneWay}" />
+                        </Border>
+                
+                    </StackPanel>
+                    <!-- 全局搜索：输入回车跳到「搜索结果」页，结果不在下拉里堆着 -->
+                    <ui:TextBox x:Name="GlobalSearchBox"
+                                Width="260"
+                                Height="30"
+                                Margin="18,0,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="12.5"
+                                Icon="{ui:SymbolIcon Search20}"
+                                KeyDown="OnGlobalSearchKeyDown"
+                                PlaceholderText="搜索  Ctrl+K"
+                                ToolTip="搜页面、任务、脚本；回车看结果，Esc 清空" />
                 </StackPanel>
             </ui:TitleBar.Header>
             <ui:TitleBar.TrailingContent>

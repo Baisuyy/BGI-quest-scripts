@@ -16,6 +16,7 @@
 10. ApplicationHostService       —— 启动时注册助手小面板的全局快捷键
 11. BetterGenshinImpact.csproj   —— 补回特别版文件依赖、上游没有的 NuGet 包
 12. DownloadCategory.cs          —— 补回特别版增量包用的下载分类 SpecialUpdate
+13. 全局搜索                     —— 顶栏搜索框、代码后置、DI 注册（新增文件走 KEEP）
 
 每一处都先判断是否已存在（幂等），锚点找不到就返回非 0，由 workflow 报警并开 issue。
 新增文件（Core/Ai 等）不在这里处理，由 sync_source.py 的 KEEP 清单保留。
@@ -323,6 +324,258 @@ def patch_page() -> bool:
     raise SystemExit(3)
 
 
+# ---------------------------------------------------------------- 13. 全局搜索
+#
+# 顶栏输入框 + 独立结果页。改到的三个文件（App.xaml.cs / MainWindow.xaml /
+# MainWindow.xaml.cs）都是上游文件，同步会整体覆盖，补丁必须在这里重贴；
+# Service/Search、SearchResultPage 这些新增文件由 sync_source 的 KEEP 保留。
+#
+# 2026-11-25 的同步把搜索整份删掉过一次：新增文件当时没进 KEEP，
+# 「搜一下」这个入口凭空消失，而编译照样过——所以这里补了 KEEP。
+MAIN_WINDOW_CS = "BetterGenshinImpact/View/MainWindow.xaml.cs"
+
+SEARCH_BOX = '''                    <!-- 全局搜索：输入回车跳到「搜索结果」页，结果不在下拉里堆着 -->
+                    <ui:TextBox x:Name="GlobalSearchBox"
+                                Width="260"
+                                Height="30"
+                                Margin="18,0,0,0"
+                                VerticalAlignment="Center"
+                                FontSize="12.5"
+                                Icon="{ui:SymbolIcon Search20}"
+                                KeyDown="OnGlobalSearchKeyDown"
+                                PlaceholderText="搜索  Ctrl+K"
+                                ToolTip="搜页面、任务、脚本；回车看结果，Esc 清空" />
+'''
+
+HEADER_PATTERN = re.compile(
+    r"(?P<open><ui:TitleBar\.Header>\s*<StackPanel[^>]*>)(?P<inner>.*?)(?P<close></StackPanel>\s*</ui:TitleBar\.Header>)",
+    re.S)
+
+SEARCH_CODE = '''    /// <summary>
+    /// Ctrl+K 聚焦搜索框；Esc 在搜索框里时清空。
+    /// </summary>
+    private void OnWindowPreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.K && Keyboard.Modifiers == ModifierKeys.Control)
+        {
+            GlobalSearchBox.Focus();
+            GlobalSearchBox.SelectAll();
+            e.Handled = true;
+        }
+    }
+
+    /// <summary>
+    /// 顶栏搜索框：回车提交，Esc 清空。
+    /// </summary>
+    private void OnGlobalSearchKeyDown(object sender, KeyEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case Key.Enter:
+                SubmitGlobalSearch();
+                e.Handled = true;
+                break;
+            case Key.Escape:
+                GlobalSearchBox.Text = string.Empty;
+                e.Handled = true;
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 把关键词交给搜索结果页，再导航过去。
+    /// <para>
+    /// 导航只接受页面类型，带不了参数，关键词走 <see cref="Service.Search.GlobalSearchState"/>。
+    /// </para>
+    /// </summary>
+    private void SubmitGlobalSearch()
+    {
+        var keyword = GlobalSearchBox.Text?.Trim();
+        if (string.IsNullOrEmpty(keyword))
+        {
+            return;
+        }
+
+        var state = App.GetService<GlobalSearchState>();
+        if (state != null)
+        {
+            state.Query = keyword;
+        }
+
+        Navigate(typeof(SearchResultPage));
+    }
+
+'''
+
+
+def patch_global_search() -> None:
+    """顶栏搜索：XAML 包一层横向容器 + 代码后置三个方法 + DI 注册。"""
+    xaml = ROOT / MAIN_WINDOW
+    text = xaml.read_text(encoding="utf-8")
+    if "GlobalSearchBox" not in text:
+        match = HEADER_PATTERN.search(text)
+        if match is None:
+            print(f"[x] {MAIN_WINDOW}：找不到 TitleBar.Header 里的 StackPanel，上游结构可能已改动", file=sys.stderr)
+            raise SystemExit(3)
+        # 原 Header 里是一个带拖拽行为的 StackPanel：外面再包一层，把搜索框放到拖拽区之外，
+        # 点输入框不会变成拖窗口。内层整体缩进 4 格，保持 XAML 可读。
+        inner = "\n".join(
+            ("    " + line) if line.strip() else line
+            for line in match.group("inner").strip("\n").split("\n"))
+        block = (match.group("open")
+                 + '\n                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">\n'
+                 + inner
+                 + "\n                    </StackPanel>\n"
+                 + SEARCH_BOX
+                 + "                </StackPanel>\n            </ui:TitleBar.Header>")
+        text = text[:match.start()] + block + text[match.end():]
+        xaml.write_text(text, encoding="utf-8")
+        print("[+] 顶栏搜索框")
+    else:
+        print("[=] 顶栏搜索框：已存在，跳过")
+
+    code = ROOT / MAIN_WINDOW_CS
+    source = code.read_text(encoding="utf-8")
+    if "SubmitGlobalSearch" in source:
+        print("[=] 顶栏搜索代码：已存在，跳过")
+    else:
+        using_anchor = "using BetterGenshinImpact.View.Behavior;"
+        if using_anchor not in source:
+            print(f"[x] {MAIN_WINDOW_CS} 缺少 using 锚点：{using_anchor}", file=sys.stderr)
+            raise SystemExit(3)
+        source = source.replace(
+            using_anchor,
+            "using BetterGenshinImpact.Service.Search;\n" + using_anchor + "\nusing BetterGenshinImpact.View.Pages;",
+            1)
+
+        ctor_anchor = ("        AddHandler(PreviewMouseWheelEvent, "
+                       "new MouseWheelEventHandler(OnGlobalPreviewMouseWheel), true);")
+        if ctor_anchor not in source:
+            print(f"[x] {MAIN_WINDOW_CS} 找不到构造函数里的滚轮绑定，上游结构可能已改动", file=sys.stderr)
+            raise SystemExit(3)
+        source = source.replace(
+            ctor_anchor,
+            ctor_anchor + "\n        // Ctrl+K 直接聚焦顶栏搜索框，和浏览器/编辑器里的习惯一致"
+                          "\n        PreviewKeyDown += OnWindowPreviewKeyDown;",
+            1)
+
+        method_anchor = "    private void OnGlobalPreviewMouseWheel(object sender, MouseWheelEventArgs e)"
+        if method_anchor not in source:
+            print(f"[x] {MAIN_WINDOW_CS} 找不到 OnGlobalPreviewMouseWheel，上游结构可能已改动", file=sys.stderr)
+            raise SystemExit(3)
+        source = source.replace(method_anchor, SEARCH_CODE + method_anchor, 1)
+        code.write_text(source, encoding="utf-8")
+        print("[+] 顶栏搜索代码")
+
+    patch(APP, "using BetterGenshinImpact.Service.Search;", "using BetterGenshinImpact.Service.Guide;",
+          "using BetterGenshinImpact.Service.Guide;\nusing BetterGenshinImpact.Service.Search;",
+          "搜索 using")
+    patch(APP, "AddView<SearchResultPage", "                services.AddView<MusicPage, MusicPageViewModel>();",
+          "                services.AddView<MusicPage, MusicPageViewModel>();\n"
+          "                // 全局搜索：顶栏输入，结果在独立页面里分组展示\n"
+          "                services.AddSingleton<GlobalSearchState>();\n"
+          "                services.AddSingleton<GlobalSearchService>();\n"
+          "                services.AddView<SearchResultPage, SearchResultPageViewModel>();",
+          "注册全局搜索")
+
+
+# ---------------------------------------------------------------- 14. 版本需求比较
+#
+# 路线 / 脚本里的 bgiVersion 是「至少要这个版本」。特别版版本号长成
+# 0.67.0-special.7.7.3，SemVer 把 -special.* 当预发布，排序在 0.67.0 之前，
+# 于是要求 0.67.0 的路线在特别版上全部被判「版本不够」——2026-11-25 的线上日志里
+# 所有标了 bgiVersion 的社区路线都被拒绝运行。
+#
+# Global.cs / Manifest.cs / PathingTask.cs 都是上游文件，同步会覆盖，所以在这里重贴。
+GLOBAL = "BetterGenshinImpact/Core/Config/Global.cs"
+MANIFEST = "BetterGenshinImpact/Core/Script/Project/Manifest.cs"
+PATHING_TASK = "BetterGenshinImpact/GameTask/AutoPathing/Model/PathingTask.cs"
+
+REQUIREMENT_ANCHOR = "    public static void WriteAllText(string relativePath, string blackListJson)"
+
+REQUIREMENT_BLOCK = '''    /// <summary>
+    ///     脚本 / 路线里写的 bgiVersion 是「至少要这个版本」，不是「必须精确等于」。
+    ///     <para>
+    ///         特别版版本号是 0.67.0-special.7.7.3 这种：SemVer 把 "-" 后面当预发布，
+    ///         排序在 0.67.0 之前，要求 0.67.0 的路线在特别版上会全被判成「版本不够」。
+    ///         特别版是在该内核版本上继续开发，比较时去掉 -special 段即可。
+    ///     </para>
+    ///     <para>
+    ///         只用于「要求的最低版本」，不要拿去比较两个特别版之间的新旧——
+    ///         那会把 0.67.0-special.8 和 0.67.0-special.7.7.3 看成一样。
+    ///     </para>
+    /// </summary>
+    /// <param name="requiredVersion">脚本或路线要求的最低版本</param>
+    /// <returns>当前版本是否满足要求；版本号解析失败时放行</returns>
+    public static bool IsRequirementMet(string requiredVersion)
+    {
+        try
+        {
+            var required = SemVersion.Parse(StripSpecialSuffix(requiredVersion));
+            var current = SemVersion.Parse(StripSpecialSuffix(Version));
+            return required.CompareSortOrderTo(current) <= 0;
+        }
+        catch
+        {
+            // 写错的版本号不该让脚本直接不可用，交给其它校验
+            return true;
+        }
+    }
+
+    /// <summary>去掉特别版的 -special.x 后缀，只留内核版本。</summary>
+    private static string StripSpecialSuffix(string version)
+    {
+        var index = version.IndexOf("-special", StringComparison.OrdinalIgnoreCase);
+        return index > 0 ? version[..index] : version;
+    }
+
+'''
+
+
+def patch_version_requirement() -> None:
+    """把「最低版本」判断换成按内核版本比较，并去掉重复打三遍的错误日志。"""
+    patch(GLOBAL, "IsRequirementMet", REQUIREMENT_ANCHOR,
+          REQUIREMENT_BLOCK + REQUIREMENT_ANCHOR, "版本需求比较")
+
+    for rel, marker, label in (
+        (MANIFEST, "Global.IsNewVersion(BgiVersion)", "脚本清单版本检查"),
+        (PATHING_TASK, "Global.IsNewVersion(task.Info.BgiVersion)", "路线版本检查"),
+    ):
+        path = ROOT / rel
+        text = path.read_text(encoding="utf-8")
+        if marker not in text:
+            print(f"[=] {label}：已是新版，跳过")
+            continue
+        text = text.replace(marker, "!" + marker.replace("Global.IsNewVersion", "Global.IsRequirementMet"), 1)
+        path.write_text(text, encoding="utf-8")
+        print(f"[+] {label}")
+
+    # PathingTask 里同一条错误日志连打三次，纯噪音
+    path = ROOT / PATHING_TASK
+    text = path.read_text(encoding="utf-8")
+    line = r'[ \t]*TaskControl\.Logger\.LogError\("地图追踪任务[^\n]*\n'
+    deduped, count = re.subn(f"({line})(?:{line})+", r"\1", text)
+    if count:
+        path.write_text(deduped, encoding="utf-8")
+        print(f"[+] 路线版本日志去重（{count} 处）")
+
+
+# ---------------------------------------------------------------- 15. 插件市场
+#
+# 市场客户端要进 DI（页面 VM 构造参数），而 App.xaml.cs 是上游文件。
+# 市场本身的代码在 Core/Plugins/Market/ 与 ViewModel/Pages/Plugins/ 下，由 KEEP 保留。
+def patch_plugin_market() -> None:
+    patch(APP, "using BetterGenshinImpact.Core.Plugins.Market;",
+          "using BetterGenshinImpact.Core.Plugins.Hosting;",
+          "using BetterGenshinImpact.Core.Plugins.Hosting;\nusing BetterGenshinImpact.Core.Plugins.Market;",
+          "插件市场 using")
+    patch(APP, "AddSingleton<PluginMarketClient>", "                services.AddSingleton<GlobalSearchService>();",
+          "                services.AddSingleton<GlobalSearchService>();\n"
+          "                // 插件市场：读索引、下载并校验安装包\n"
+          "                services.AddSingleton<PluginMarketClient>();",
+          "注册插件市场")
+
+
 def main() -> int:
     ensure_packages()
     patch_download_category()
@@ -343,6 +596,9 @@ def main() -> int:
           NAV_BLOCK, "侧边栏 AI 助手入口")
     patch(APP_HOST, "AgentPanelWindow.EnsureGlobalHotkey", APP_HOST_ANCHOR,
           APP_HOST_ANCHOR + APP_HOST_BLOCK, "助手小面板快捷键")
+    patch_global_search()
+    patch_version_requirement()
+    patch_plugin_market()
 
     # EngineExtend / App / VM 需要引用 Core.Ai 里的 AiKernel
     for rel, anchor, line in (

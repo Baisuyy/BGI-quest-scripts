@@ -14,6 +14,7 @@ using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.ONNX;
 using BetterGenshinImpact.Core.Monitor;
 using BetterGenshinImpact.Core.Plugins.Hosting;
+using BetterGenshinImpact.Core.Plugins.Market;
 using BetterGenshinImpact.Core.Plugins.Pluggables;
 using BetterGenshinImpact.Core.Script;
 using BetterGenshinImpact.GameTask;
@@ -45,6 +46,7 @@ using BetterGenshinImpact.Service.ChildSession;
 using BetterGenshinImpact.Service.ExternalAccess;
 using BetterGenshinImpact.Service.ExternalAccess.Logging;
 using BetterGenshinImpact.Service.Guide;
+using BetterGenshinImpact.Service.Search;
 using BetterGenshinImpact.Service.Instance;
 using BetterGenshinImpact.GameTask.I18n;
 using BetterGenshinImpact.Service.I18n;
@@ -322,6 +324,12 @@ public partial class App : Application
                 services.AddSingleton<IStorageAreaProvider>(sp => sp.GetRequiredService<InventoryIconCache>());
                 services.AddTransient<AccountRecordsInventoryViewModel>();
                 services.AddView<MusicPage, MusicPageViewModel>();
+                // 全局搜索：顶栏输入，结果在独立页面里分组展示
+                services.AddSingleton<GlobalSearchState>();
+                services.AddSingleton<GlobalSearchService>();
+                // 插件市场：读索引、下载并校验安装包
+                services.AddSingleton<PluginMarketClient>();
+                services.AddView<SearchResultPage, SearchResultPageViewModel>();
                 // 自动配音：入口为实时触发页卡片，设置在独立窗口；设置模型为单例以保留草稿。
                 services.AddSingleton<RoutingCatalogStore>();
                 services.AddSingleton<QuestVoiceSettingsViewModel>();

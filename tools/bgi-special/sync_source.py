@@ -13,6 +13,7 @@
 """
 
 import pathlib
+import re
 import shutil
 import sys
 
@@ -65,6 +66,11 @@ KEEP = (
     "BetterGenshinImpact/View/Windows/MysLoginWindow.xaml.cs",
     # 多账号切换
     "BetterGenshinImpact/GameTask/GenshinAccountSwitch/",
+    # 全局搜索：顶栏输入框 + 独立结果页，上游没有
+    "BetterGenshinImpact/Service/Search/",
+    "BetterGenshinImpact/View/Pages/SearchResultPage.xaml",
+    "BetterGenshinImpact/View/Pages/SearchResultPage.xaml.cs",
+    "BetterGenshinImpact/ViewModel/Pages/SearchResultPageViewModel.cs",
     # 路径进度（断点续跑）
     "BetterGenshinImpact/GameTask/AutoPathing/PathProgressStore.cs",
     "BetterGenshinImpact/GameTask/AutoPathing/AutoPathingPathTask.cs",
@@ -76,6 +82,7 @@ KEEP = (
     # 特别版文档、发版说明与安装器配置
     "Docs/",
     "docs/",
+    "plugin-market/",
     "AGENTS.md",
     "Build/kachina.special.config.json",
     ".github/workflows/upload-123pan.yml",
@@ -115,6 +122,7 @@ def dropped(rel: str) -> bool:
 # 代码在远端躺了一夜编译不过。这里当最后一道闸：真要删，先报错让人确认。
 PROTECTED = (
     "BetterGenshinImpact/Service/RemoteTask/",
+    "BetterGenshinImpact/Service/Search/",
     "BetterGenshinImpact/Core/Ai/",
     "BetterGenshinImpact/Core/Special/",
     "BetterGenshinImpact/Core/Mys/",
@@ -124,6 +132,39 @@ PROTECTED = (
 
 def protected(rel: str) -> bool:
     return any(rel == p or (p.endswith("/") and rel.startswith(p)) for p in PROTECTED)
+
+
+# csproj 整份跟随上游，但 <Version> 是特别版自己的版本线，不能跟着变。
+# 上游写着 0.67.2-alpha.2 时直接覆盖，下次本地构建出来的版本号就悄悄换了，
+# 而特别版的更新检查、发版说明、产物命名全挂在这串上。版本号只由人改。
+CSPROJ = "BetterGenshinImpact/BetterGenshinImpact.csproj"
+VERSION_RE = re.compile(r"<Version>[^<]*</Version>")
+
+
+def read_version() -> str | None:
+    path = pathlib.Path.cwd() / CSPROJ
+    if not path.is_file():
+        return None
+    match = VERSION_RE.search(path.read_text(encoding="utf-8"))
+    return match.group(0) if match else None
+
+
+def restore_version(version: str | None) -> None:
+    if version is None:
+        print("[!] 本地 csproj 没有 <Version>，跳过版本号保护", file=sys.stderr)
+        return
+    path = pathlib.Path.cwd() / CSPROJ
+    if not path.is_file():
+        print(f"[!] 覆盖后找不到 {CSPROJ}", file=sys.stderr)
+        return
+    text = path.read_text(encoding="utf-8")
+    if not VERSION_RE.search(text):
+        print(f"[!] {CSPROJ} 里没有 <Version>，跳过版本号保护", file=sys.stderr)
+        return
+    if VERSION_RE.search(text).group(0) == version:
+        return
+    path.write_text(VERSION_RE.sub(version, text, count=1), encoding="utf-8")
+    print(f"[+] 保留特别版版本号 {version[9:-10]}")
 
 
 def files_of(root: pathlib.Path):
@@ -145,6 +186,7 @@ def main() -> int:
     local = pathlib.Path.cwd()
     up_files = set(files_of(upstream))
     local_files = set(files_of(local))
+    saved_version = read_version()
 
     removed = 0
     removed_names = []
@@ -191,6 +233,7 @@ def main() -> int:
             pass
 
     print(f"[+] 删除 {removed} 个文件，覆盖 {copied} 个文件")
+    restore_version(saved_version)
     # 删了什么要能看见：只报个数字，事后想确认「是不是误删」只能去翻 diff。
     for rel in removed_names[:20]:
         print(f"    - {rel}")
