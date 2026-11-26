@@ -5,7 +5,16 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       Title="AI 助手">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="16,16,16,24">
+        <StackPanel Margin="{StaticResource PagePadding}">
+            <!-- 页头：这一页有三块，先说清各自管什么，省得来回翻 -->
+            <StackPanel Margin="0,0,0,12">
+                <ui:TextBlock FontTypography="BodyStrong" Text="AI 助手" />
+                <ui:TextBlock Margin="0,2,0,0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              Text="模型连接、本地助手与游戏内小面板。密钥只写在本机配置里，不会上传。"
+                              TextWrapping="Wrap" />
+            </StackPanel>
+
             <!-- 模型连接：与「任务设置」里那张卡是同一份配置 -->
             <controls:AiSettingsCard />
 
@@ -139,13 +148,14 @@
                                       Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
                                       TextWrapping="Wrap"
                                       Text="留空表示软件自身目录；相对路径也相对软件目录。目录内的读写默认允许，目录外一律先问" />
-                        <TextBox Grid.Row="0"
-                                 Grid.RowSpan="2"
-                                 Grid.Column="1"
-                                 Width="300"
-                                 Margin="0,0,36,0"
-                                 VerticalAlignment="Top"
-                                 Text="{Binding Config.AiConfig.AgentSandboxRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <ui:TextBox Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    Grid.Column="1"
+                                    Width="300"
+                                    Margin="0,0,36,0"
+                                    VerticalAlignment="Top"
+                                    PlaceholderText="留空 = 软件目录"
+                                    Text="{Binding Config.AiConfig.AgentSandboxRoot, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,8,0,0">
                             <ui:TextBlock Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
                                           Text="{Binding SandboxRoot, StringFormat=实际使用：{0}}"
@@ -236,16 +246,25 @@
                                       Value="{Binding Config.AiConfig.AgentTimeoutSeconds, Mode=TwoWay}" />
                     </Grid>
 
-                    <ui:TextBlock Margin="16,8,36,0" FontTypography="Body" Text="任务" />
-                    <TextBox Margin="16,8,36,0"
-                             Height="80"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             VerticalContentAlignment="Top"
-                             VerticalScrollBarVisibility="Auto"
-                             Text="{Binding TaskInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <ui:TextBlock Margin="16,14,36,0" FontTypography="Body" Text="任务" />
+                    <!-- 输入与输出统一成「带描边的输入区」，裸 TextBox 在深浅主题下发白，和卡片对不上 -->
+                    <Border Margin="16,6,36,0"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource ControlCornerRadius}">
+                        <TextBox Height="80"
+                                 Padding="8,6"
+                                 AcceptsReturn="True"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 TextWrapping="Wrap"
+                                 VerticalContentAlignment="Top"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Text="{Binding TaskInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Border>
 
-                    <StackPanel Margin="16,12,36,0" Orientation="Horizontal">
+                    <StackPanel Margin="16,10,36,0" Orientation="Horizontal">
                         <ui:Button Appearance="Primary"
                                    Command="{Binding RunCommand}"
                                    Content="{Binding RunButtonText}" />
@@ -256,15 +275,24 @@
                                       Text="{Binding BudgetText, StringFormat=本次运行请求：{0}}" />
                     </StackPanel>
 
-                    <TextBox Margin="16,12,36,16"
-                             Height="220"
-                             IsReadOnly="True"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             FontFamily="Consolas"
-                             VerticalContentAlignment="Top"
-                             VerticalScrollBarVisibility="Auto"
-                             Text="{Binding Output, Mode=OneWay}" />
+                    <ui:TextBlock Margin="16,14,36,0" FontTypography="Body" Text="运行记录" />
+                    <Border Margin="16,6,36,16"
+                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource ControlCornerRadius}">
+                        <TextBox Height="200"
+                                 Padding="8,6"
+                                 IsReadOnly="True"
+                                 AcceptsReturn="True"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 TextWrapping="Wrap"
+                                 FontFamily="Consolas"
+                                 VerticalContentAlignment="Top"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Text="{Binding Output, Mode=OneWay}" />
+                    </Border>
                 </StackPanel>
             </ui:CardExpander>
         </StackPanel>

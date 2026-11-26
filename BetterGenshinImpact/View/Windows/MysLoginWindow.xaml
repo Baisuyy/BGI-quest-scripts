@@ -36,43 +36,72 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <!-- 二维码底必须纯白：深色主题下贴主题色会让手机扫不出来 -->
             <Border Width="264"
                     Height="264"
                     Background="White"
                     BorderBrush="{ui:ThemeResource ControlStrokeColorDefaultBrush}"
                     BorderThickness="1"
-                    CornerRadius="8">
+                    CornerRadius="10">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="18" Direction="270" Opacity="0.18" ShadowDepth="2" />
+                </Border.Effect>
                 <Image x:Name="QrImage"
-                       Margin="6"
+                       Margin="8"
                        RenderOptions.BitmapScalingMode="NearestNeighbor"
                        Stretch="Uniform" />
             </Border>
 
-            <StackPanel Grid.Column="1" Margin="20,0,0,0">
-                <ui:TextBlock x:Name="StatusText"
-                              FontTypography="Body"
-                              Text="正在生成二维码…"
+            <StackPanel Grid.Column="1" Margin="22,2,0,0">
+                <ui:TextBlock FontTypography="Subtitle" Text="扫码绑定" />
+                <ui:TextBlock Margin="0,4,0,0"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              Text="绑定后不开游戏也能查树脂、洞天宝钱和每日委托。"
+                              TextWrapping="Wrap" />
+
+                <!-- 状态条：扫码、确认、成功、过期都写在这里，配色跟随正文，不额外加色块 -->
+                <Border Margin="0,14,0,0"
+                        Padding="12,10"
+                        Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{DynamicResource ControlCornerRadius}">
+                    <ui:TextBlock x:Name="StatusText"
+                                  FontTypography="Body"
+                                  Text="正在生成二维码…"
+                                  TextWrapping="Wrap" />
+                </Border>
+
+                <ui:TextBlock Margin="0,14,0,0"
+                              FontTypography="Caption"
+                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                              Text="1 打开米游社 App　2 右上角「扫一扫」　3 确认登录"
                               TextWrapping="Wrap" />
 
                 <ComboBox x:Name="RolePicker"
-                          Margin="0,16,0,0"
+                          Margin="0,14,0,0"
                           DisplayMemberPath="Display"
                           Visibility="Collapsed" />
                 <ui:Button x:Name="ConfirmRoleButton"
                            Margin="0,8,0,0"
                            HorizontalAlignment="Left"
+                           Appearance="Primary"
                            Click="OnConfirmRoleClick"
                            Content="绑定这个角色"
                            Visibility="Collapsed" />
             </StackPanel>
         </Grid>
 
-        <StackPanel Grid.Row="2"
-                    Margin="20,12,20,20"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-            <ui:Button Margin="0,0,8,0" Click="OnRefreshClick" Content="换一张二维码" />
-            <ui:Button Click="OnCloseClick" Content="关闭" />
-        </StackPanel>
+        <Border Grid.Row="2"
+                Margin="0,12,0,0"
+                BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="0,1,0,0">
+            <StackPanel Margin="20,12,20,16"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <ui:Button Margin="0,0,8,0" Click="OnRefreshClick" Content="换一张二维码" />
+                <ui:Button Click="OnCloseClick" Content="关闭" />
+            </StackPanel>
+        </Border>
     </Grid>
 </ui:FluentWindow>

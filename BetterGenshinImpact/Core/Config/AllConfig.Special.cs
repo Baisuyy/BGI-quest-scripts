@@ -83,4 +83,9 @@ public partial class AllConfig
     ///     定时任务配置（按时间点或树脂阈值自动触发任务）
     /// </summary>
     public RemoteScheduleConfig RemoteScheduleConfig { get; set; } = new();
+
+    /// <summary>
+    ///     插件市场配置（索引地址）
+    /// </summary>
+    public PluginMarketConfig PluginMarketConfig { get; set; } = new();
 }

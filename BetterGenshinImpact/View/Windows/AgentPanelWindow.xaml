@@ -60,6 +60,47 @@
             <Setter Property="FontSize" Value="14" />
         </Style>
 
+        <!-- 主按钮：悬停变亮而不是变灰，避免强调色被 hover 的那层白盖住 -->
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
+            <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Foreground" Value="#0B0B0C" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="14,5" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#7FD4FF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#35A8E0" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 快捷键胶囊：一眼能读到，但不像按钮那样抢注意力 -->
+        <Style x:Key="KeyCap" TargetType="Border">
+            <Setter Property="Background" Value="#1FFFFFFF" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="10,0,0,0" />
+        </Style>
+
         <!-- 一条消息的气泡：用户靠右、AI 靠左、工具步骤压成小字。
              以前整块是一个 TextBlock，模型说的话和 [3/16] 步骤混在同一行，分不清谁在说。 -->
         <DataTemplate x:Key="MessageTemplate">
@@ -133,8 +174,10 @@
                              VerticalAlignment="Center" Margin="0,0,7,0" />
                     <TextBlock Text="BGI 助手" FontWeight="SemiBold" Foreground="White"
                                VerticalAlignment="Center" />
-                    <TextBlock x:Name="HintText" Text="Ctrl+Alt+A" Foreground="{StaticResource MutedText}"
-                               FontSize="11" Margin="10,0,0,0" VerticalAlignment="Center" />
+                    <Border Style="{StaticResource KeyCap}">
+                        <TextBlock x:Name="HintText" Text="Ctrl+Alt+A" Foreground="{StaticResource MutedText}"
+                                   FontSize="10.5" />
+                    </Border>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button x:Name="SettingsButton" Content="⚙" Style="{StaticResource IconButton}"
@@ -144,17 +187,40 @@
                 </StackPanel>
             </Grid>
 
-            <!-- 中部：对话流（用户 / AI / 工具步骤分色） -->
+            <!-- 中部：对话流（用户 / AI / 工具步骤分色）。没有任何消息时给一句能直接照抄的例子 -->
             <Border Grid.Row="1" Background="#14FFFFFF" CornerRadius="8" Padding="8,6">
-                <ScrollViewer x:Name="OutputScroll" VerticalScrollBarVisibility="Auto">
-                    <ItemsControl x:Name="OutputList" ItemTemplate="{StaticResource MessageTemplate}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                    </ItemsControl>
-                </ScrollViewer>
+                <Grid>
+                    <ScrollViewer x:Name="OutputScroll" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="OutputList" ItemTemplate="{StaticResource MessageTemplate}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasItems, ElementName=OutputList}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock HorizontalAlignment="Center"
+                                   Foreground="#6FFFFFFF"
+                                   FontSize="12"
+                                   Text="说一句话就开始" />
+                        <TextBlock Margin="0,4,0,0"
+                                   HorizontalAlignment="Center"
+                                   Foreground="#4DFFFFFF"
+                                   FontSize="11"
+                                   Text="试试「清一下体力」「打开地图追踪」" />
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <!-- 底部：输入 + 发送/停止 -->
@@ -164,23 +230,40 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" Background="#1FFFFFFF" CornerRadius="8" Padding="8,4">
-                    <TextBox x:Name="InputBox"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             Foreground="White"
-                             CaretBrush="White"
-                             TextWrapping="Wrap"
-                             AcceptsReturn="False"
-                             MaxHeight="56"
-                             VerticalScrollBarVisibility="Auto"
-                             VerticalContentAlignment="Center"
-                             KeyDown="OnInputKeyDown" />
+                    <Grid>
+                        <TextBox x:Name="InputBox"
+                                 Background="Transparent"
+                                 BorderThickness="0"
+                                 Foreground="White"
+                                 CaretBrush="White"
+                                 TextWrapping="Wrap"
+                                 AcceptsReturn="False"
+                                 MaxHeight="56"
+                                 VerticalScrollBarVisibility="Auto"
+                                 VerticalContentAlignment="Center"
+                                 KeyDown="OnInputKeyDown" />
+                        <!-- 水印：只在输入框为空时出现，不拦截点击 -->
+                        <TextBlock Margin="4,0,0,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="#59FFFFFF"
+                                   FontSize="12.5"
+                                   IsHitTestVisible="False"
+                                   Text="输入任务或问题，回车发送">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=InputBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
                 </Border>
                 <Button x:Name="SendButton" Grid.Column="1" Content="发送"
-                        Style="{StaticResource FlatButton}"
-                        Background="{StaticResource AccentBrush}"
-                        Foreground="#0B0B0C"
-                        FontWeight="SemiBold"
+                        Style="{StaticResource PrimaryButton}"
                         Margin="8,0,0,0"
                         MinWidth="64"
                         Click="OnSend" />

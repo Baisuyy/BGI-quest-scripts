@@ -18,7 +18,6 @@
 
     <Page.Resources>
         <!--  设置项标题  -->
-        <!--  WPF-UI 没有为 ui:TextBlock 提供按类型索引的默认样式，这里不使用 BasedOn  -->
         <Style x:Key="PluginItemTitle" TargetType="ui:TextBlock">
             <Setter Property="FontTypography" Value="Body" />
             <Setter Property="TextWrapping" Value="Wrap" />
@@ -37,24 +36,44 @@
         <Style x:Key="PluggableComboBox"
                BasedOn="{StaticResource {x:Type ComboBox}}"
                TargetType="ComboBox">
-            <Setter Property="MinWidth" Value="260" />
-            <Setter Property="Margin" Value="0,0,36,0" />
+            <Setter Property="MinWidth" Value="240" />
+            <Setter Property="Margin" Value="0,0,12,0" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="DisplayMemberPath" Value="Text" />
         </Style>
+        <!--  市场卡片：统一边框与留白，卡片之间靠间距分组而不是分割线  -->
+        <Style x:Key="MarketCard" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
     </Page.Resources>
 
-    <StackPanel Margin="{StaticResource PagePadding}">
-        <!--  标题与操作  -->
-        <Grid Margin="0,0,0,4">
+    <Grid Margin="{StaticResource PagePadding}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--  标题与操作：标题在左，操作固定在右，窄窗口下不会把标题挤成两行  -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <ui:TextBlock VerticalAlignment="Center"
-                          FontTypography="BodyStrong"
-                          Text="{i18n:T 插件}" />
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <StackPanel VerticalAlignment="Center">
+                <ui:TextBlock FontTypography="BodyStrong" Text="{i18n:T 插件}" />
+                <ui:TextBlock Margin="0,2,0,0"
+                              Style="{StaticResource PluginItemDescription}"
+                              Text="{i18n:T 插件可以替换 BetterGI 的部分功能，例如 OCR 模型。启用、停用和切换都不需要重启。}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal">
                 <ui:Button Margin="0,0,8,0"
                            Appearance="Primary"
                            Command="{Binding InstallFromFileCommand}"
@@ -71,144 +90,462 @@
                            Icon="{ui:SymbolIcon ArrowSync24}" />
             </StackPanel>
         </Grid>
-        <ui:TextBlock Margin="0,0,0,12"
-                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                      Text="{i18n:T 插件可以替换 BetterGI 的部分功能，例如 OCR 模型。启用、停用和切换都不需要重启。}"
-                      TextWrapping="Wrap" />
 
-        <!--  权限提示  -->
-        <Border Margin="0,0,0,16"
-                Padding="16,10"
+        <!--  权限提示：插件与主程序同权，安装前必须看见这句话  -->
+        <Border Grid.Row="1"
+                Margin="0,0,0,12"
+                Padding="14,8"
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{DynamicResource SystemFillColorCautionBrush}"
                 BorderThickness="1"
                 CornerRadius="{DynamicResource ControlCornerRadius}">
-            <ui:TextBlock Text="{i18n:T 插件拥有与 BetterGI 相同的系统权限（管理员），请只安装可信来源的插件。}" TextWrapping="Wrap" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ui:SymbolIcon Margin="0,1,10,0"
+                               VerticalAlignment="Top"
+                               FontSize="16"
+                               Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                               Symbol="ShieldCheckmark24" />
+                <ui:TextBlock Grid.Column="1"
+                              Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                              Text="{i18n:T 插件拥有与 BetterGI 相同的系统权限（管理员），请只安装可信来源的插件。}"
+                              TextWrapping="Wrap" />
+            </Grid>
         </Border>
 
-        <!--  功能选择：每项可插拔能力一行，新增可插拔能力时自动出现  -->
-        <ui:TextBlock Margin="0,0,0,8"
-                      FontTypography="BodyStrong"
-                      Text="{i18n:T 功能选择}" />
-        <ItemsControl Margin="0,0,0,16" ItemsSource="{Binding Pluggables, Mode=OneWay}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type plugins:PluggableItemViewModel}">
-                    <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon Options24}">
-                        <ui:CardControl.Header>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel VerticalAlignment="Center">
-                                    <ui:TextBlock Style="{StaticResource PluginItemTitle}" Text="{Binding DisplayName, Mode=OneWay}" />
-                                    <ui:TextBlock Style="{StaticResource PluginItemDescription}" Text="{Binding Description, Mode=OneWay}" />
-                                    <ui:TextBlock Margin="0,4,0,0"
-                                                  Style="{StaticResource PluginItemWarning}"
-                                                  Text="{Binding FallbackText, Mode=OneWay}"
-                                                  Visibility="{Binding HasFallback, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+        <!--  三个页签：市场 / 已安装 / 功能选择。页签下留一条细线，和设置页的分组感一致  -->
+        <TabControl Grid.Row="2"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    HorizontalContentAlignment="Stretch"
+                    SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}"
+                    VerticalContentAlignment="Stretch">
+            <TabControl.ItemContainerStyle>
+                <Style BasedOn="{StaticResource {x:Type TabItem}}" TargetType="TabItem">
+                    <Setter Property="HeaderTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <ContentPresenter Content="{Binding Mode=OneWay}" />
+                                    <Border x:Name="SelectionIndicator"
+                                            Height="3"
+                                            Margin="0,6,0,0"
+                                            Background="{DynamicResource AccentFillColorDefaultBrush}"
+                                            CornerRadius="1.5"
+                                            Opacity="0" />
                                 </StackPanel>
-                                <ComboBox Grid.Column="1"
-                                          ItemsSource="{Binding Options, Mode=OneWay}"
-                                          SelectedItem="{Binding SelectedOption, Mode=TwoWay}"
-                                          Style="{StaticResource PluggableComboBox}" />
-                            </Grid>
-                        </ui:CardControl.Header>
-                    </ui:CardControl>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=TabItem}, Mode=OneWay}" Value="True">
+                                        <Setter TargetName="SelectionIndicator" Property="Opacity" Value="1" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </TabControl.ItemContainerStyle>
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Height="1"
+                                VerticalAlignment="Bottom"
+                                Background="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                        <TabPanel x:Name="HeaderPanel"
+                                  Margin="0,0,0,4"
+                                  VerticalAlignment="Center"
+                                  IsItemsHost="True" />
+                        <ContentPresenter x:Name="PART_SelectedContentHost"
+                                          Grid.Row="1"
+                                          Margin="0,12,0,0"
+                                          ContentSource="SelectedContent" />
+                    </Grid>
+                </ControlTemplate>
+            </TabControl.Template>
 
-        <!--  已安装插件  -->
-        <ui:TextBlock Margin="0,0,0,8"
-                      FontTypography="BodyStrong"
-                      Text="{i18n:T 已安装插件}" />
-        <ui:TextBlock Margin="0,0,0,8"
-                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
-                      Text="{i18n:T 尚未安装插件。可以从文件安装，或把插件文件夹放到插件目录后点击刷新。}"
-                      TextWrapping="Wrap"
-                      Visibility="{Binding HasNoPlugins, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-        <ItemsControl ItemsSource="{Binding Plugins, Mode=OneWay}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type plugins:InstalledPluginItemViewModel}">
-                    <ui:CardExpander Margin="0,0,0,8"
-                                     ContentPadding="0"
-                                     Icon="{ui:SymbolIcon PuzzlePiece24}">
+            <!--  ============================ 市场  ============================  -->
+            <TabItem Header="插件市场">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--  搜索 + 分类 + 刷新  -->
+                    <Grid Grid.Row="0" Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <ui:TextBox Height="34"
+                                    Icon="{ui:SymbolIcon Search24}"
+                                    PlaceholderText="搜索插件名称、作者、标签"
+                                    Text="{Binding MarketKeyword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <StackPanel Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    Orientation="Horizontal">
+                            <ComboBox MinWidth="110"
+                                      Height="34"
+                                      VerticalContentAlignment="Center"
+                                      ItemsSource="{Binding MarketCategories, Mode=OneWay}"
+                                      SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" />
+                            <ui:Button Height="34"
+                                       Margin="8,0,0,0"
+                                       Command="{Binding LoadMarketCommand}"
+                                       Content="刷新"
+                                       Icon="{ui:SymbolIcon ArrowSync24}"
+                                       IsEnabled="{Binding IsMarketLoading, Mode=OneWay, Converter={StaticResource InverseBooleanConverter}}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!--  加载失败：留在页内提示，不弹窗  -->
+                    <Border Grid.Row="1"
+                            Margin="0,0,0,10"
+                            Padding="12,8"
+                            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{DynamicResource SystemFillColorCautionBrush}"
+                            BorderThickness="1"
+                            CornerRadius="{DynamicResource ControlCornerRadius}"
+                            Visibility="{Binding HasMarketError, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ui:TextBlock VerticalAlignment="Center"
+                                          FontTypography="Caption"
+                                          Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                                          Text="{Binding MarketError, Mode=OneWay}"
+                                          TextWrapping="Wrap" />
+                            <ui:Button Grid.Column="1"
+                                       Margin="12,0,0,0"
+                                       Command="{Binding LoadMarketCommand}"
+                                       Content="重试" />
+                        </Grid>
+                    </Border>
+
+                    <!--  卡片列表  -->
+                    <ScrollViewer Grid.Row="2"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding MarketItems, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type plugins:PluginMarketItemViewModel}">
+                                    <Border Style="{StaticResource MarketCard}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                                <!--  名称 + 分类标签 + 版本  -->
+                                                <StackPanel Orientation="Horizontal">
+                                                    <ui:TextBlock VerticalAlignment="Center"
+                                                                  FontTypography="BodyStrong"
+                                                                  Text="{Binding Name, Mode=OneWay}"
+                                                                  TextTrimming="CharacterEllipsis" />
+                                                    <Border Margin="8,0,0,0"
+                                                            Padding="6,1"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                                            CornerRadius="4">
+                                                        <TextBlock FontSize="11"
+                                                                   Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                                                   Text="{Binding Category, Mode=OneWay}" />
+                                                    </Border>
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="11"
+                                                               Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                                               Text="{Binding Version, StringFormat={}v{0}}" />
+                                                </StackPanel>
+
+                                                <!--  简介  -->
+                                                <ui:TextBlock Margin="0,4,0,0"
+                                                              MaxHeight="40"
+                                                              Style="{StaticResource PluginItemDescription}"
+                                                              Text="{Binding Description, Mode=OneWay}"
+                                                              TextTrimming="CharacterEllipsis" />
+
+                                                <!--  作者 · 更新时间 · 标识  -->
+                                                <TextBlock Margin="0,6,0,0"
+                                                           FontSize="11"
+                                                           Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                                           TextTrimming="CharacterEllipsis">
+                                                    <Run Text="{Binding AuthorsText, Mode=OneWay}" />
+                                                    <Run Text=" · " />
+                                                    <Run Text="{Binding UpdatedText, Mode=OneWay}" />
+                                                    <Run Text=" · " />
+                                                    <Run Text="{Binding Id, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </StackPanel>
+
+                                            <!--  状态与操作  -->
+                                            <StackPanel Grid.Column="1"
+                                                        MinWidth="132"
+                                                        VerticalAlignment="Center">
+                                                <ui:TextBlock HorizontalAlignment="Right"
+                                                              FontTypography="Caption"
+                                                              Text="{Binding StatusText, Mode=OneWay}"
+                                                              TextWrapping="Wrap">
+                                                    <ui:TextBlock.Style>
+                                                        <Style TargetType="ui:TextBlock">
+                                                            <Setter Property="Foreground" Value="{ui:ThemeResource TextFillColorTertiaryBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsInstalled, Mode=OneWay}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsWarning, Mode=OneWay}" Value="True">
+                                                                    <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ui:TextBlock.Style>
+                                                </ui:TextBlock>
+
+                                                <ui:Button Margin="0,6,0,0"
+                                                           HorizontalAlignment="Right"
+                                                           MinWidth="104"
+                                                           Appearance="Primary"
+                                                           Command="{Binding InstallCommand}"
+                                                           Content="{Binding ActionText, Mode=OneWay}"
+                                                           IsEnabled="{Binding CanInstall, Mode=OneWay}" />
+
+                                                <!--  下载进度只在忙的时候占位，平时不留空行  -->
+                                                <ProgressBar Height="3"
+                                                             Margin="0,8,0,0"
+                                                             Maximum="1"
+                                                             Value="{Binding Progress, Mode=OneWay}"
+                                                             Visibility="{Binding IsBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <ui:TextBlock Margin="0,4,0,0"
+                                                              HorizontalAlignment="Right"
+                                                              FontTypography="Caption"
+                                                              Text="{Binding BusyText, Mode=OneWay}"
+                                                              Visibility="{Binding IsBusy, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <!--  空状态：市场为空 / 没有匹配 / 还没有加载出来  -->
+                    <StackPanel Grid.Row="2"
+                                Margin="0,32,0,0"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Top"
+                                Visibility="{Binding IsMarketEmpty, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <ui:SymbolIcon HorizontalAlignment="Center"
+                                       FontSize="32"
+                                       Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                       Symbol="BoxMultiple24" />
+                        <ui:TextBlock Margin="0,10,0,0"
+                                      HorizontalAlignment="Center"
+                                      Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                      Text="没有找到插件" />
+                        <ui:TextBlock Margin="0,4,0,0"
+                                      HorizontalAlignment="Center"
+                                      FontTypography="Caption"
+                                      Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                      Text="换个关键词，或清空搜索查看全部" />
+                    </StackPanel>
+
+                    <!--  索引来源：折叠起来，平时不占视线  -->
+                    <ui:CardExpander Grid.Row="3"
+                                     Margin="0,10,0,0"
+                                     HorizontalAlignment="Stretch">
                         <ui:CardExpander.Header>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <ui:TextBlock Grid.Row="0"
-                                              Style="{StaticResource PluginItemTitle}"
-                                              Text="{Binding Name, Mode=OneWay}" />
-                                <ui:TextBlock Grid.Row="1"
-                                              Style="{StaticResource PluginItemDescription}"
-                                              Text="{Binding VersionText, Mode=OneWay}" />
-                                <ui:TextBlock Grid.Row="2"
-                                              Style="{StaticResource PluginItemDescription}"
-                                              Text="{Binding StatusText, Mode=OneWay}"
-                                              Visibility="{Binding IsProblem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityRevertConverter}}" />
-                                <ui:TextBlock Grid.Row="2"
-                                              Style="{StaticResource PluginItemWarning}"
-                                              Text="{Binding StatusText, Mode=OneWay}"
-                                              Visibility="{Binding IsProblem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <!--  插件声明了设置界面时显示，点击后在弹窗中打开  -->
-                                <ui:Button Grid.Row="0"
-                                           Grid.RowSpan="3"
-                                           Grid.Column="1"
-                                           Margin="12,0,16,0"
-                                           VerticalAlignment="Center"
-                                           Command="{Binding OpenSettingsCommand}"
-                                           Content="{i18n:T 设置}"
-                                           Icon="{ui:SymbolIcon Settings24}"
-                                           Visibility="{Binding HasSettings, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <ui:ToggleSwitch Grid.Row="0"
-                                                 Grid.RowSpan="3"
-                                                 Grid.Column="2"
-                                                 Margin="0,0,24,0"
-                                                 IsChecked="{Binding IsEnabled, Mode=TwoWay}"
-                                                 IsEnabled="{Binding CanToggle, Mode=OneWay}" />
-                            </Grid>
-                        </ui:CardExpander.Header>
-                        <StackPanel Margin="16">
-                            <ui:TextBlock Style="{StaticResource PluginItemTitle}" Text="{Binding Description, Mode=OneWay}" />
-                            <ui:TextBlock Margin="0,8,0,0" Style="{StaticResource PluginItemDescription}">
-                                <Run Text="{i18n:T 提供的功能：}" />
-                                <Run Text="{Binding ImplementationsText, Mode=OneWay}" />
-                            </ui:TextBlock>
-                            <ui:TextBlock Margin="0,4,0,0" Style="{StaticResource PluginItemDescription}">
-                                <Run Text="{i18n:T 标识：}" />
-                                <Run Text="{Binding Id, Mode=OneWay}" />
-                            </ui:TextBlock>
-                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
-                                <ui:Button Margin="0,0,8,0"
-                                           Command="{Binding OpenDirectoryCommand}"
-                                           Content="{i18n:T 打开目录}"
-                                           Icon="{ui:SymbolIcon FolderOpen24}" />
-                                <ui:Button Margin="0,0,8,0"
-                                           Command="{Binding OpenHomepageCommand}"
-                                           Content="{i18n:T 主页}"
-                                           Icon="{ui:SymbolIcon Globe24}"
-                                           Visibility="{Binding HasHomepage, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                <ui:Button Command="{Binding DataContext.UninstallCommand, RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
-                                           CommandParameter="{Binding}"
-                                           Content="{i18n:T 卸载}"
-                                           Icon="{ui:SymbolIcon Delete24}"
-                                           IsEnabled="{Binding CanUninstall, Mode=OneWay}"
-                                           Visibility="{Binding DataContext.CanManagePackages, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type Page}}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            <StackPanel>
+                                <ui:TextBlock FontTypography="Body" Text="市场设置" />
+                                <ui:TextBlock FontTypography="Caption"
+                                              Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                              Text="{Binding MarketSummary, Mode=OneWay}"
+                                              TextWrapping="Wrap" />
                             </StackPanel>
+                        </ui:CardExpander.Header>
+                        <StackPanel Margin="16,12,16,16">
+                            <ui:TextBlock Style="{StaticResource PluginItemDescription}" Text="索引地址：一份列出插件、版本与下载地址的 index.json" />
+                            <ui:TextBox Margin="0,6,0,0"
+                                        Text="{Binding IndexUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        PlaceholderText="https://…/index.json" />
+                            <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                                <ui:Button Appearance="Primary"
+                                           Command="{Binding SaveIndexUrlCommand}"
+                                           Content="保存并刷新"
+                                           Icon="{ui:SymbolIcon Save24}" />
+                                <ui:Button Margin="8,0,0,0"
+                                           Command="{Binding ResetIndexUrlCommand}"
+                                           Content="恢复默认" />
+                                <ui:Button Margin="8,0,0,0"
+                                           Command="{Binding CancelMarketInstallCommand}"
+                                           Content="取消下载"
+                                           Visibility="{Binding IsMarketInstalling, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                            </StackPanel>
+                            <ui:TextBlock Margin="0,8,0,0"
+                                          Style="{StaticResource PluginItemDescription}"
+                                          Text="插件包在安装前会校验 SHA-256；校验不过直接拒绝安装。" />
                         </StackPanel>
                     </ui:CardExpander>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!--  ========================== 已安装  ==========================  -->
+            <TabItem Header="已安装">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!--  空状态：给两条能立刻做的下一步  -->
+                        <StackPanel Margin="0,32,0,0"
+                                    HorizontalAlignment="Center"
+                                    Visibility="{Binding HasNoPlugins, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <ui:SymbolIcon HorizontalAlignment="Center"
+                                           FontSize="32"
+                                           Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                           Symbol="PuzzlePiece24" />
+                            <ui:TextBlock Margin="0,10,0,0"
+                                          HorizontalAlignment="Center"
+                                          Foreground="{ui:ThemeResource TextFillColorSecondaryBrush}"
+                                          Text="还没有安装插件" />
+                            <ui:TextBlock Margin="0,4,0,0"
+                                          HorizontalAlignment="Center"
+                                          FontTypography="Caption"
+                                          Foreground="{ui:ThemeResource TextFillColorTertiaryBrush}"
+                                          Text="去「插件市场」看看，或把插件文件夹放进插件目录后点刷新" />
+                        </StackPanel>
+
+                        <ItemsControl ItemsSource="{Binding Plugins, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type plugins:InstalledPluginItemViewModel}">
+                                    <ui:CardExpander Margin="0,0,0,8"
+                                                     ContentPadding="0"
+                                                     Icon="{ui:SymbolIcon PuzzlePiece24}">
+                                        <ui:CardExpander.Header>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <ui:TextBlock Grid.Row="0"
+                                                              Style="{StaticResource PluginItemTitle}"
+                                                              Text="{Binding Name, Mode=OneWay}" />
+                                                <ui:TextBlock Grid.Row="1"
+                                                              Style="{StaticResource PluginItemDescription}"
+                                                              Text="{Binding VersionText, Mode=OneWay}" />
+                                                <ui:TextBlock Grid.Row="2"
+                                                              Style="{StaticResource PluginItemDescription}"
+                                                              Text="{Binding StatusText, Mode=OneWay}"
+                                                              Visibility="{Binding IsProblem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityRevertConverter}}" />
+                                                <ui:TextBlock Grid.Row="2"
+                                                              Style="{StaticResource PluginItemWarning}"
+                                                              Text="{Binding StatusText, Mode=OneWay}"
+                                                              Visibility="{Binding IsProblem, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <!--  插件声明了设置界面时显示，点击后在弹窗中打开  -->
+                                                <ui:Button Grid.Row="0"
+                                                           Grid.RowSpan="3"
+                                                           Grid.Column="1"
+                                                           Margin="12,0,16,0"
+                                                           VerticalAlignment="Center"
+                                                           Command="{Binding OpenSettingsCommand}"
+                                                           Content="{i18n:T 设置}"
+                                                           Icon="{ui:SymbolIcon Settings24}"
+                                                           Visibility="{Binding HasSettings, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <ui:ToggleSwitch Grid.Row="0"
+                                                                 Grid.RowSpan="3"
+                                                                 Grid.Column="2"
+                                                                 Margin="0,0,24,0"
+                                                                 IsChecked="{Binding IsEnabled, Mode=TwoWay}"
+                                                                 IsEnabled="{Binding CanToggle, Mode=OneWay}" />
+                                            </Grid>
+                                        </ui:CardExpander.Header>
+                                        <StackPanel Margin="16">
+                                            <ui:TextBlock Style="{StaticResource PluginItemTitle}" Text="{Binding Description, Mode=OneWay}" />
+                                            <ui:TextBlock Margin="0,8,0,0" Style="{StaticResource PluginItemDescription}">
+                                                <Run Text="{i18n:T 提供的功能：}" />
+                                                <Run Text="{Binding ImplementationsText, Mode=OneWay}" />
+                                            </ui:TextBlock>
+                                            <ui:TextBlock Margin="0,4,0,0" Style="{StaticResource PluginItemDescription}">
+                                                <Run Text="{i18n:T 标识：}" />
+                                                <Run Text="{Binding Id, Mode=OneWay}" />
+                                            </ui:TextBlock>
+                                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                                <ui:Button Margin="0,0,8,0"
+                                                           Command="{Binding OpenDirectoryCommand}"
+                                                           Content="{i18n:T 打开目录}"
+                                                           Icon="{ui:SymbolIcon FolderOpen24}" />
+                                                <ui:Button Margin="0,0,8,0"
+                                                           Command="{Binding OpenHomepageCommand}"
+                                                           Content="{i18n:T 主页}"
+                                                           Icon="{ui:SymbolIcon Globe24}"
+                                                           Visibility="{Binding HasHomepage, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                <ui:Button Command="{Binding DataContext.UninstallCommand, RelativeSource={RelativeSource AncestorType={x:Type Page}}}"
+                                                           CommandParameter="{Binding}"
+                                                           Content="{i18n:T 卸载}"
+                                                           Icon="{ui:SymbolIcon Delete24}"
+                                                           IsEnabled="{Binding CanUninstall, Mode=OneWay}"
+                                                           Visibility="{Binding DataContext.CanManagePackages, Mode=OneWay, RelativeSource={RelativeSource AncestorType={x:Type Page}}, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </ui:CardExpander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!--  ======================== 功能选择  ========================  -->
+            <TabItem Header="功能选择">
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <ui:TextBlock Margin="0,0,0,8"
+                                      Style="{StaticResource PluginItemDescription}"
+                                      Text="每项能力可以换用不同的实现；切换立即生效，不需要重启。" />
+                        <ItemsControl ItemsSource="{Binding Pluggables, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type plugins:PluggableItemViewModel}">
+                                    <ui:CardControl Margin="0,0,0,8" Icon="{ui:SymbolIcon Options24}">
+                                        <ui:CardControl.Header>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel VerticalAlignment="Center">
+                                                    <ui:TextBlock Style="{StaticResource PluginItemTitle}" Text="{Binding DisplayName, Mode=OneWay}" />
+                                                    <ui:TextBlock Style="{StaticResource PluginItemDescription}" Text="{Binding Description, Mode=OneWay}" />
+                                                    <ui:TextBlock Margin="0,4,0,0"
+                                                                  Style="{StaticResource PluginItemWarning}"
+                                                                  Text="{Binding FallbackText, Mode=OneWay}"
+                                                                  Visibility="{Binding HasFallback, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                </StackPanel>
+                                                <ComboBox Grid.Column="1"
+                                                          ItemsSource="{Binding Options, Mode=OneWay}"
+                                                          SelectedItem="{Binding SelectedOption, Mode=TwoWay}"
+                                                          Style="{StaticResource PluggableComboBox}" />
+                                            </Grid>
+                                        </ui:CardControl.Header>
+                                    </ui:CardControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </Page>
