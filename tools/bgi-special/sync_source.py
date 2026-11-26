@@ -71,6 +71,16 @@ KEEP = (
     "BetterGenshinImpact/View/Pages/SearchResultPage.xaml",
     "BetterGenshinImpact/View/Pages/SearchResultPage.xaml.cs",
     "BetterGenshinImpact/ViewModel/Pages/SearchResultPageViewModel.cs",
+    # 插件市场
+    "BetterGenshinImpact/Core/Plugins/Market/",
+    "BetterGenshinImpact/Core/Config/PluginMarketConfig.cs",
+    "BetterGenshinImpact/ViewModel/Pages/Plugins/PluginMarketItemViewModel.cs",
+    # 插件页的界面与 VM 由特别版自己维护：页签、市场卡片改动太大，
+    # 做不成锚点补丁。上游改这两个文件时不会自动跟进来，同步会打印冲突提醒，
+    # 需要人工比对一次再决定要不要合并。
+    "BetterGenshinImpact/View/Pages/PluginsPage.xaml",
+    "BetterGenshinImpact/ViewModel/Pages/Plugins/PluginsPageViewModel.cs",
+    "plugin-market/",
     # 路径进度（断点续跑）
     "BetterGenshinImpact/GameTask/AutoPathing/PathProgressStore.cs",
     "BetterGenshinImpact/GameTask/AutoPathing/AutoPathingPathTask.cs",
@@ -215,8 +225,17 @@ def main() -> int:
         removed += 1
 
     copied = 0
+    conflicts = []
     for rel in sorted(up_files):
-        if kept(rel) or dropped(rel):
+        if dropped(rel):
+            continue
+        if kept(rel):
+            # 保留清单里的文件不覆盖；但上游也改了同一个文件时要提醒——
+            # 这类文件（如插件页）长期由特别版维护，上游的结构改动会悄悄错过
+            src = upstream / rel
+            dst = local / rel
+            if dst.is_file() and src.read_bytes() != dst.read_bytes():
+                conflicts.append(rel)
             continue
         dst = local / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -239,6 +258,12 @@ def main() -> int:
         print(f"    - {rel}")
     if len(removed_names) > 20:
         print(f"    …… 另有 {len(removed_names) - 20} 个")
+    if conflicts:
+        print(f"[!] {len(conflicts)} 个文件上游也改了，但保留清单里是本地版本，需要人工比对：")
+        for rel in conflicts[:15]:
+            print(f"    ~ {rel}")
+        if len(conflicts) > 15:
+            print(f"    …… 另有 {len(conflicts) - 15} 个")
     return 0
 
 

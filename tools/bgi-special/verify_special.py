@@ -35,6 +35,11 @@ MUST_EXIST = (
     "BetterGenshinImpact/Core/Pathing/",
     "BetterGenshinImpact/GameTask/AutoPathing/PathProgressStore.cs",
     "Test/BetterGenshinImpact.UnitTest/HelperTests/RepeatSuppressorSinkTests.cs",
+    # 插件市场：索引模型、下载校验、卡片 VM，以及索引文件本身
+    "BetterGenshinImpact/Core/Plugins/Market/",
+    "BetterGenshinImpact/Core/Config/PluginMarketConfig.cs",
+    "BetterGenshinImpact/ViewModel/Pages/Plugins/PluginMarketItemViewModel.cs",
+    "plugin-market/index.json",
     # 特别版 CI 不跟上游。这两个文件上游没有，靠 KEEP 的 .github/workflows/ 保留；
     # 一旦 KEEP 被误删，它们会被当成「上游已废弃文件」清掉，这里立刻报出来。
     ".github/workflows/build-special.yml",
@@ -68,6 +73,21 @@ MUST_CONTAIN = (
      "AiConfig AiConfig", "内置 AI 配置节点"),
     ("BetterGenshinImpact/Core/Config/AllConfig.Special.cs",
      "RemoteTaskConfig RemoteTaskConfig", "远程任务配置节点"),
+    # 全局搜索：新增文件靠 KEEP，改到的上游文件靠 patch_special
+    ("BetterGenshinImpact/View/MainWindow.xaml",
+     "GlobalSearchBox", "顶栏搜索框"),
+    ("BetterGenshinImpact/App.xaml.cs",
+     "AddView<SearchResultPage", "搜索结果页注册"),
+    # 版本需求比较：上游文件，改一次被冲一次
+    ("BetterGenshinImpact/Core/Config/Global.cs",
+     "IsRequirementMet", "版本需求比较"),
+    # 插件市场：PluginsPage 的两个文件由特别版自己维护（见 KEEP 注释）
+    ("BetterGenshinImpact/App.xaml.cs",
+     "AddSingleton<PluginMarketClient>", "插件市场注册"),
+    ("BetterGenshinImpact/View/Pages/PluginsPage.xaml",
+     "插件市场", "插件页市场页签"),
+    ("BetterGenshinImpact/ViewModel/Pages/Plugins/PluginsPageViewModel.cs",
+     "MarketItems", "插件市场列表"),
 )
 
 # 反向检查：这些上游文件里不该出现特别版字段。
