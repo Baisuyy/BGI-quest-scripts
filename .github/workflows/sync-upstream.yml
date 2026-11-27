@@ -61,11 +61,28 @@ jobs:
           fi
 
           SHA=$(git -C /tmp/upstream rev-parse --short HEAD)
+          FULL=$(git -C /tmp/upstream rev-parse HEAD)
           OLD=$(cat .bgi-upstream 2>/dev/null || echo none)
           echo "ref=$REF" >> "$GITHUB_OUTPUT"
           echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "full_sha=$FULL" >> "$GITHUB_OUTPUT"
           echo "本地记录 $OLD，上游 $SHA"
-          if [ "$OLD" = "$SHA" ]; then
+
+          # 上次同步的上游快照，给核心文件三方比较当 base。
+          # .bgi-upstream 以前存的是短 sha，按 sha fetch 需要完整 40 位；
+          # 取不到就跳过比对（打警告），不会因此拦下正常同步。
+          if [ "$OLD" != "none" ] && [ "$OLD" != "$FULL" ]; then
+            if git -C /tmp/upstream fetch --quiet --depth 1 origin "$OLD" 2>/dev/null; then
+              mkdir -p /tmp/upstream-base
+              git -C /tmp/upstream archive "$OLD" | tar -x -C /tmp/upstream-base
+              echo "已取到上次上游快照 ${OLD:0:7}"
+            else
+              echo "::warning::取不到上次上游快照 ${OLD}，本轮跳过核心文件比对"
+            fi
+          fi
+          # .bgi-upstream 现在存完整 sha（三方比较要按 sha fetch），旧值是短 sha
+          OLD_SHORT=$(echo "$OLD" | cut -c1-7)
+          if [ "$OLD_SHORT" = "$SHA" ]; then
             echo "state=noop" >> "$GITHUB_OUTPUT"
           else
             echo "state=changed" >> "$GITHUB_OUTPUT"
@@ -76,13 +93,24 @@ jobs:
         id: apply
         run: |
           set -euo pipefail
-          python3 tools/bgi-special/sync_source.py /tmp/upstream
+          python3 tools/bgi-special/sync_source.py /tmp/upstream /tmp/upstream-base
           python3 tools/bgi-special/patch_special.py
           python3 tools/bgi-special/apply_upstream_extra.py
           # 推送前先验一遍特别版的东西还在。这一步不过就不推——
           # 2026-11-20 那次同步「成功推送」但分支编不过，问题在第二天才被发现。
           python3 tools/bgi-special/verify_special.py
-          echo "${{ steps.up.outputs.sha }}" > .bgi-upstream
+          echo "${{ steps.up.outputs.full_sha }}" > .bgi-upstream
+
+      # 核心文件撞车时 sync_source.py 会退出 4，不提交。diff 留在 sync-review/，
+      # 这里传成 artifact，日志里看不到的上下文可以直接下载。
+      - name: 保留核心文件冲突 diff
+        if: ${{ failure() && steps.up.outputs.state == 'changed' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-review
+          path: sync-review/
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: 提交并推送
         if: ${{ steps.up.outputs.state == 'changed' }}
@@ -158,6 +186,9 @@ jobs:
             "\`verify_special.py\` 报错时看它列出的具体条目：能力层文件被删就补 \`sync_source.py\` 的 KEEP；" \
             "补丁标记缺失就看 \`patch_special.py\` 对应那条的锚点；" \
             "上游文件里出现特别版字段，说明有人把它写回了会被覆盖的地方，要搬到同名 \`*.Special.cs\`。" \
+            "" \
+            "如果是核心文件冲突（日志出现「核心文件的改动与上游撞车」），说明双方改到了同一段：" \
+            "到本次运行的 Artifacts 下载 \`sync-review\`，照着 diff 决定补丁是挪位置还是放弃，改完重跑。" \
             "" \
             "处理方式：本地按 SPECIAL-API.md 的说明调整" \
             "\`tools/bgi-special/patch_special.py\`、\`tools/bgi-special/apply_upstream_extra.py\`、\`Core/Ai/\` 或 \`VisionHost.cs\`，再手动跑一次同步。" \

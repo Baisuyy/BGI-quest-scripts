@@ -84,6 +84,11 @@ MUST_CONTAIN = (
      "public static string StripSpecialSuffix", "版本后缀剥离已公开"),
     ("BetterGenshinImpact/Core/Plugins/Hosting/PluginCompatibility.cs",
      "StripSpecialSuffix(Global.Version)", "插件版本比较剥后缀"),
+    # 同步闸门本身：核心文件三方比较 + 基线传入，缺一条这道闸就形同虚设
+    ("tools/bgi-special/sync_source.py",
+     "def review_core", "核心文件三方比较"),
+    (".github/workflows/sync-upstream.yml",
+     "/tmp/upstream-base", "同步传入上次上游快照"),
     ("BetterGenshinImpact/Service/UpdateService.cs",
      "SpecialUpdater.TryHandleAsync", "更新检查改道"),
     ("BetterGenshinImpact/View/MainWindow.xaml",

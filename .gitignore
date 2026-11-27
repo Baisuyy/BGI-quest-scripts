@@ -60,3 +60,6 @@ __pycache__/
 
 # Claude
 .claude/*
+
+# 同步时核心文件冲突的 diff：给人看的，不进版本库
+sync-review/
