@@ -740,6 +740,64 @@ def patch_remote_task_and_logging() -> None:
     path.write_text(text, encoding="utf-8")
 
 
+# ---------------------------------------------------------------- 18. 插件版本比较
+#
+# 特别版的版本号是 0.67.0-special.x，SemVer 里低于 0.67.0。上游同步会覆盖这两处，
+# 导致所有 sdk_version=0.67.0 的插件被判成「需要更高版本」而装不上。
+GLOBAL_CONFIG = "BetterGenshinImpact/Core/Config/Global.cs"
+PLUGIN_COMPAT = "BetterGenshinImpact/Core/Plugins/Hosting/PluginCompatibility.cs"
+
+
+def patch_plugin_version_compare() -> None:
+    # 1) Global：StripSpecialSuffix 必须是 public，插件兼容性检查才能调用
+    path = ROOT / GLOBAL_CONFIG
+    if not path.is_file():
+        print(f"[x] 找不到 {GLOBAL_CONFIG}", file=sys.stderr)
+        raise SystemExit(2)
+
+    text = path.read_text(encoding="utf-8")
+    old = """    /// <summary>去掉特别版的 -special.x 后缀，只留内核版本。</summary>
+    private static string StripSpecialSuffix(string version)"""
+    new = """    /// <summary>
+    /// 去掉特别版的 -special.x 后缀，只留内核版本。
+    /// <para>
+    /// SemVer 里 <c>0.67.0-special.7.7.3</c> 的优先级低于 <c>0.67.0</c>，
+    /// 直接比会被判成「特别版比同版本的官方版还老」，脚本的 bgi_version 与插件的 sdk_version 都会误判。
+    /// </para>
+    /// </summary>
+    public static string StripSpecialSuffix(string version)"""
+    if "public static string StripSpecialSuffix" in text:
+        print("[=] 插件版本比较：Global 已公开，跳过")
+    elif old in text:
+        path.write_text(text.replace(old, new, 1), encoding="utf-8")
+        print("[+] Global.StripSpecialSuffix 改为 public")
+    else:
+        print("[x] Global：StripSpecialSuffix 锚点不匹配，上游可能改过", file=sys.stderr)
+        raise SystemExit(3)
+
+    # 2) PluginCompatibility：比较前剥掉 -special 后缀
+    path = ROOT / PLUGIN_COMPAT
+    if not path.is_file():
+        print(f"[x] 找不到 {PLUGIN_COMPAT}", file=sys.stderr)
+        raise SystemExit(2)
+
+    text = path.read_text(encoding="utf-8")
+    old = """        // 开发版等无法解析版本号的主程序跳过以下比较
+        if (!TryParse(Global.Version, out var host))"""
+    new = """        // 开发版等无法解析版本号的主程序跳过以下比较。
+        // 特别版的版本号带 -special 后缀，SemVer 里它低于同版本号的正式版，
+        // 不剥掉的话用官方 SDK（sdk_version 0.67.0）编译的插件会被判成「需要更高版本」而装不上。
+        if (!TryParse(Global.StripSpecialSuffix(Global.Version), out var host))"""
+    if "StripSpecialSuffix(Global.Version)" in text:
+        print("[=] 插件版本比较：已剥后缀，跳过")
+    elif old in text:
+        path.write_text(text.replace(old, new, 1), encoding="utf-8")
+        print("[+] 插件版本比较剥掉 -special 后缀")
+    else:
+        print("[x] PluginCompatibility：锚点不匹配，上游可能改过", file=sys.stderr)
+        raise SystemExit(3)
+
+
 def main() -> int:
     ensure_packages()
     patch_download_category()
@@ -765,6 +823,7 @@ def main() -> int:
     patch_plugin_market()
     patch_special_settings_cards()
     patch_remote_task_and_logging()
+    patch_plugin_version_compare()
 
     # EngineExtend / App / VM 需要引用 Core.Ai 里的 AiKernel
     for rel, anchor, line in (

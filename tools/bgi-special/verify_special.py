@@ -79,6 +79,11 @@ MUST_CONTAIN = (
      "QqBotAppId", "机器人设置界面"),
     ("BetterGenshinImpact/ViewModel/Pages/CommonSettingsPageViewModel.Special.cs",
      "OnUploadLog", "日志上传命令"),
+    # 特别版版本号在 SemVer 里低于同版本正式版，插件兼容性比较前必须剥掉 -special 后缀
+    ("BetterGenshinImpact/Core/Config/Global.cs",
+     "public static string StripSpecialSuffix", "版本后缀剥离已公开"),
+    ("BetterGenshinImpact/Core/Plugins/Hosting/PluginCompatibility.cs",
+     "StripSpecialSuffix(Global.Version)", "插件版本比较剥后缀"),
     ("BetterGenshinImpact/Service/UpdateService.cs",
      "SpecialUpdater.TryHandleAsync", "更新检查改道"),
     ("BetterGenshinImpact/View/MainWindow.xaml",
