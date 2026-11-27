@@ -107,14 +107,8 @@ public class Global
         }
     }
 
-    /// <summary>
-    /// 去掉特别版的 -special.x 后缀，只留内核版本。
-    /// <para>
-    /// SemVer 里 <c>0.67.0-special.7.7.3</c> 的优先级**低于** <c>0.67.0</c>，
-    /// 直接比会被判成「特别版比同版本的官方版还老」，脚本的 bgi_version 与插件的 sdk_version 都会误判。
-    /// </para>
-    /// </summary>
-    public static string StripSpecialSuffix(string version)
+    /// <summary>去掉特别版的 -special.x 后缀，只留内核版本。</summary>
+    private static string StripSpecialSuffix(string version)
     {
         var index = version.IndexOf("-special", StringComparison.OrdinalIgnoreCase);
         return index > 0 ? version[..index] : version;

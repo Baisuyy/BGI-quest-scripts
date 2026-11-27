@@ -126,8 +126,7 @@ public partial class App : Application
                 var logFolder = Path.Combine(AppContext.BaseDirectory, "log");
                 Directory.CreateDirectory(logFolder);
                 var logFile = Path.Combine(logFolder, "better-genshin-impact.log");
-                // 老版本的行首只有时分秒，新版带日期。升级后两者被写进同一个按天滚动的文件，
-                // 光看行首分不清哪段是哪个版本写的，跨午夜还会把顺序读反。
+                // 旧版本行首只有时分秒，和带日期的新格式混在一个文件里读不出先后
                 SpecialLogging.ArchiveLegacyLog(logFolder);
                 var instanceContext = InstanceBootstrap.Current.Context;
                 // 网页版实例带上实例名，例如 WebView(小号A):S1:P1234:T…
